@@ -1,0 +1,125 @@
+@use "../../../../assets/styles/variables" as v;
+
+.sidebar {
+  width: v.$sidebar-width;
+  min-height: 100vh;
+  background: v.$sidebar-bg;
+  display: flex;
+  flex-direction: column;
+  transition: width v.$transition-normal;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: v.$header-height;
+  bottom: 0;
+  z-index: v.$z-sidebar;
+
+  &.collapsed {
+    width: v.$sidebar-collapsed-width;
+    .profile-info {
+      display: none;
+    }
+    .nav-label {
+      display: none;
+    }
+    .nav-item {
+      justify-content: center;
+      padding: 14px;
+    }
+  }
+}
+
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.avatar-wrapper {
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, v.$accent-blue, v.$success-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: v.$white;
+  }
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.profile-name {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$white;
+  white-space: nowrap;
+}
+
+.profile-role {
+  font-size: v.$font-size-xs;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all v.$transition-fast;
+  border-left: 4px solid transparent;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  text-decoration: none;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: v.$white;
+  }
+
+  &.active {
+    background: rgba(96, 165, 250, 0.2);
+    color: v.$white;
+    border-left-color: v.$accent-blue;
+
+    .nav-icon {
+      color: v.$accent-blue;
+    }
+  }
+}
+
+.nav-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  white-space: nowrap;
+}

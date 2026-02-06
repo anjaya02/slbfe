@@ -1,0 +1,33 @@
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <!-- User Profile -->
+  <div class="sidebar-profile">
+    <div class="avatar-wrapper">
+      <div class="avatar">
+        <mat-icon>person</mat-icon>
+      </div>
+    </div>
+    <div class="profile-info" *ngIf="!collapsed">
+      <span class="profile-name">{{ auth.currentUser?.name }}</span>
+      <span class="profile-role">{{
+        auth.currentUser?.role === "SUPERVISOR" ? "Admin" : "Case Officer"
+      }}</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <ng-container *ngFor="let item of navItems">
+      <a
+        *ngIf="canShow(item)"
+        class="nav-item"
+        [class.active]="isActive(item.route)"
+        (click)="navigate(item.route)"
+        [matTooltip]="collapsed ? item.label : ''"
+        matTooltipPosition="right"
+      >
+        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
+      </a>
+    </ng-container>
+  </nav>
+</aside>

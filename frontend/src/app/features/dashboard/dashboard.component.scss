@@ -1,0 +1,244 @@
+@use "../../../assets/styles/variables" as v;
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ===== METRICS =====
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-radius: v.$radius-lg;
+  color: v.$white;
+  box-shadow: v.$shadow-md;
+  transition:
+    transform v.$transition-fast,
+    box-shadow v.$transition-fast;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: v.$shadow-lg;
+  }
+
+  &.blue {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+  }
+  &.indigo {
+    background: linear-gradient(135deg, #3730a3, #6366f1);
+  }
+  &.purple {
+    background: linear-gradient(135deg, #5b21b6, #8b5cf6);
+  }
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  opacity: 0.9;
+}
+
+.metric-value {
+  font-size: 36px;
+  font-weight: v.$font-weight-bold;
+  line-height: 1.1;
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+}
+
+// ===== HERO BANNER =====
+.hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+  border-radius: v.$radius-lg;
+  padding: 40px 48px;
+  color: v.$white;
+  min-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-text h1 {
+  font-size: 28px;
+  font-weight: v.$font-weight-bold;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.hero-illustration {
+  flex-shrink: 0;
+}
+
+.illustration-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  opacity: 0.3;
+}
+
+.mini-cards {
+  display: flex;
+  gap: 8px;
+}
+
+.mini-card {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: v.$radius-sm;
+  font-size: 11px;
+  font-weight: v.$font-weight-semibold;
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &.red {
+    background: rgba(239, 68, 68, 0.9);
+  }
+  &.orange {
+    background: rgba(245, 158, 11, 0.9);
+  }
+  &.green {
+    background: rgba(16, 185, 129, 0.9);
+  }
+}
+
+// ===== CHARTS =====
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-card {
+  border-radius: v.$radius-lg;
+  padding: 24px;
+  box-shadow: v.$shadow-md;
+  overflow: hidden;
+
+  &.weekly {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
+    color: v.$white;
+  }
+
+  &.yearly {
+    background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
+    color: v.$dark;
+  }
+}
+
+.chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.chart-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.chart-title {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+}
+
+.chart-value {
+  font-size: 36px;
+  font-weight: v.$font-weight-bold;
+  line-height: 1;
+}
+
+.chart-body {
+  height: 200px;
+  position: relative;
+}
+
+.chart-loading {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: v.$bp-laptop) {
+  .metrics-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: v.$bp-tablet) {
+  .metrics-row {
+    grid-template-columns: 1fr;
+  }
+  .hero-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px 24px;
+  }
+  .hero-illustration {
+    display: none;
+  }
+}

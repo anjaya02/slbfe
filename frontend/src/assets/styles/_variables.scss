@@ -1,0 +1,104 @@
+// ===== COLOR PALETTE =====
+$primary-blue: #0056B8; // Exact SLT Blue from image
+$primary-dark: #004595;
+$primary-light: #4A90E2; 
+$accent-blue: #00AEEF; // Cyan/Light Blue
+$accent-cyan: #00AEEF;
+
+$success-green: #2CAD37; // Exact Mobitel Green from image
+$success-dark: #238A2C;
+$success-light: #A8D875;
+$warning-orange: #FF9E1B;
+$warning-dark: #D48110;
+$danger-red: #E63B2E;
+$danger-dark: #C92A1E;
+
+$dark: #111827;
+$dark-700: #374151;
+$gray-600: #4b5563;
+$gray-500: #6b7280;
+$gray-400: #9ca3af;
+$gray-300: #d1d5db;
+$gray-200: #e5e7eb;
+$gray-100: #f3f4f6;
+$gray-50: #f9fafb;
+$white: #ffffff;
+
+$primary-gradient: $primary-blue; // REMOVED GRADIENT per user request
+$card-gradient: $white; // REMOVED GRADIENT
+
+// ===== SIDEBAR =====
+$sidebar-width: 280px;
+$sidebar-collapsed-width: 80px;
+$sidebar-bg: $primary-blue; // Solid color sidebar
+
+// ===== HEADER =====
+$header-height: 70px;
+$header-bg: $white; // Clean white header
+$header-text: $primary-dark;
+
+// ===== TYPOGRAPHY =====
+$font-primary: "Inter", "Segoe UI", "Roboto", sans-serif;
+$font-mono: "JetBrains Mono", "Courier New", monospace;
+
+$font-size-xs: 0.75rem; // 12px
+$font-size-sm: 0.875rem; // 14px
+$font-size-base: 1rem; // 16px
+$font-size-lg: 1.25rem; // 20px
+$font-size-xl: 1.5rem; // 24px
+$font-size-2xl: 2rem; // 32px
+$font-size-3xl: 2.5rem; // 40px
+
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// ===== SPACING =====
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 16px;
+$space-lg: 24px;
+$space-xl: 32px;
+$space-2xl: 48px;
+
+// ===== BORDER RADIUS =====
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-full: 9999px;
+
+// ===== SHADOWS =====
+$shadow-sm:
+  0 1px 3px rgba(0, 0, 0, 0.08),
+  0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md:
+  0 4px 6px rgba(0, 0, 0, 0.07),
+  0 2px 4px rgba(0, 0, 0, 0.06);
+$shadow-lg:
+  0 10px 25px rgba(0, 0, 0, 0.1),
+  0 6px 10px rgba(0, 0, 0, 0.08);
+$shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+
+// ===== TRANSITIONS =====
+$transition-fast: 150ms ease-in-out;
+$transition-normal: 250ms ease-in-out;
+$transition-slow: 400ms ease-in-out;
+$transition-cubic: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// ===== BREAKPOINTS =====
+$bp-mobile: 480px;
+$bp-tablet: 768px;
+$bp-laptop: 992px;
+$bp-desktop: 1200px;
+$bp-wide: 1440px;
+
+// ===== Z-INDEX =====
+$z-sidebar: 100;
+$z-header: 200;
+$z-dropdown: 300;
+$z-modal-backdrop: 400;
+$z-modal: 500;
+$z-toast: 600;

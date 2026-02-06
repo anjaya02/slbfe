@@ -1,0 +1,205 @@
+<div class="detail-page" *ngIf="!loading && complaint">
+  <!-- Status Stepper -->
+  <div class="stepper-section">
+    <app-status-stepper [currentStatus]="complaint.status"></app-status-stepper>
+    <div class="stepper-actions">
+      <button mat-icon-button matTooltip="Print" (click)="printCase()">
+        <mat-icon>print</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Detail / Update Toggle -->
+  <div class="content-area" *ngIf="!showUpdatePanel">
+    <!-- Top Row: Worker Profile + Incident -->
+    <div class="detail-grid">
+      <!-- Worker Profile Card -->
+      <div class="card worker-card">
+        <h3 class="card-title">Worker profile</h3>
+        <div class="profile-fields">
+          <div class="field">
+            <span class="field-label">NAME</span
+            ><span class="field-value">{{
+              complaint.workerName | uppercase
+            }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">ADDRESS</span
+            ><span class="field-value">{{
+              complaint.workerAddress | uppercase
+            }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">CONTACT</span
+            ><span class="field-value">{{ complaint.workerContact }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">SERVICE ID</span
+            ><span class="field-value">{{ complaint.serviceId }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">BRANCH</span
+            ><span class="field-value">{{ complaint.branch | uppercase }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incident Card -->
+      <div class="card incident-card">
+        <h3 class="card-title">Incident</h3>
+        <p class="incident-description">{{ complaint.description }}</p>
+        <div class="attachments" *ngIf="complaint.attachments.length">
+          <div class="attachment-label">Attachments</div>
+          <div class="attachment-grid">
+            <div
+              class="attachment-thumb"
+              *ngFor="let att of complaint.attachments"
+            >
+              <mat-icon>{{
+                att.fileType.includes("image") ? "image" : "description"
+              }}</mat-icon>
+              <span class="att-name">{{ att.fileName }}</span>
+            </div>
+          </div>
+        </div>
+        <button
+          mat-raised-button
+          class="btn-solve"
+          (click)="toggleUpdatePanel()"
+        >
+          Solve
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Row: History + Notes -->
+    <div class="detail-grid">
+      <!-- Case History -->
+      <div class="card history-card">
+        <h3 class="card-title">
+          <mat-icon>history</mat-icon> Case management history
+        </h3>
+        <div class="timeline">
+          <div
+            class="timeline-item"
+            *ngFor="let h of complaint.history; let last = last"
+          >
+            <div class="timeline-dot" [class.active]="h.newStatus"></div>
+            <div class="timeline-connector" *ngIf="!last"></div>
+            <div class="timeline-content">
+              <span class="timeline-action">{{ h.action }}</span>
+              <span class="timeline-date">{{
+                h.timestamp | date: "dd MMM yyyy, hh:mm a"
+              }}</span>
+              <p class="timeline-desc">{{ h.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Worker / Complaint Notes -->
+      <div class="card notes-card">
+        <h3 class="card-title">
+          <mat-icon>description</mat-icon> Worker / Complaint note
+        </h3>
+        <div class="notes-list">
+          <div class="note-item" *ngFor="let note of complaint.notes">
+            <div
+              class="note-tag"
+              [ngClass]="
+                note.type === 'WORKER_UPDATE' ? 'tag-blue' : 'tag-green'
+              "
+            >
+              {{
+                note.type === "WORKER_UPDATE"
+                  ? "Worker Update"
+                  : note.type === "INTERNAL_NOTE"
+                    ? "Internal Note"
+                    : "System Log"
+              }}
+            </div>
+            <span class="note-time">{{
+              note.timestamp | date: "dd MMM yyyy, hh:mm a"
+            }}</span>
+            <p class="note-content">"{{ note.content }}"</p>
+            <span class="note-author">— {{ note.author }}</span>
+          </div>
+          <div class="empty-notes" *ngIf="!complaint.notes.length">
+            <mat-icon>speaker_notes_off</mat-icon>
+            <span>No notes yet</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Note Section -->
+    <div class="card note-input-card">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Add internal note</mat-label>
+        <textarea matInput [(ngModel)]="noteText" rows="3"></textarea>
+      </mat-form-field>
+      <button
+        mat-raised-button
+        class="btn-add-note"
+        (click)="addNote()"
+        [disabled]="addingNote || !noteText.trim()"
+      >
+        <mat-spinner *ngIf="addingNote" diameter="18"></mat-spinner>
+        <span *ngIf="!addingNote">ADD NOTE</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Update Panel (Screen 5) -->
+  <div class="content-area" *ngIf="showUpdatePanel">
+    <div class="card update-card">
+      <h3 class="update-title">How to solve this?</h3>
+
+      <div class="update-form">
+        <mat-form-field appearance="outline" class="action-select">
+          <mat-label>Select action</mat-label>
+          <mat-select [(ngModel)]="selectedAction">
+            <mat-option *ngFor="let opt of actionOptions" [value]="opt.value">{{
+              opt.label
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          class="btn-update"
+          (click)="updateStatus()"
+          [disabled]="updating || !selectedAction"
+        >
+          <mat-spinner *ngIf="updating" diameter="18"></mat-spinner>
+          <span *ngIf="!updating">Update</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card note-input-card">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Add internal note</mat-label>
+        <textarea matInput [(ngModel)]="noteText" rows="3"></textarea>
+      </mat-form-field>
+      <button
+        mat-raised-button
+        class="btn-add-note"
+        (click)="addNote()"
+        [disabled]="addingNote || !noteText.trim()"
+      >
+        <mat-spinner *ngIf="addingNote" diameter="18"></mat-spinner>
+        <span *ngIf="!addingNote">ADD NOTE</span>
+      </button>
+    </div>
+
+    <button mat-button class="btn-back" (click)="toggleUpdatePanel()">
+      <mat-icon>arrow_back</mat-icon> Back to Details
+    </button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-page" *ngIf="loading">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>

@@ -1,0 +1,34 @@
+@use "variables" as v;
+
+// ===== FIXED LIGHT THEME (Blue, Green, White) =====
+:root {
+  --bg-main: #{v.$gray-50};
+  --bg-primary: #{v.$gray-100};
+  --bg-secondary: #{v.$white};
+  --bg-card: #{v.$white};
+  --bg-sidebar: #{v.$primary-blue};
+  --bg-header: #{v.$primary-dark};
+  --bg-input: #{v.$gray-50};
+  --bg-hover: #{v.$gray-100};
+  --bg-sky: #dbeafe;
+  --bg-green-light: #d1fae5;
+
+  --text-primary: #{v.$dark};
+  --text-secondary: #{v.$gray-600};
+  --text-muted: #{v.$gray-400};
+  --text-inverse: #{v.$white};
+
+  --border-color: #{v.$gray-200};
+  --border-light: #{v.$gray-100};
+
+  --accent-primary: #{v.$primary-blue};
+  --accent-light: #{v.$accent-blue};
+  --accent-success: #{v.$success-green};
+  --accent-success-dark: #{v.$success-dark};
+  --accent-warning: #{v.$warning-orange};
+  --accent-danger: #{v.$danger-red};
+  --accent-info: #{v.$accent-cyan};
+
+  --shadow-card: #{v.$shadow-sm};
+  --shadow-elevated: #{v.$shadow-md};
+}

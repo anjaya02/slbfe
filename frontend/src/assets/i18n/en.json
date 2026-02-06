@@ -1,0 +1,113 @@
+{
+  "APP": {
+    "TITLE": "SLBFE - Consular Affairs Division",
+    "SUBTITLE": "Complaint Management System"
+  },
+  "NAV": {
+    "HOME": "Home",
+    "PROBLEM_LIST": "Problem List",
+    "NOTIFICATIONS": "Notifications",
+    "REPORTS": "Reports"
+  },
+  "LOGIN": {
+    "TITLE": "Sign In",
+    "EMAIL": "Email Address",
+    "PASSWORD": "Password",
+    "REMEMBER_ME": "Remember Me",
+    "FORGOT_PASSWORD": "Forgot Password?",
+    "LOGIN_BUTTON": "Login",
+    "SIGNUP_BUTTON": "SignUp",
+    "ERROR_INVALID": "Invalid email or password"
+  },
+  "DASHBOARD": {
+    "TITLE": "Dashboard",
+    "WELCOME": "Welcome back",
+    "TOTAL_COMPLAINTS": "Total Complaints",
+    "ACTIVE_CASES": "Active Cases",
+    "RESOLVED": "Resolved",
+    "WEEKLY_CHART": "Weekly Complaints",
+    "YEARLY_CHART": "Yearly Overview"
+  },
+  "COMPLAINTS": {
+    "TITLE": "Problem List",
+    "SEARCH": "Search by name, reference...",
+    "WORKER_NAME": "Worker Name",
+    "REFERENCE_NO": "Reference No",
+    "DATE_SUBMITTED": "Date Submitted",
+    "TYPE": "Type",
+    "STATUS": "Status",
+    "ACTIONS": "Actions",
+    "VIEW": "View"
+  },
+  "DETAIL": {
+    "WORKER_PROFILE": "Worker profile",
+    "INCIDENT": "Incident",
+    "HISTORY": "Case management history",
+    "NOTES": "Worker / Complaint note",
+    "ADD_NOTE": "Add internal note",
+    "SOLVE": "Solve",
+    "HOW_TO_SOLVE": "How to solve this?",
+    "SELECT_ACTION": "Select action",
+    "UPDATE": "Update",
+    "BACK": "Back to Details",
+    "PRINT": "Print"
+  },
+  "NOTIFICATIONS_PAGE": {
+    "TITLE": "Notifications",
+    "MARK_ALL_READ": "Mark all as read",
+    "CLEAR_ALL": "Clear all",
+    "ALL": "All",
+    "UNREAD": "Unread",
+    "EMPTY": "No notifications",
+    "ALL_CAUGHT_UP": "All caught up!",
+    "NO_NOTIFICATIONS": "You have no notifications yet."
+  },
+  "REPORTS_PAGE": {
+    "TITLE": "Reports",
+    "EXPORT_CSV": "Export CSV",
+    "EXPORT_PDF": "Export PDF",
+    "REPORT_TYPE": "Report Type",
+    "MONTHLY": "Monthly Report",
+    "QUARTERLY": "Quarterly Report",
+    "ANNUAL": "Annual Report",
+    "CUSTOM": "Custom Range",
+    "GENERATE": "Generate",
+    "TOTAL_CASES": "Total Cases",
+    "RESOLVED": "Resolved",
+    "PENDING": "Pending",
+    "AVG_RESOLUTION": "Avg Resolution",
+    "STATUS_BREAKDOWN": "Status Breakdown",
+    "MONTHLY_TREND": "Monthly Trend",
+    "OFFICER_PERFORMANCE": "Officer Performance"
+  },
+  "PROFILE": {
+    "TITLE": "My Profile",
+    "FULL_NAME": "Full Name",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
+    "LOCATION": "Location",
+    "SAVE": "Save Change",
+    "CANCEL": "Cancel"
+  },
+  "SETTINGS": {
+    "TITLE": "Settings",
+    "LANGUAGE": "Language",
+    "NOTIFICATIONS": "Notifications",
+    "NOTIFICATIONS_DESC": "Enable push notifications for case updates",
+    "DATE_FORMAT": "Date Format",
+    "CLOSE": "Close"
+  },
+  "HEADER": {
+    "MY_PROFILE": "My Profile",
+    "SETTINGS": "Settings",
+    "NOTIFICATION": "Notification",
+    "LOGOUT": "Log Out"
+  },
+  "COMMON": {
+    "LOADING": "Loading...",
+    "ERROR": "Something went wrong",
+    "SUCCESS": "Success",
+    "CLOSE": "Close",
+    "DAYS": "days"
+  }
+}

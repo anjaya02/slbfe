@@ -1,0 +1,77 @@
+@use "../../../../assets/styles/variables" as v;
+
+.settings-modal {
+  width: 440px;
+  max-width: 90vw;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  h2 {
+    margin: 0;
+    font-size: v.$font-size-xl;
+    font-weight: v.$font-weight-bold;
+    color: var(--text-primary);
+  }
+}
+
+.modal-body {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setting-label {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: var(--text-primary);
+}
+
+.setting-desc {
+  font-size: v.$font-size-xs;
+  color: var(--text-muted);
+}
+
+.toggle-group {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid v.$gray-100;
+  .toggle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 24px;
+}
+
+.btn-close {
+  background: v.$primary-blue !important;
+  color: v.$white !important;
+  font-weight: v.$font-weight-semibold;
+  border-radius: v.$radius-md !important;
+  min-width: 100px;
+  &:hover {
+    background: v.$primary-dark !important;
+  }
+}

@@ -1,0 +1,25 @@
+<div class="stepper-container">
+  <div class="stepper">
+    <ng-container *ngFor="let step of steps; let i = index; let last = last">
+      <div class="step" [ngClass]="getStepState(step)">
+        <div class="step-circle">
+          <mat-icon *ngIf="getStepState(step) === 'completed'"
+            >check_circle</mat-icon
+          >
+          <mat-icon *ngIf="getStepState(step) === 'active'" class="active-icon"
+            >radio_button_checked</mat-icon
+          >
+          <mat-icon *ngIf="getStepState(step) === 'pending'"
+            >radio_button_unchecked</mat-icon
+          >
+        </div>
+        <span class="step-label">{{ getStepLabel(step) }}</span>
+      </div>
+      <div
+        class="step-connector"
+        *ngIf="!last"
+        [ngClass]="getStepState(steps[i + 1])"
+      ></div>
+    </ng-container>
+  </div>
+</div>

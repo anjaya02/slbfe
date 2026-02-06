@@ -1,0 +1,84 @@
+<header class="header">
+  <div class="header-left">
+    <button mat-icon-button class="menu-toggle" (click)="menuToggle.emit()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <div class="brand">
+      <div class="brand-logo">
+        <mat-icon class="logo-icon">account_balance</mat-icon>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title"
+          >MINISTRY OF FOREIGN AFFAIRS, FOREIGN EMPLOYMENT & TOURISM</span
+        >
+        <span class="brand-subtitle">Consular Affairs Division</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <button
+      mat-icon-button
+      class="notification-btn"
+      routerLink="/notifications"
+    >
+      <mat-icon
+        [matBadge]="unreadCount > 0 ? unreadCount : null"
+        matBadgeColor="warn"
+        matBadgeSize="small"
+      >
+        notifications
+      </mat-icon>
+    </button>
+
+    <div class="user-menu-wrapper">
+      <button class="user-avatar-btn" (click)="toggleUserMenu()">
+        <div class="header-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+      </button>
+
+      <div class="user-dropdown" *ngIf="showUserMenu" @fadeSlideDown>
+        <div class="dropdown-header">
+          <div class="dropdown-avatar">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="dropdown-info">
+            <span class="dropdown-name">{{ auth.currentUser?.name }}</span>
+            <span class="dropdown-email">{{ auth.currentUser?.email }}</span>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a
+          class="dropdown-item"
+          (click)="profileClicked.emit(); closeUserMenu()"
+        >
+          <mat-icon>person_outline</mat-icon>
+          <span>My Profile</span>
+          <mat-icon class="arrow">chevron_right</mat-icon>
+        </a>
+        <a
+          class="dropdown-item"
+          (click)="settingsClicked.emit(); closeUserMenu()"
+        >
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+          <mat-icon class="arrow">chevron_right</mat-icon>
+        </a>
+        <a class="dropdown-item">
+          <mat-icon>notifications</mat-icon>
+          <span>Notification</span>
+          <span class="badge-text">Allow</span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a
+          class="dropdown-item logout"
+          (click)="auth.logout(); closeUserMenu()"
+        >
+          <mat-icon>logout</mat-icon>
+          <span>Log Out</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

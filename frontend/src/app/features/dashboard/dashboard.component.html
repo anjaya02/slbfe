@@ -1,0 +1,98 @@
+<div class="dashboard">
+  <!-- Metrics Row -->
+  <div class="metrics-row">
+    <div class="metric-card blue">
+      <div class="metric-info">
+        <span class="metric-label">Total Cases</span>
+        <span class="metric-value">{{ stats?.totalCases || 0 }}</span>
+      </div>
+      <div class="metric-icon"><mat-icon>visibility</mat-icon></div>
+    </div>
+    <div class="metric-card indigo">
+      <div class="metric-info">
+        <span class="metric-label">Resolved Cases</span>
+        <span class="metric-value">{{ stats?.resolvedCases || 0 }}</span>
+      </div>
+      <div class="metric-icon"><mat-icon>chat_bubble</mat-icon></div>
+    </div>
+    <div class="metric-card purple">
+      <div class="metric-info">
+        <span class="metric-label">Pending Review</span>
+        <span class="metric-value">{{
+          (stats?.pendingReview || 0).toString().padStart(2, "0")
+        }}</span>
+      </div>
+      <div class="metric-icon"><mat-icon>settings</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-text">
+      <h1>Manage Cases.</h1>
+      <h1>Track Progress.</h1>
+      <h1>Ensure Resolution.</h1>
+    </div>
+    <div class="hero-illustration">
+      <div class="illustration-placeholder">
+        <mat-icon class="hero-icon">assessment</mat-icon>
+        <div class="mini-cards">
+          <div class="mini-card red"><mat-icon>flag</mat-icon> 10,500</div>
+          <div class="mini-card orange"><mat-icon>warning</mat-icon> 8,000</div>
+          <div class="mini-card green">
+            <mat-icon>check_circle</mat-icon> 6,500
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <!-- Weekly Chart -->
+    <div class="chart-card weekly">
+      <div class="chart-header">
+        <div class="chart-title-group">
+          <mat-icon>bar_chart</mat-icon>
+          <span class="chart-title">Weekly Case Overview</span>
+        </div>
+        <span class="chart-value">226</span>
+      </div>
+      <div class="chart-body" *ngIf="!loading">
+        <canvas
+          baseChart
+          [data]="weeklyChartData"
+          [options]="weeklyChartOptions"
+          type="bar"
+        >
+        </canvas>
+      </div>
+      <div class="chart-loading" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </div>
+
+    <!-- Yearly Chart -->
+    <div class="chart-card yearly">
+      <div class="chart-header">
+        <div class="chart-title-group">
+          <mat-icon>show_chart</mat-icon>
+          <span class="chart-title">Yearly Case Overview</span>
+        </div>
+        <span class="chart-value">4.38K</span>
+      </div>
+      <div class="chart-body" *ngIf="!loading">
+        <canvas
+          baseChart
+          [data]="yearlyChartData"
+          [options]="yearlyChartOptions"
+          type="line"
+        >
+        </canvas>
+      </div>
+      <div class="chart-loading" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </div>
+  </div>
+</div>

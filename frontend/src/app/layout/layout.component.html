@@ -1,0 +1,12 @@
+<app-header
+  (menuToggle)="toggleSidebar()"
+  (profileClicked)="openProfile()"
+  (settingsClicked)="openSettings()"
+></app-header>
+
+<div class="app-body" [class.sidebar-collapsed]="sidebarCollapsed">
+  <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

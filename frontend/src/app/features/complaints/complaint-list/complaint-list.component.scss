@@ -1,0 +1,139 @@
+@use "../../../../assets/styles/variables" as v;
+
+.complaint-list-page {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-bold;
+  color: var(--text-primary);
+}
+
+.filters-bar {
+  margin-bottom: 16px;
+}
+
+.search-field {
+  width: 360px;
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.table-card {
+  background: var(--bg-card);
+  border-radius: v.$radius-lg;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.complaint-table {
+  width: 100%;
+}
+
+th.mat-mdc-header-cell {
+  font-weight: v.$font-weight-semibold !important;
+  color: var(--text-primary) !important;
+  font-size: v.$font-size-sm;
+  background: v.$gray-50;
+}
+
+.table-row {
+  transition: background v.$transition-fast;
+  &:hover {
+    background: v.$gray-50;
+  }
+  &:nth-child(even) {
+    background: #f7faff;
+  }
+  &:nth-child(even):hover {
+    background: v.$gray-100;
+  }
+}
+
+.ref-no {
+  font-family: v.$font-mono;
+  font-weight: v.$font-weight-medium;
+  color: var(--text-secondary);
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  white-space: nowrap;
+
+  &.badge-blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  &.badge-purple {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
+  &.badge-green {
+    background: #d1fae5;
+    color: #059669;
+  }
+  &.badge-orange {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  &.badge-red {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  &.badge-gray {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+}
+
+.btn-view {
+  background: linear-gradient(135deg, v.$primary-blue, v.$success-green) !important;
+  color: v.$white !important;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  border-radius: v.$radius-md !important;
+  min-width: 72px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
+  transition: all 0.25s ease;
+  &:hover {
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.35) !important;
+    transform: translateY(-1px);
+  }
+}
+
+::ng-deep .mat-mdc-paginator {
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: v.$bp-tablet) {
+  .search-field {
+    width: 100%;
+  }
+}

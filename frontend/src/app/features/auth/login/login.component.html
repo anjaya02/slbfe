@@ -1,0 +1,125 @@
+<div class="login-page">
+  <!-- Left: Branding Panel -->
+  <aside class="login-branding">
+    <div class="branding-content">
+      <div class="brand-emblem">
+        <mat-icon class="emblem-icon">account_balance</mat-icon>
+      </div>
+      <h1 class="brand-heading">
+        MINISTRY OF FOREIGN AFFAIRS,<br />FOREIGN EMPLOYMENT & TOURISM
+      </h1>
+      <p class="brand-subheading">Consular Affairs Division</p>
+      <div class="brand-divider"></div>
+      
+      <div class="welcome-section">
+        <h2 class="welcome-title">Welcome</h2>
+        <p class="welcome-text">
+          Complaint Management System — protecting the rights and welfare of Sri
+          Lankan migrant workers worldwide.
+        </p>
+      </div>
+
+      <div class="feature-pills">
+        <div class="pill">
+          <mat-icon>verified_user</mat-icon> Secure Platform
+        </div>
+        <div class="pill">
+          <mat-icon>speed</mat-icon> Fast Resolution
+        </div>
+        <div class="pill">
+          <mat-icon>support_agent</mat-icon> 24/7 Support
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Right: Login Form -->
+  <div class="login-content">
+    <div class="login-card">
+      <div class="card-header">
+        <div class="card-logo">
+          <mat-icon>shield</mat-icon>
+        </div>
+        <h1 class="login-title">Welcome Back</h1>
+        <p class="login-subtitle">Sign in to continue to your dashboard</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="alert-error" *ngIf="error">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error }}</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input
+            matInput
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+          />
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')"
+            >Email is required</mat-error
+          >
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')"
+            >Enter a valid email</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            autocomplete="current-password"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword = !hidePassword"
+          >
+            <mat-icon>{{
+              hidePassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')"
+            >Password is required</mat-error
+          >
+          <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')"
+            >Minimum 8 characters</mat-error
+          >
+        </mat-form-field>
+
+        <div class="form-options">
+          <mat-checkbox formControlName="rememberMe" color="primary"
+            >Remember Me</mat-checkbox
+          >
+          <a class="forgot-link" href="javascript:void(0)"
+            >Forgot Password?</a
+          >
+        </div>
+
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            type="submit"
+            class="btn-login"
+            [disabled]="loading"
+          >
+            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+            <span *ngIf="!loading">Login</span>
+            <mat-icon *ngIf="!loading">arrow_forward</mat-icon>
+          </button>
+          <button mat-stroked-button type="button" class="btn-signup">
+            Create Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

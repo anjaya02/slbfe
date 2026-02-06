@@ -1,0 +1,82 @@
+<div class="notification-page">
+  <div class="page-header">
+    <h1>Notifications</h1>
+    <div class="header-actions">
+      <button
+        mat-button
+        (click)="markAllAsRead()"
+        [disabled]="!notifications.length"
+      >
+        <mat-icon>done_all</mat-icon> Mark all as read
+      </button>
+      <button
+        mat-button
+        color="warn"
+        (click)="clearAll()"
+        [disabled]="!notifications.length"
+      >
+        <mat-icon>delete_sweep</mat-icon> Clear all
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button
+      mat-button
+      [class.active]="activeFilter === 'all'"
+      (click)="setFilter('all')"
+    >
+      All
+    </button>
+    <button
+      mat-button
+      [class.active]="activeFilter === 'unread'"
+      (click)="setFilter('unread')"
+    >
+      Unread
+    </button>
+  </div>
+
+  <!-- Notification List -->
+  <div class="notification-list">
+    <div
+      class="notification-item"
+      *ngFor="let n of filteredNotifications"
+      [class.unread]="!n.read"
+      (click)="markAsRead(n.id)"
+    >
+      <div class="notif-icon" [ngClass]="getIconClass(n.type)">
+        <mat-icon>{{ getIcon(n.type) }}</mat-icon>
+      </div>
+      <div class="notif-content">
+        <h4 class="notif-title">{{ n.title }}</h4>
+        <p class="notif-message">{{ n.message }}</p>
+        <span class="notif-time">{{
+          n.timestamp | date: "dd MMM yyyy, hh:mm a"
+        }}</span>
+      </div>
+      <div class="notif-actions">
+        <button
+          mat-icon-button
+          matTooltip="Delete"
+          (click)="deleteNotification(n.id); $event.stopPropagation()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!filteredNotifications.length">
+      <mat-icon>notifications_off</mat-icon>
+      <h3>No notifications</h3>
+      <p>
+        {{
+          activeFilter === "unread"
+            ? "All caught up!"
+            : "You have no notifications yet."
+        }}
+      </p>
+    </div>
+  </div>
+</div>

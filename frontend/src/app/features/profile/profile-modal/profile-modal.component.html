@@ -1,0 +1,73 @@
+<div class="profile-modal">
+  <div class="modal-header">
+    <h2>My Profile</h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Avatar -->
+    <div class="avatar-section">
+      <div class="avatar" *ngIf="!user?.avatar">{{ getInitials() }}</div>
+      <img
+        *ngIf="user?.avatar"
+        [src]="user!.avatar"
+        class="avatar-img"
+        alt="Profile"
+      />
+      <div class="avatar-info">
+        <h3>{{ user?.name }}</h3>
+        <span class="role-badge">{{
+          user?.role === "SUPERVISOR" ? "Supervisor" : "Case Officer"
+        }}</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="profileForm" (ngSubmit)="save()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Full Name</mat-label>
+        <input matInput formControlName="name" />
+        <mat-icon matPrefix>person</mat-icon>
+        <mat-error *ngIf="profileForm.get('name')?.hasError('required')"
+          >Name is required</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" />
+        <mat-icon matPrefix>email</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" />
+        <mat-icon matPrefix>phone</mat-icon>
+        <mat-error *ngIf="profileForm.get('phone')?.hasError('required')"
+          >Phone is required</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Location</mat-label>
+        <input matInput formControlName="location" />
+        <mat-icon matPrefix>location_on</mat-icon>
+      </mat-form-field>
+
+      <div class="modal-actions">
+        <button mat-button type="button" (click)="close()">Cancel</button>
+        <button
+          mat-raised-button
+          class="btn-save"
+          type="submit"
+          [disabled]="saving || profileForm.invalid"
+        >
+          <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+          <span *ngIf="!saving">Save Change</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

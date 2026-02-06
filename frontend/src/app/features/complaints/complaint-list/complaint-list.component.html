@@ -1,0 +1,97 @@
+<div class="complaint-list-page">
+  <div class="page-header">
+    <h2 class="page-title">Problem List</h2>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Search by name or reference...</mat-label>
+      <input matInput [(ngModel)]="searchValue" (keyup)="applyFilter()" />
+    </mat-form-field>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      matSort
+      *ngIf="!loading"
+      class="complaint-table"
+    >
+      <!-- Worker Name -->
+      <ng-container matColumnDef="workerName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Worker's name</th>
+        <td mat-cell *matCellDef="let row">{{ row.workerName }}</td>
+      </ng-container>
+
+      <!-- Reference No -->
+      <ng-container matColumnDef="referenceNo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Reference No</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="ref-no">{{ row.referenceNo }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Date Submitted -->
+      <ng-container matColumnDef="dateSubmitted">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          Date Submitted
+        </th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.dateSubmitted | date: "dd/MM/yyyy" }}
+        </td>
+      </ng-container>
+
+      <!-- Type -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+        <td mat-cell *matCellDef="let row">{{ $any(typeLabels)[row.type] }}</td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{
+            row.status
+          }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Action -->
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button
+            mat-raised-button
+            class="btn-view"
+            (click)="viewComplaint(row)"
+          >
+            View
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="table-row"
+      ></tr>
+    </table>
+
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 50]"
+      showFirstLastButtons
+      *ngIf="!loading"
+    ></mat-paginator>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+@use "../../../../assets/styles/variables" as v;
+
+.stepper-container {
+  padding: 24px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all v.$transition-normal;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.step.completed .step-circle mat-icon {
+  color: v.$primary-blue;
+}
+
+.step.active .step-circle .active-icon {
+  color: v.$danger-red;
+}
+
+.step.pending .step-circle mat-icon {
+  color: v.$gray-300;
+}
+
+.step-label {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.step.completed .step-label {
+  color: v.$primary-blue;
+  font-weight: v.$font-weight-semibold;
+}
+.step.active .step-label {
+  color: v.$danger-red;
+  font-weight: v.$font-weight-semibold;
+}
+
+.step-connector {
+  flex: 1;
+  height: 3px;
+  min-width: 40px;
+  margin-top: 19px;
+  background: v.$gray-300;
+  transition: background v.$transition-normal;
+
+  &.completed {
+    background: v.$primary-blue;
+  }
+
+  &.active {
+    background: linear-gradient(90deg, v.$primary-blue, v.$gray-300);
+  }
+}
+
+@media (max-width: 600px) {
+  .step {
+    min-width: 60px;
+  }
+  .step-label {
+    font-size: 10px;
+  }
+  .step-connector {
+    min-width: 20px;
+  }
+}

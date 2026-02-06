@@ -1,0 +1,27 @@
+@use "../../assets/styles/variables" as v;
+
+.app-body {
+  display: flex;
+  padding-top: v.$header-height;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: v.$sidebar-width;
+  padding: v.$space-lg;
+  background: var(--bg-primary);
+  min-height: calc(100vh - #{v.$header-height});
+  transition: margin-left v.$transition-normal;
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: v.$sidebar-collapsed-width;
+}
+
+@media (max-width: v.$bp-tablet) {
+  .main-content {
+    margin-left: 0;
+    padding: v.$space-md;
+  }
+}
