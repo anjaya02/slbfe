@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
         {
           label: "Submitted",
           data: data.weeklyData.map((d: WeeklyData) => d.submitted),
-          backgroundColor: "#00539F", // SLT Blue
+          backgroundColor: "#004080", 
           borderRadius: 6,
           barPercentage: 0.7,
         },
@@ -102,11 +102,11 @@ export class DashboardComponent implements OnInit {
         {
           label: "Cases",
           data: data.monthlyData.map((d: MonthlyData) => d.count),
-          borderColor: "#00539F",
-          backgroundColor: "rgba(0, 83, 159, 0.08)",
+          borderColor: "#004080",
+          backgroundColor: "rgba(0, 64, 128, 0.08)",
           fill: true,
           tension: 0.4,
-          pointBackgroundColor: "#00539F",
+          pointBackgroundColor: "#004080",
           pointBorderColor: "#fff",
           pointBorderWidth: 2,
         },

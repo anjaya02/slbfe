@@ -49,22 +49,16 @@
 }
 
 .brand-emblem {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
+  margin-bottom: 24px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  justify-content: flex-start; // Align to left since text is left-aligned
 
-  .emblem-icon {
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
-    color: v.$white;
+  .emblem-logo {
+    width: 80px;
+    height: auto;
+    filter: drop-shadow(
+      0 4px 6px rgba(0, 0, 0, 0.2)
+    ); // Slight shadow for depth
   }
 }
 
@@ -328,8 +322,12 @@
     min-height: auto;
     padding: 32px 24px 24px;
   }
-  .brand-stats { display: none; }
-  .brand-tagline { display: none; }
+  .brand-stats {
+    display: none;
+  }
+  .brand-tagline {
+    display: none;
+  }
   .login-content {
     padding: 32px 20px;
   }
