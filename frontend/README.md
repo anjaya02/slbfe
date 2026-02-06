@@ -140,4 +140,3 @@ Built by **Anjaya Induwara** ([@anjaya02](https://github.com/anjaya02))
 
 ---
 
-© 2026 Sri Lanka Bureau of Foreign Employment. All rights reserved.
