@@ -93,8 +93,7 @@ export class ComplaintDetailComponent implements OnInit {
     this.complaintService
       .addNote(this.complaint.id, this.noteText, true)
       .subscribe({
-        next: (note) => {
-          this.complaint!.notes = [...this.complaint!.notes, note];
+        next: () => {
           this.noteText = "";
           this.addingNote = false;
           this.snackBar.open("Note added successfully", "Close", {

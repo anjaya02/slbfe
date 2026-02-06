@@ -80,6 +80,12 @@ a {
     --mdc-snackbar-container-color: #ef4444;
     --mdc-snackbar-supporting-text-color: #{v.$white};
   }
+
+  // Force button text to white with high specificity
+  .mdc-button.mat-mdc-snack-bar-action {
+    --mdc-text-button-label-text-color: #{v.$white} !important;
+    color: v.$white !important;
+  }
 }
 
 .mat-mdc-table {
