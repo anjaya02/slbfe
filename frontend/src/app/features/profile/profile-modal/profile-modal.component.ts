@@ -46,15 +46,23 @@ export class ProfileModalComponent implements OnInit {
     if (this.profileForm.invalid) return;
     this.saving = true;
     const updates = this.profileForm.getRawValue();
-    this.authService.updateProfile(updates);
-    setTimeout(() => {
-      this.saving = false;
-      this.snackBar.open("Profile updated successfully", "Close", {
-        duration: 3000,
-        panelClass: ["success-snackbar"],
-      });
-      this.dialogRef.close(true);
-    }, 600);
+    this.authService.updateProfile(updates).subscribe({
+      next: () => {
+        this.saving = false;
+        this.snackBar.open("Profile updated successfully", "Close", {
+          duration: 3000,
+          panelClass: ["success-snackbar"],
+        });
+        this.dialogRef.close(true);
+      },
+      error: () => {
+        this.saving = false;
+        this.snackBar.open("Failed to update profile", "Close", {
+          duration: 3000,
+          panelClass: ["error-snackbar"],
+        });
+      },
+    });
   }
 
   close(): void {
