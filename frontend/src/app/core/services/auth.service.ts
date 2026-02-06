@@ -10,7 +10,7 @@ const MOCK_USERS: { email: string; password: string; user: User }[] = [
     password: "admin123",
     user: {
       id: "USR001",
-      name: "Aman Admin",
+      name: "Main Admin",
       email: "admin@slbfe.gov.lk",
       role: "SUPERVISOR",
       avatar: "",
@@ -25,7 +25,7 @@ const MOCK_USERS: { email: string; password: string; user: User }[] = [
     password: "officer123",
     user: {
       id: "USR002",
-      name: "Kamal Perera",
+      name: "Iman Fernando",
       email: "officer@slbfe.gov.lk",
       role: "CASE_OFFICER",
       avatar: "",

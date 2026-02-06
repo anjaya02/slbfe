@@ -47,6 +47,13 @@ export class HeaderComponent {
     this.showUserMenu = false;
   }
 
+  toggleNotifications(): void {
+    if (this.auth.currentUser) {
+      const newState = !this.auth.currentUser.notificationsEnabled;
+      this.auth.updateProfile({ notificationsEnabled: newState }).subscribe();
+    }
+  }
+
   get unreadCount(): number {
     return this.notificationService.getUnreadCount();
   }

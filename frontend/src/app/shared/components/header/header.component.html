@@ -65,10 +65,12 @@
           <span>Settings</span>
           <mat-icon class="arrow">chevron_right</mat-icon>
         </a>
-        <a class="dropdown-item">
-          <mat-icon>notifications</mat-icon>
+        <a class="dropdown-item" (click)="toggleNotifications(); $event.stopPropagation()">
+          <mat-icon>{{ auth.currentUser?.notificationsEnabled ? 'notifications' : 'notifications_off' }}</mat-icon>
           <span>Notification</span>
-          <span class="badge-text">Allow</span>
+          <span class="badge-text" [class.muted]="!auth.currentUser?.notificationsEnabled">
+            {{ auth.currentUser?.notificationsEnabled ? 'Allow' : 'Muted' }}
+          </span>
         </a>
         <div class="dropdown-divider"></div>
         <a

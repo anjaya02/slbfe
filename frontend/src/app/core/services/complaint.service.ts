@@ -60,7 +60,7 @@ const MOCK_COMPLAINTS: Complaint[] = [
         action: "Status Changed: Investigation",
         description:
           "Case moved from 'Under Review' to 'Investigation' after initial documentation verification.",
-        performedBy: "Kamal Perera",
+        performedBy: "Iman Fernando",
         timestamp: new Date(),
         previousStatus: ComplaintStatus.UNDER_REVIEW,
         newStatus: ComplaintStatus.INVESTIGATION,
@@ -71,7 +71,7 @@ const MOCK_COMPLAINTS: Complaint[] = [
         action: "Agency Inquiry Sent",
         description:
           "Official notice dispatched to Lanka Manpower Solutions regarding salary non-payment",
-        performedBy: "Kamal Perera",
+        performedBy: "Iman Fernando",
         timestamp: new Date(Date.now() - 86400000),
       },
       {
