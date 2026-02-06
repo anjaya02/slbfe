@@ -124,13 +124,19 @@ src/
 | `npm start` | Dev server on port 4200 |
 | `npm run build` | Production build |
 | `npm run watch` | Build in watch mode |
-| `npm test` | Unit tests (Karma) |
 
 ## Notes
 
 - `--legacy-peer-deps` is required during `npm install` due to peer-dependency version ranges between Angular Material 17 and ng2-charts 5.
 - `downlevelIteration` has been removed from `tsconfig.json` — it is unnecessary with `target: ES2022`.
 - `"ignoreDeprecations": "6.0"` silences TypeScript 6.x+ warnings for deprecated options (`baseUrl`, `moduleResolution: "node"`) that are still required by Angular 17's build toolchain.
+
+---
+
+
+## Built By
+
+Built by **Anjaya Induwara** ([@anjaya02](https://github.com/anjaya02))
 
 ---
 
