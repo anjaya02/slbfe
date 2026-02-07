@@ -1,20 +1,28 @@
 @use "../../../../assets/styles/variables" as v;
 
 .settings-modal {
-  width: 440px;
-  max-width: 90vw;
+  width: 100%;
 }
 
 .modal-header {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 12px;
+  justify-content: center;
+  padding: 24px 24px 16px;
+  
   h2 {
     margin: 0;
     font-size: v.$font-size-xl;
     font-weight: v.$font-weight-bold;
     color: var(--text-primary);
+  }
+
+  button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }
 
@@ -22,13 +30,13 @@
   padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 .setting-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .setting-label {
@@ -46,8 +54,9 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 4px 0 16px;
   border-bottom: 1px solid v.$gray-100;
+  
   .toggle-info {
     display: flex;
     flex-direction: column;
@@ -61,7 +70,7 @@
 
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   padding: 16px 24px 24px;
 }
 

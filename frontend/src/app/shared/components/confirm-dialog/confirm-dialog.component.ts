@@ -12,12 +12,8 @@ export interface ConfirmDialogData {
   selector: "app-confirm-dialog",
   template: `
     <div class="confirm-dialog-wrapper">
-      <div class="dialog-header-bg">
-        <div class="pulse-ring"></div>
-      </div>
-      
-      <div class="dialog-body">
-        <div class="icon-floating">
+      <div class="dialog-content">
+        <div class="icon-wrapper">
           <mat-icon>logout</mat-icon>
         </div>
 
@@ -29,8 +25,7 @@ export interface ConfirmDialogData {
             {{ data.cancelText }}
           </button>
           <button mat-raised-button (click)="onConfirm()" class="btn-confirm">
-            <span class="btn-label">{{ data.confirmText }}</span>
-            <mat-icon class="btn-icon">arrow_forward</mat-icon>
+            {{ data.confirmText }}
           </button>
         </div>
       </div>
@@ -41,121 +36,96 @@ export interface ConfirmDialogData {
       @use "../../../../assets/styles/variables" as v;
 
       .confirm-dialog-wrapper {
+        background: #ffffff;
+        padding: 40px 32px;
+        text-align: center;
+        border-radius: 28px;
         position: relative;
         overflow: hidden;
-        border-radius: 28px; /* Highly curved corners */
-        background: v.$white;
       }
 
-      .dialog-header-bg {
-        height: 100px;
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); /* Soft Red Gradient */
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .pulse-ring {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        top: -50px;
-        /* Animation could go here */
-      }
-
-      .dialog-body {
-        padding: 0 32px 32px;
-        text-align: center;
-        margin-top: -40px; /* Pull content up overlapping header */
-        position: relative;
-        z-index: 2;
-      }
-
-      .icon-floating {
+      .icon-wrapper {
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: v.$white;
-        margin: 0 auto 16px;
+        background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+        color: #DC2626;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8px 24px rgba(220, 38, 38, 0.15);
+        margin: 0 auto 24px;
+        box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.15);
+        border: 4px solid #fff;
         
         mat-icon {
           font-size: 36px;
-          height: 36px;
           width: 36px;
-          color: v.$danger-red;
+          height: 36px;
         }
       }
 
       h2 {
-        font-family: v.$font-primary;
+        font-family: 'Inter', sans-serif;
         font-size: 24px;
-        font-weight: 800; /* Extra bold */
-        color: v.$dark;
-        margin-bottom: 8px;
-        letter-spacing: -0.5px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 12px;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
       }
 
       .dialog-message {
-        color: v.$gray-500;
-        font-size: 15px;
+        color: #6B7280;
+        font-size: 16px;
+        font-weight: 400;
         line-height: 1.6;
-        margin-bottom: 32px;
+        margin: 0 auto 32px;
+        max-width: 300px;
       }
 
       .dialog-actions {
-        display: grid;
-        grid-template-columns: 1fr 1.5fr; /* Confirm button larger */
+        display: flex;
+        justify-content: center;
         gap: 16px;
-        align-items: center;
+        
+        button {
+          min-width: 120px;
+          height: 48px;
+          font-weight: 600;
+          font-family: 'Inter', sans-serif;
+          font-size: 15px;
+          border-radius: 12px;
+          letter-spacing: 0.01em;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
       }
 
       .btn-cancel {
-        height: 52px;
-        border-radius: 999px !important; /* Pill shape */
-        font-weight: 600;
-        color: v.$gray-500 !important;
-        background: v.$gray-50 !important;
+        background-color: #F3F4F6 !important;
+        color: #374151 !important;
+        border: 1px solid transparent !important;
         
         &:hover {
-          background: v.$gray-100 !important;
-          color: v.$dark !important;
+          background-color: #E5E7EB !important;
+          color: #111827 !important;
         }
       }
 
       .btn-confirm {
-        height: 52px;
-        border-radius: 999px !important; /* Pill shape */
-        background: linear-gradient(135deg, v.$danger-red, v.$danger-dark) !important; /* Vibrant Red Gradient */
-        color: v.$white !important;
-        font-weight: 600;
-        font-size: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        transition: transform 0.2s, box-shadow 0.2s;
-
-        .btn-label {
-          margin-top: 2px;
-        }
-
-        .btn-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-
+        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+        border: none !important;
+        
         &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 16px rgba(220, 38, 38, 0.4);
+          background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important;
+          box-shadow: 0 8px 16px rgba(220, 38, 38, 0.35);
+          transform: translateY(-1px);
+        }
+
+        &:active {
+          transform: translateY(0);
+          box-shadow: 0 4px 6px rgba(220, 38, 38, 0.25); /* restore original shadow */
         }
       }
     `,

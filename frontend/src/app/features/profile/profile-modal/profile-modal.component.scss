@@ -1,20 +1,28 @@
 @use "../../../../assets/styles/variables" as v;
 
 .profile-modal {
-  width: 480px;
-  max-width: 90vw;
+  width: 100%;
 }
 
 .modal-header {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 12px;
+  justify-content: center;
+  padding: 24px 24px 16px;
+  
   h2 {
     margin: 0;
     font-size: v.$font-size-xl;
     font-weight: v.$font-weight-bold;
     color: var(--text-primary);
+  }
+
+  button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }
 
@@ -27,11 +35,13 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid v.$gray-100;
 }
 
 .avatar {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: v.$primary-light;
   color: v.$white;
@@ -41,19 +51,21 @@
   font-size: v.$font-size-xl;
   font-weight: v.$font-weight-bold;
   flex-shrink: 0;
+  box-shadow: v.$shadow-md;
 
   mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
   }
 }
 
 .avatar-img {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
+  box-shadow: v.$shadow-md;
 }
 
 .avatar-info {
@@ -62,27 +74,30 @@
   gap: 4px;
   h3 {
     margin: 0;
-    font-size: v.$font-size-base;
-    font-weight: v.$font-weight-semibold;
+    font-size: v.$font-size-lg;
+    font-weight: v.$font-weight-bold;
     color: var(--text-primary);
   }
 }
 
 .role-badge {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
+  padding: 4px 12px;
   border-radius: v.$radius-full;
   background: #dbeafe;
   color: v.$primary-blue;
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px; // Increased gap
 }
 
 .full-width {
@@ -94,7 +109,7 @@ form {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 24px;
 }
 
 .btn-save {
@@ -107,12 +122,15 @@ form {
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
   min-width: 140px;
-  box-shadow: 0 3px 12px rgba(30, 64, 175, 0.25);
+  height: 44px;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
   transition: all 0.25s ease;
+  
   &:hover {
-    box-shadow: 0 5px 18px rgba(30, 64, 175, 0.35) !important;
+    box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3) !important;
     transform: translateY(-1px);
   }
+  
   &:disabled {
     opacity: 0.7;
     box-shadow: none;

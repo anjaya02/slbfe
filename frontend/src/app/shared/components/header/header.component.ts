@@ -1,4 +1,10 @@
-import { Component, ElementRef, EventEmitter, HostListener, Output } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Output,
+} from "@angular/core";
 import { trigger, transition, style, animate } from "@angular/animations";
 import { AuthService } from "../../../core/services/auth.service";
 import { NotificationService } from "../../../core/services/notification.service";
@@ -10,16 +16,22 @@ import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.compone
   templateUrl: "./header.component.html",
   styleUrls: ["./header.component.scss"],
   animations: [
-    trigger('fadeSlideDown', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(-8px)' }),
-        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+    trigger("fadeSlideDown", [
+      transition(":enter", [
+        style({ opacity: 0, transform: "translateY(-8px)" }),
+        animate(
+          "200ms ease-out",
+          style({ opacity: 1, transform: "translateY(0)" }),
+        ),
       ]),
-      transition(':leave', [
-        animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-8px)' }))
-      ])
-    ])
-  ]
+      transition(":leave", [
+        animate(
+          "150ms ease-in",
+          style({ opacity: 0, transform: "translateY(-8px)" }),
+        ),
+      ]),
+    ]),
+  ],
 })
 export class HeaderComponent {
   @Output() profileClicked = new EventEmitter<void>();
@@ -32,32 +44,37 @@ export class HeaderComponent {
     public auth: AuthService,
     public notificationService: NotificationService,
     private elementRef: ElementRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   onLogout(): void {
     this.closeUserMenu();
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '360px',
-      panelClass: 'confirm-dialog-container',
+      width: "360px",
+      panelClass: "confirm-dialog-container",
       data: {
-        title: 'Confirm Logout',
-        message: 'Are you sure you want to log out of your account?',
-        confirmText: 'Log Out',
-        cancelText: 'Cancel'
-      }
+        title: "Confirm Logout",
+        message: "Are you sure you want to log out of your account?",
+        confirmText: "Log Out",
+        cancelText: "Cancel",
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.beforeClosed().subscribe((result) => {
       if (result) {
         this.auth.logout();
       }
     });
   }
 
-  @HostListener('document:click', ['$event'])
+  @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {
-    if (this.showUserMenu && !this.elementRef.nativeElement.querySelector('.user-menu-wrapper')?.contains(event.target as Node)) {
+    if (
+      this.showUserMenu &&
+      !this.elementRef.nativeElement
+        .querySelector(".user-menu-wrapper")
+        ?.contains(event.target as Node)
+    ) {
       this.showUserMenu = false;
     }
   }
