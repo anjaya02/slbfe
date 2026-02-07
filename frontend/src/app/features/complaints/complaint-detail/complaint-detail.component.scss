@@ -204,7 +204,7 @@
 }
 
 .btn-solve {
-  background: linear-gradient(135deg, v.$success-green, #059669) !important;
+  background: linear-gradient(135deg, v.$success-green, v.$success-dark) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
@@ -395,7 +395,7 @@
 }
 
 .btn-update {
-  background: linear-gradient(135deg, v.$primary-blue, #2563eb) !important;
+  background: linear-gradient(135deg, v.$primary-blue, v.$primary-dark) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;

@@ -42,16 +42,16 @@
   }
 
   &.blue {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    background: linear-gradient(135deg, #1e40af, #3b82f6); // Single blue theme
     // Subtle inner sheen
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), v.$shadow-md;
   }
   &.indigo {
-    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    background: linear-gradient(135deg, #4338ca, #6366f1); // Single indigo theme
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), v.$shadow-md;
   }
   &.purple {
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    background: linear-gradient(135deg, #6d28d9, #8b5cf6); // Single purple theme
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), v.$shadow-md;
   }
 }
@@ -95,7 +95,7 @@
   align-items: center;
   justify-content: space-between;
   // More professional, less "deep" blue gradient
-  background: linear-gradient(120deg, #1e40af 0%, #2563eb 100%);
+  background: v.$primary-blue; // Solid blue for the banner
   border-radius: v.$radius-lg;
   padding: 40px 48px;
   color: v.$white;
