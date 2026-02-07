@@ -1,0 +1,168 @@
+@use "../../../assets/styles/variables" as v;
+
+.user-management-page {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-bold;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.btn-add-user {
+  background: linear-gradient(135deg, v.$primary-blue, #2563eb) !important;
+  color: v.$white !important;
+  font-weight: v.$font-weight-semibold;
+  border-radius: v.$radius-md !important;
+  box-shadow: 0 3px 12px rgba(30, 64, 175, 0.25);
+  transition: all 0.25s ease;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+
+  &:hover {
+    box-shadow: 0 5px 18px rgba(30, 64, 175, 0.35) !important;
+    transform: translateY(-1px);
+  }
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.error-state {
+  text-align: center;
+  padding: 48px 24px;
+
+  .error-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: v.$danger-red;
+  }
+
+  h3 {
+    color: var(--text-primary);
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+}
+
+.table-card {
+  background: var(--bg-card);
+  border-radius: v.$radius-lg;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.user-table {
+  width: 100%;
+}
+
+.user-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: v.$gray-100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: v.$gray-500;
+  }
+}
+
+.role-badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: v.$radius-full;
+  font-size: 11px;
+  font-weight: v.$font-weight-semibold;
+
+  &.badge-supervisor {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+
+  &.badge-officer {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+
+  &.dot-active {
+    background: v.$success-green;
+  }
+
+  &.dot-inactive {
+    background: v.$gray-400;
+  }
+}
+
+.table-row {
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: v.$gray-50;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  color: var(--text-muted);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+}

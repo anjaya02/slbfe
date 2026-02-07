@@ -75,6 +75,55 @@
   }
 }
 
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  .card-title {
+    margin-bottom: 0;
+  }
+}
+
+.path-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: v.$radius-full;
+  font-size: 11px;
+  font-weight: v.$font-weight-bold;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+
+  .path-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.badge-slbfe {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+
+    .path-icon {
+      color: #1e40af;
+    }
+  }
+
+  &.badge-consular {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+
+    .path-icon {
+      color: #92400e;
+    }
+  }
+}
+
 // Worker Profile
 .profile-fields {
   display: flex;

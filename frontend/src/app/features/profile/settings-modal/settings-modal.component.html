@@ -7,21 +7,6 @@
   </div>
 
   <div class="modal-body">
-    <!-- Language -->
-    <div class="setting-group">
-      <label class="setting-label">Language</label>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-select
-          [(value)]="selectedLanguage"
-          (selectionChange)="onLanguageChange($event.value)"
-        >
-          <mat-option *ngFor="let lang of languages" [value]="lang.value">{{
-            lang.label
-          }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
     <!-- Notifications -->
     <div class="setting-group toggle-group">
       <div class="toggle-info">

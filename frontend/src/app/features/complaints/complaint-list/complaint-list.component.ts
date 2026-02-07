@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../../core/services/complaint.service";
 import {
   Complaint,
@@ -14,7 +16,7 @@ import {
   templateUrl: "./complaint-list.component.html",
   styleUrls: ["./complaint-list.component.scss"],
 })
-export class ComplaintListComponent implements OnInit {
+export class ComplaintListComponent implements OnInit, OnDestroy {
   displayedColumns = [
     "workerName",
     "referenceNo",
@@ -25,8 +27,10 @@ export class ComplaintListComponent implements OnInit {
   ];
   dataSource = new MatTableDataSource<Complaint>([]);
   loading = true;
+  error = false;
   typeLabels = COMPLAINT_TYPE_LABELS;
   searchValue = "";
+  private destroy$ = new Subject<void>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -37,16 +41,34 @@ export class ComplaintListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadComplaints();
+  }
+
+  loadComplaints(): void {
+    this.loading = true;
+    this.error = false;
     this.complaintService
       .getComplaints({ page: 0, pageSize: 50 })
-      .subscribe((res) => {
-        this.dataSource.data = res.data;
-        this.loading = false;
-        setTimeout(() => {
-          if (this.paginator) this.dataSource.paginator = this.paginator;
-          if (this.sort) this.dataSource.sort = this.sort;
-        });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.dataSource.data = res.data;
+          this.loading = false;
+          setTimeout(() => {
+            if (this.paginator) this.dataSource.paginator = this.paginator;
+            if (this.sort) this.dataSource.sort = this.sort;
+          });
+        },
+        error: () => {
+          this.loading = false;
+          this.error = true;
+        },
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   applyFilter(): void {

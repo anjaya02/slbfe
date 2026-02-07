@@ -1,11 +1,6 @@
 import { ComplaintStatus, ComplaintType } from "./complaint.model";
 
-export type ReportType =
-  | "SUMMARY"
-  | "STATUS"
-  | "TYPE"
-  | "OFFICER_PERFORMANCE"
-  | "TREND_ANALYSIS";
+export type ReportType = "MONTHLY" | "QUARTERLY" | "ANNUAL" | "CUSTOM";
 
 export interface ReportFilter {
   reportType: ReportType;

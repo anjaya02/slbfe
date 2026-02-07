@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
-import { delay } from "rxjs/operators";
+import { delay, map } from "rxjs/operators";
 import { AppNotification } from "../models/notification.model";
 
 const MOCK_NOTIFICATIONS: AppNotification[] = [
@@ -67,9 +67,9 @@ export class NotificationService {
   public notifications$ = this.notificationsSubject.asObservable();
 
   get unreadCount$(): Observable<number> {
-    return new BehaviorSubject(
-      this.notificationsSubject.value.filter((n) => !n.read).length,
-    ).asObservable();
+    return this.notificationsSubject.pipe(
+      map((notifications) => notifications.filter((n) => !n.read).length),
+    );
   }
 
   getUnreadCount(): number {

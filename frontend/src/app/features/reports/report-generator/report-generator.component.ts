@@ -1,12 +1,13 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { ChartConfiguration, ChartType } from "chart.js";
+import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
+import { ChartConfiguration } from "chart.js";
 import { BaseChartDirective } from "ng2-charts";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { ReportService } from "../../../core/services/report.service";
 import {
   ReportData,
   ReportFilter,
-  StatusBreakdownItem,
-  OfficerPerformanceItem,
+  ReportType,
 } from "../../../core/models/report.model";
 
 @Component({
@@ -14,14 +15,15 @@ import {
   templateUrl: "./report-generator.component.html",
   styleUrls: ["./report-generator.component.scss"],
 })
-export class ReportGeneratorComponent implements OnInit {
+export class ReportGeneratorComponent implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   reportData: ReportData | null = null;
   loading = false;
+  private destroy$ = new Subject<void>();
 
   // Filter
-  selectedReportType: "MONTHLY" | "QUARTERLY" | "ANNUAL" | "CUSTOM" = "MONTHLY";
+  selectedReportType: ReportType = "MONTHLY";
   startDate: Date | null = null;
   endDate: Date | null = null;
 
@@ -67,32 +69,41 @@ export class ReportGeneratorComponent implements OnInit {
   generateReport(): void {
     this.loading = true;
     const filter: ReportFilter = {
-      reportType: this.selectedReportType as any,
+      reportType: this.selectedReportType,
       dateFrom: this.startDate || undefined,
       dateTo: this.endDate || undefined,
     };
 
-    this.reportService.generateReport(filter).subscribe({
-      next: (data) => {
-        this.reportData = data;
-        this.updateCharts(data);
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+    this.reportService
+      .generateReport(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.reportData = data;
+          this.updateCharts(data);
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        },
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   updateCharts(data: ReportData): void {
     const statusColors: Record<string, string> = {
-      SUBMITTED: "#6B7280",
-      UNDER_REVIEW: "#3B82F6",
-      IN_PROGRESS: "#8B5CF6",
-      AWAITING_INFO: "#F59E0B",
-      ESCALATED: "#EF4444",
-      RESOLVED: "#10B981",
-      CLOSED: "#1F2937",
+      Submitted: "#6B7280",
+      "Under Review": "#3B82F6",
+      Investigation: "#8B5CF6",
+      "In Progress": "#A855F7",
+      "Awaiting Info": "#F59E0B",
+      Escalated: "#EF4444",
+      Resolved: "#10B981",
+      Closed: "#1F2937",
     };
 
     // Pie chart

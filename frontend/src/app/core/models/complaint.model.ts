@@ -20,6 +20,8 @@ export type ComplaintType =
 
 export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
+export type RegistrationPath = "SLBFE" | "CONSULAR";
+
 export interface Complaint {
   id: string;
   referenceNo: string;
@@ -33,11 +35,13 @@ export interface Complaint {
   type: ComplaintType;
   status: ComplaintStatus;
   priority: Priority;
+  registrationPath: RegistrationPath;
   description: string;
   attachments: Attachment[];
   dateSubmitted: Date;
   dateUpdated: Date;
   assignedTo?: string;
+  assignedToName?: string;
   history: CaseHistory[];
   notes: ComplaintNote[];
 }

@@ -44,7 +44,7 @@
       class="notification-item"
       *ngFor="let n of filteredNotifications"
       [class.unread]="!n.read"
-      (click)="markAsRead(n.id)"
+      (click)="markAsRead(n)"
     >
       <div class="notif-icon" [ngClass]="getIconClass(n.type)">
         <mat-icon>{{ getIcon(n.type) }}</mat-icon>

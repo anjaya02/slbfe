@@ -1,0 +1,110 @@
+<div class="user-management-page">
+  <div class="page-header">
+    <h2 class="page-title">User Management</h2>
+    <button mat-raised-button class="btn-add-user" (click)="openCreateDialog()">
+      <mat-icon>person_add</mat-icon>
+      Add User
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Error -->
+  <div class="error-state" *ngIf="!loading && error">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3>Failed to load users</h3>
+    <p>Something went wrong while fetching the user list.</p>
+    <button mat-raised-button color="primary" (click)="loadUsers()">
+      Retry
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!loading && !error">
+    <table mat-table [dataSource]="dataSource" class="user-table">
+      <!-- Name -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="user-name-cell">
+            <div class="user-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <span>{{ row.name }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Email -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let row">{{ row.email }}</td>
+      </ng-container>
+
+      <!-- Role -->
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="role-badge" [ngClass]="getRoleBadgeClass(row.role)">
+            {{ getRoleLabel(row.role) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Location -->
+      <ng-container matColumnDef="location">
+        <th mat-header-cell *matHeaderCellDef>Location</th>
+        <td mat-cell *matCellDef="let row">{{ row.location || "—" }}</td>
+      </ng-container>
+
+      <!-- Status -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span
+            class="status-dot"
+            [ngClass]="row.isActive ? 'dot-active' : 'dot-inactive'"
+          ></span>
+          {{ row.isActive ? "Active" : "Inactive" }}
+        </td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button
+            mat-icon-button
+            matTooltip="Edit user"
+            (click)="openEditDialog(row)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="row.isActive ? 'Deactivate user' : 'Activate user'"
+            (click)="toggleUserStatus(row)"
+          >
+            <mat-icon>{{ row.isActive ? "person_off" : "person" }}</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="table-row"
+      ></tr>
+    </table>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="dataSource.data.length === 0">
+      <mat-icon>group_off</mat-icon>
+      <p>No users found</p>
+    </div>
+  </div>
+</div>

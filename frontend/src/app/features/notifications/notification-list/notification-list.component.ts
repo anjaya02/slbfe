@@ -1,4 +1,7 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Router } from "@angular/router";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { NotificationService } from "../../../core/services/notification.service";
 import { AppNotification } from "../../../core/models/notification.model";
 
@@ -7,18 +10,29 @@ import { AppNotification } from "../../../core/models/notification.model";
   templateUrl: "./notification-list.component.html",
   styleUrls: ["./notification-list.component.scss"],
 })
-export class NotificationListComponent implements OnInit {
+export class NotificationListComponent implements OnInit, OnDestroy {
   notifications: AppNotification[] = [];
   filteredNotifications: AppNotification[] = [];
   activeFilter: "all" | "unread" = "all";
+  private destroy$ = new Subject<void>();
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
-    this.notificationService.notifications$.subscribe((n) => {
-      this.notifications = n;
-      this.applyFilter();
-    });
+    this.notificationService.notifications$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((n) => {
+        this.notifications = n;
+        this.applyFilter();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   applyFilter(): void {
@@ -34,8 +48,11 @@ export class NotificationListComponent implements OnInit {
     this.applyFilter();
   }
 
-  markAsRead(id: string): void {
-    this.notificationService.markAsRead(id);
+  markAsRead(notification: AppNotification): void {
+    this.notificationService.markAsRead(notification.id);
+    if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    }
   }
 
   markAllAsRead(): void {
@@ -52,22 +69,20 @@ export class NotificationListComponent implements OnInit {
 
   getIcon(type: string): string {
     const icons: Record<string, string> = {
-      STATUS_UPDATE: "update",
-      NEW_ASSIGNMENT: "assignment",
-      ESCALATION: "priority_high",
-      DEADLINE: "schedule",
-      SYSTEM: "info",
+      CASE_UPDATE: "update",
+      ASSIGNMENT: "assignment",
+      SYSTEM_ALERT: "info",
+      MENTION: "alternate_email",
     };
     return icons[type] || "notifications";
   }
 
   getIconClass(type: string): string {
     const cls: Record<string, string> = {
-      STATUS_UPDATE: "icon-blue",
-      NEW_ASSIGNMENT: "icon-green",
-      ESCALATION: "icon-red",
-      DEADLINE: "icon-orange",
-      SYSTEM: "icon-gray",
+      CASE_UPDATE: "icon-blue",
+      ASSIGNMENT: "icon-green",
+      SYSTEM_ALERT: "icon-gray",
+      MENTION: "icon-orange",
     };
     return cls[type] || "icon-gray";
   }

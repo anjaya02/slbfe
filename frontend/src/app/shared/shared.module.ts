@@ -30,6 +30,7 @@ import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { StatusStepperComponent } from "./components/status-stepper/status-stepper.component";
+import { LoadingComponent } from "./components/loading/loading.component";
 
 // Pipes & Directives
 import { TimeAgoPipe } from "./pipes/time-ago.pipe";
@@ -65,6 +66,7 @@ const MATERIAL_MODULES = [
     SidebarComponent,
     HeaderComponent,
     StatusStepperComponent,
+    LoadingComponent,
     TimeAgoPipe,
     StatusColorPipe,
     HasRoleDirective,
@@ -85,6 +87,7 @@ const MATERIAL_MODULES = [
     SidebarComponent,
     HeaderComponent,
     StatusStepperComponent,
+    LoadingComponent,
     TimeAgoPipe,
     StatusColorPipe,
     HasRoleDirective,

@@ -1,6 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { BreakpointObserver, BreakpointState } from "@angular/cdk/layout";
 import { MatDialog } from "@angular/material/dialog";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { ProfileModalComponent } from "../features/profile/profile-modal/profile-modal.component";
 import { SettingsModalComponent } from "../features/profile/settings-modal/settings-modal.component";
 
@@ -9,24 +11,27 @@ import { SettingsModalComponent } from "../features/profile/settings-modal/setti
   templateUrl: "./layout.component.html",
   styleUrls: ["./layout.component.scss"],
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent implements OnInit, OnDestroy {
   sidebarCollapsed = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dialog: MatDialog,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
   ) {}
 
   ngOnInit(): void {
     this.breakpointObserver
       .observe(["(max-width: 1024px)"])
+      .pipe(takeUntil(this.destroy$))
       .subscribe((result: BreakpointState) => {
-        if (result.matches) {
-          this.sidebarCollapsed = true;
-        } else {
-          this.sidebarCollapsed = false;
-        }
+        this.sidebarCollapsed = result.matches;
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleSidebar(): void {

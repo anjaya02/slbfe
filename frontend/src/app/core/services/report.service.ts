@@ -1,11 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { delay } from "rxjs/operators";
-import {
-  ReportData,
-  ReportFilter,
-  ReportSummary,
-} from "../models/report.model";
+import { ReportData, ReportFilter } from "../models/report.model";
 
 @Injectable({ providedIn: "root" })
 export class ReportService {
@@ -95,11 +91,10 @@ export class ReportService {
 
   private getReportTitle(type: string): string {
     const titles: Record<string, string> = {
-      SUMMARY: "Summary Report",
-      STATUS: "Status Distribution Report",
-      TYPE: "Complaint Type Report",
-      OFFICER_PERFORMANCE: "Officer Performance Report",
-      TREND_ANALYSIS: "Trend Analysis Report",
+      MONTHLY: "Monthly Report",
+      QUARTERLY: "Quarterly Report",
+      ANNUAL: "Annual Report",
+      CUSTOM: "Custom Range Report",
     };
     return titles[type] || "Report";
   }

@@ -1,4 +1,4 @@
-<div class="dashboard">
+<div class="dashboard" *ngIf="!loading && !error">
   <!-- Metrics Row -->
   <div class="metrics-row">
     <div class="metric-card blue">
@@ -95,4 +95,21 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Loading -->
+<app-loading *ngIf="loading" mode="full-page" message="Synchronizing dashboard data..."></app-loading>
+
+<!-- Error -->
+<div class="error-page" *ngIf="error">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <h2>Failed to load dashboard</h2>
+  <p>Something went wrong while loading the data. Please try again.</p>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="loading = true; error = false; ngOnInit()"
+  >
+    <mat-icon>refresh</mat-icon> Retry
+  </button>
 </div>

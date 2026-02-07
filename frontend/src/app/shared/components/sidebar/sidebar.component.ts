@@ -1,6 +1,13 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnDestroy,
+} from "@angular/core";
 import { Router, NavigationEnd } from "@angular/router";
-import { filter } from "rxjs/operators";
+import { Subject } from "rxjs";
+import { filter, takeUntil } from "rxjs/operators";
 import { AuthService } from "../../../core/services/auth.service";
 
 interface NavItem {
@@ -15,10 +22,11 @@ interface NavItem {
   templateUrl: "./sidebar.component.html",
   styleUrls: ["./sidebar.component.scss"],
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnDestroy {
   @Input() collapsed = false;
   @Output() navigated = new EventEmitter<void>();
   activeRoute = "";
+  private destroy$ = new Subject<void>();
 
   navItems: NavItem[] = [
     { label: "Home", icon: "dashboard", route: "/dashboard" },
@@ -30,6 +38,12 @@ export class SidebarComponent {
       route: "/reports",
       roles: ["SUPERVISOR"],
     },
+    {
+      label: "Users",
+      icon: "group",
+      route: "/users",
+      roles: ["SUPERVISOR"],
+    },
   ];
 
   constructor(
@@ -37,7 +51,10 @@ export class SidebarComponent {
     private router: Router,
   ) {
     this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntil(this.destroy$),
+      )
       .subscribe((e: any) => {
         this.activeRoute = e.urlAfterRedirects || e.url;
       });
@@ -59,5 +76,10 @@ export class SidebarComponent {
 
   toggleCollapse(): void {
     this.collapsed = !this.collapsed;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

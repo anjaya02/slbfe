@@ -8,6 +8,7 @@ import { ComplaintListComponent } from "./features/complaints/complaint-list/com
 import { ComplaintDetailComponent } from "./features/complaints/complaint-detail/complaint-detail.component";
 import { NotificationListComponent } from "./features/notifications/notification-list/notification-list.component";
 import { ReportGeneratorComponent } from "./features/reports/report-generator/report-generator.component";
+import { UserManagementComponent } from "./features/user-management/user-management.component";
 
 import { AuthGuard } from "./core/guards/auth.guard";
 import { RoleGuard } from "./core/guards/role.guard";
@@ -27,6 +28,12 @@ const routes: Routes = [
       {
         path: "reports",
         component: ReportGeneratorComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ["SUPERVISOR"] },
+      },
+      {
+        path: "users",
+        component: UserManagementComponent,
         canActivate: [RoleGuard],
         data: { roles: ["SUPERVISOR"] },
       },

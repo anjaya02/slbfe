@@ -3,9 +3,6 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 
-import { TranslateModule, TranslateLoader } from "@ngx-translate/core";
-import { TranslateHttpLoader } from "@ngx-translate/http-loader";
-import { HttpClient } from "@angular/common/http";
 import { NgChartsModule } from "ng2-charts";
 
 import { AppRoutingModule } from "./app-routing.module";
@@ -24,15 +21,12 @@ import { NotificationListComponent } from "./features/notifications/notification
 import { ReportGeneratorComponent } from "./features/reports/report-generator/report-generator.component";
 import { ProfileModalComponent } from "./features/profile/profile-modal/profile-modal.component";
 import { SettingsModalComponent } from "./features/profile/settings-modal/settings-modal.component";
+import { UserManagementComponent } from "./features/user-management/user-management.component";
+import { UserFormDialogComponent } from "./features/user-management/user-form-dialog/user-form-dialog.component";
 
 // Interceptors
 import { AuthInterceptor } from "./core/interceptors/auth.interceptor";
 import { ErrorInterceptor } from "./core/interceptors/error.interceptor";
-
-// AoT requires an exported function for factories
-export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, "./assets/i18n/", ".json");
-}
 
 @NgModule({
   declarations: [
@@ -46,6 +40,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     ReportGeneratorComponent,
     ProfileModalComponent,
     SettingsModalComponent,
+    UserManagementComponent,
+    UserFormDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -54,14 +50,6 @@ export function HttpLoaderFactory(http: HttpClient) {
     AppRoutingModule,
     SharedModule,
     NgChartsModule,
-    TranslateModule.forRoot({
-      defaultLanguage: "en",
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

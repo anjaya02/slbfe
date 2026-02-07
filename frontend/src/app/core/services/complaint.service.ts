@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
-import { delay, map } from "rxjs/operators";
+import { delay, map, take } from "rxjs/operators";
 import {
   Complaint,
   ComplaintStatus,
@@ -12,6 +12,7 @@ import {
   WeeklyData,
   MonthlyData,
   Attachment,
+  RegistrationPath,
 } from "../models/complaint.model";
 
 const MOCK_COMPLAINTS: Complaint[] = [
@@ -28,6 +29,7 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "SALARY_ISSUES",
     status: ComplaintStatus.INVESTIGATION,
     priority: "HIGH",
+    registrationPath: "SLBFE",
     description:
       "The worker reported that they have not received their salary for the past 3 months (July, August, September 2023). Furthermore, the employer has confiscated the passport and is refusing to provide an exit permit despite the contract period having ended. The worker also claims that overtime hours are mandatory but unpaid.",
     attachments: [
@@ -53,6 +55,7 @@ const MOCK_COMPLAINTS: Complaint[] = [
     dateSubmitted: new Date("2024-10-12"),
     dateUpdated: new Date("2024-10-15"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [
       {
         id: "H1",
@@ -118,12 +121,14 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "LEAVE_ISSUES",
     status: ComplaintStatus.UNDER_REVIEW,
     priority: "MEDIUM",
+    registrationPath: "CONSULAR",
     description:
       "Worker has not been granted annual leave for 2 consecutive years despite contractual entitlement.",
     attachments: [],
     dateSubmitted: new Date("2024-04-22"),
     dateUpdated: new Date("2024-04-23"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [
       {
         id: "H4",
@@ -148,12 +153,14 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "OTHER",
     status: ComplaintStatus.IN_PROGRESS,
     priority: "LOW",
+    registrationPath: "SLBFE",
     description:
       "General complaint regarding living conditions at worker accommodation.",
     attachments: [],
     dateSubmitted: new Date("2024-04-22"),
     dateUpdated: new Date("2024-04-25"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [],
     notes: [],
   },
@@ -169,12 +176,14 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "WORK_ENVIRONMENT",
     status: ComplaintStatus.RESOLVED,
     priority: "MEDIUM",
+    registrationPath: "CONSULAR",
     description:
       "Unsafe working conditions reported including lack of safety equipment.",
     attachments: [],
     dateSubmitted: new Date("2024-04-22"),
     dateUpdated: new Date("2024-05-10"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [],
     notes: [],
   },
@@ -190,11 +199,13 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "OTHER",
     status: ComplaintStatus.UNDER_REVIEW,
     priority: "LOW",
+    registrationPath: "SLBFE",
     description: "Request for contract translation and verification.",
     attachments: [],
     dateSubmitted: new Date("2024-04-22"),
     dateUpdated: new Date("2024-04-22"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [],
     notes: [],
   },
@@ -210,12 +221,14 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "LEAVE_ISSUES",
     status: ComplaintStatus.IN_PROGRESS,
     priority: "HIGH",
+    registrationPath: "SLBFE",
     description:
       "Employer refusing to allow worker to travel home for family emergency.",
     attachments: [],
     dateSubmitted: new Date("2024-04-22"),
     dateUpdated: new Date("2024-04-28"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [],
     notes: [],
   },
@@ -231,12 +244,14 @@ const MOCK_COMPLAINTS: Complaint[] = [
     type: "SUPERVISOR_ISSUES",
     status: ComplaintStatus.IN_PROGRESS,
     priority: "MEDIUM",
+    registrationPath: "CONSULAR",
     description:
       "Worker reports verbal abuse and threats from direct supervisor.",
     attachments: [],
     dateSubmitted: new Date("2024-04-22"),
     dateUpdated: new Date("2024-04-30"),
     assignedTo: "USR002",
+    assignedToName: "Iman Fernando",
     history: [],
     notes: [],
   },
@@ -251,6 +266,7 @@ export class ComplaintService {
     filter?: ComplaintFilter,
   ): Observable<{ data: Complaint[]; total: number }> {
     return this.complaints$.pipe(
+      take(1),
       delay(600),
       map((complaints) => {
         let filtered = [...complaints];
@@ -279,6 +295,7 @@ export class ComplaintService {
 
   getComplaintById(id: string): Observable<Complaint | undefined> {
     return this.complaints$.pipe(
+      take(1),
       delay(400),
       map((list) => list.find((c) => c.id === id)),
     );
@@ -307,6 +324,40 @@ export class ComplaintService {
         timestamp: new Date(),
         previousStatus: list[idx].status,
         newStatus,
+      },
+      ...updated.history,
+    ];
+    list[idx] = updated;
+    this.complaintsSubject.next([...list]);
+    return of(updated).pipe(delay(500));
+  }
+
+  assignComplaint(
+    complaintId: string,
+    officerId: string,
+    officerName: string,
+    note?: string,
+  ): Observable<Complaint> {
+    const list = this.complaintsSubject.value;
+    const idx = list.findIndex((c) => c.id === complaintId);
+    if (idx === -1) throw new Error("Complaint not found");
+    const updated: Complaint = {
+      ...list[idx],
+      status: ComplaintStatus.IN_PROGRESS,
+      assignedTo: officerId,
+      assignedToName: officerName,
+      dateUpdated: new Date(),
+    };
+    updated.history = [
+      {
+        id: "H" + Date.now(),
+        complaintId,
+        action: `Assigned to ${officerName}`,
+        description: note || `Case assigned to ${officerName}`,
+        performedBy: "Current User",
+        timestamp: new Date(),
+        previousStatus: list[idx].status,
+        newStatus: ComplaintStatus.IN_PROGRESS,
       },
       ...updated.history,
     ];

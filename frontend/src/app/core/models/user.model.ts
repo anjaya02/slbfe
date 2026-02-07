@@ -1,5 +1,4 @@
 export type UserRole = "CASE_OFFICER" | "SUPERVISOR";
-export type Language = "en" | "si" | "ta";
 
 export interface User {
   id: string;
@@ -9,8 +8,9 @@ export interface User {
   avatar?: string;
   phone?: string;
   location?: string;
-  language: Language;
   notificationsEnabled: boolean;
+  isActive: boolean;
+  dateCreated?: Date;
 }
 
 export interface LoginRequest {
@@ -26,7 +26,6 @@ export interface LoginResponse {
 }
 
 export interface UserSettings {
-  language: Language;
   notificationsEnabled: boolean;
   dateFormat: string;
 }

@@ -1,22 +1,19 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { SettingsService } from "../../../core/services/theme.service";
-import { Language } from "../../../core/models/user.model";
+import { AuthService } from "../../../core/services/auth.service";
+
 @Component({
   selector: "app-settings-modal",
   templateUrl: "./settings-modal.component.html",
   styleUrls: ["./settings-modal.component.scss"],
 })
-export class SettingsModalComponent implements OnInit {
-  selectedLanguage = "en";
+export class SettingsModalComponent implements OnInit, OnDestroy {
   notificationsEnabled = true;
   selectedDateFormat = "DD/MM/YYYY";
-
-  languages = [
-    { value: "en", label: "English" },
-    { value: "si", label: "සිංහල (Sinhala)" },
-    { value: "ta", label: "தமிழ் (Tamil)" },
-  ];
+  private destroy$ = new Subject<void>();
 
   dateFormats = [
     { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -27,19 +24,23 @@ export class SettingsModalComponent implements OnInit {
   constructor(
     private dialogRef: MatDialogRef<SettingsModalComponent>,
     private settingsService: SettingsService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    this.settingsService.language$.subscribe(
-      (l) => (this.selectedLanguage = l),
-    );
-    this.settingsService.dateFormat$.subscribe(
-      (d) => (this.selectedDateFormat = d),
-    );
+    this.settingsService.dateFormat$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((d) => (this.selectedDateFormat = d));
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        if (user) this.notificationsEnabled = user.notificationsEnabled;
+      });
   }
 
-  onLanguageChange(lang: string): void {
-    this.settingsService.setLanguage(lang as Language);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onDateFormatChange(format: string): void {
@@ -48,6 +49,9 @@ export class SettingsModalComponent implements OnInit {
 
   toggleNotifications(): void {
     this.notificationsEnabled = !this.notificationsEnabled;
+    this.authService
+      .updateProfile({ notificationsEnabled: this.notificationsEnabled })
+      .subscribe();
   }
 
   close(): void {

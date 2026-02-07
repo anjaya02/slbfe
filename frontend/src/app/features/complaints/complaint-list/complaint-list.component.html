@@ -15,15 +15,30 @@
   <!-- Table -->
   <div class="table-card">
     <!-- Loading -->
-    <div class="loading-state" *ngIf="loading">
-      <mat-spinner diameter="40"></mat-spinner>
+    <app-loading *ngIf="loading" mode="inline" message="Fetching complaints..."></app-loading>
+
+    <!-- Error -->
+    <div
+      class="error-state"
+      *ngIf="!loading && error"
+      style="text-align: center; padding: 48px 24px"
+    >
+      <mat-icon
+        style="font-size: 48px; width: 48px; height: 48px; color: #ef4444"
+        >error_outline</mat-icon
+      >
+      <h3>Failed to load complaints</h3>
+      <p>Something went wrong while fetching complaints.</p>
+      <button mat-raised-button color="primary" (click)="loadComplaints()">
+        Retry
+      </button>
     </div>
 
     <table
       mat-table
       [dataSource]="dataSource"
       matSort
-      *ngIf="!loading"
+      *ngIf="!loading && !error"
       class="complaint-table"
     >
       <!-- Worker Name -->
@@ -91,7 +106,7 @@
     <mat-paginator
       [pageSizeOptions]="[10, 25, 50]"
       showFirstLastButtons
-      *ngIf="!loading"
+      *ngIf="!loading && !error"
     ></mat-paginator>
   </div>
 </div>

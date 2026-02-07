@@ -3,7 +3,12 @@
   <div class="stepper-section">
     <app-status-stepper [currentStatus]="complaint.status"></app-status-stepper>
     <div class="stepper-actions">
-      <button mat-icon-button color="primary" matTooltip="Print case details" (click)="printCase()">
+      <button
+        mat-icon-button
+        color="primary"
+        matTooltip="Print case details"
+        (click)="printCase()"
+      >
         <mat-icon>print</mat-icon>
       </button>
     </div>
@@ -15,7 +20,28 @@
     <div class="detail-grid">
       <!-- Worker Profile Card -->
       <div class="card worker-card">
-        <h3 class="card-title">Worker profile</h3>
+        <div class="card-title-row">
+          <h3 class="card-title">Worker profile</h3>
+          <span
+            class="path-badge"
+            [ngClass]="
+              complaint.registrationPath === 'SLBFE'
+                ? 'badge-slbfe'
+                : 'badge-consular'
+            "
+          >
+            <mat-icon class="path-icon">{{
+              complaint.registrationPath === "SLBFE"
+                ? "verified"
+                : "account_balance"
+            }}</mat-icon>
+            {{
+              complaint.registrationPath === "SLBFE"
+                ? "SLBFE PATH"
+                : "CONSULAR PATH"
+            }}
+          </span>
+        </div>
         <div class="profile-fields">
           <div class="field">
             <span class="field-label">NAME</span
@@ -40,6 +66,10 @@
           <div class="field">
             <span class="field-label">BRANCH</span
             ><span class="field-value">{{ complaint.branch | uppercase }}</span>
+          </div>
+          <div class="field" *ngIf="complaint.assignedToName">
+            <span class="field-label">ASSIGNED TO</span
+            ><span class="field-value">{{ complaint.assignedToName }}</span>
           </div>
         </div>
       </div>
@@ -165,11 +195,28 @@
           </mat-select>
         </mat-form-field>
 
+        <!-- Officer selection (shown when Assign is selected) -->
+        <mat-form-field
+          appearance="outline"
+          class="action-select"
+          *ngIf="selectedAction === 'assign'"
+        >
+          <mat-label>Select Case Officer</mat-label>
+          <mat-select [(ngModel)]="selectedOfficerId">
+            <mat-option
+              *ngFor="let officer of caseOfficers"
+              [value]="officer.id"
+            >
+              {{ officer.name }} — {{ officer.location }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <button
           mat-raised-button
           class="btn-update"
           (click)="updateStatus()"
-          [disabled]="updating || !selectedAction"
+          [disabled]="isAssignDisabled"
         >
           <mat-spinner *ngIf="updating" diameter="18"></mat-spinner>
           <span *ngIf="!updating">Update</span>
@@ -200,6 +247,14 @@
 </div>
 
 <!-- Loading -->
-<div class="loading-page" *ngIf="loading">
-  <mat-spinner diameter="48"></mat-spinner>
+<app-loading *ngIf="loading" mode="full-page" message="Loading case documentation..."></app-loading>
+
+<!-- Not Found -->
+<div class="not-found-page" *ngIf="!loading && !complaint">
+  <mat-icon class="not-found-icon">search_off</mat-icon>
+  <h2>Complaint Not Found</h2>
+  <p>The complaint you're looking for doesn't exist or has been removed.</p>
+  <button mat-raised-button color="primary" routerLink="/complaints">
+    <mat-icon>arrow_back</mat-icon> Back to Problem List
+  </button>
 </div>

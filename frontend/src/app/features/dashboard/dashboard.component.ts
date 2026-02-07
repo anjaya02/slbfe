@@ -1,4 +1,6 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../core/services/complaint.service";
 import {
   DashboardStats,
@@ -12,9 +14,11 @@ import { ChartConfiguration } from "chart.js";
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   stats: DashboardStats | null = null;
   loading = true;
+  error = false;
+  private destroy$ = new Subject<void>();
 
   // Weekly Chart
   weeklyChartData: ChartConfiguration<"bar">["data"] = {
@@ -25,7 +29,7 @@ export class DashboardComponent implements OnInit {
     indexAxis: "y",
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 1500, easing: 'easeOutQuart' },
+    animation: { duration: 1500, easing: "easeOutQuart" },
     plugins: { legend: { display: true, position: "bottom" } },
     scales: {
       x: {
@@ -44,7 +48,7 @@ export class DashboardComponent implements OnInit {
   yearlyChartOptions: ChartConfiguration<"line">["options"] = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 2000, easing: 'easeOutQuart' },
+    animation: { duration: 2000, easing: "easeOutQuart" },
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { display: false } },
@@ -58,12 +62,24 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.complaintService
       .getDashboardStats()
-      .subscribe((data: DashboardStats) => {
-        this.stats = data;
-        this.loading = false;
-        this.buildWeeklyChart(data);
-        this.buildYearlyChart(data);
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: DashboardStats) => {
+          this.stats = data;
+          this.loading = false;
+          this.buildWeeklyChart(data);
+          this.buildYearlyChart(data);
+        },
+        error: () => {
+          this.loading = false;
+          this.error = true;
+        },
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private buildWeeklyChart(data: DashboardStats): void {
@@ -73,7 +89,7 @@ export class DashboardComponent implements OnInit {
         {
           label: "Submitted",
           data: data.weeklyData.map((d: WeeklyData) => d.submitted),
-          backgroundColor: "#004080", 
+          backgroundColor: "#004080",
           borderRadius: 6,
           barPercentage: 0.7,
         },
