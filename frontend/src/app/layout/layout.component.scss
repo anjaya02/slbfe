@@ -4,15 +4,18 @@
   display: flex;
   padding-top: v.$header-height;
   min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .main-content {
   flex: 1;
   margin-left: v.$sidebar-width;
   padding: v.$space-lg;
+  padding-bottom: 80px; 
   background: var(--bg-primary);
   min-height: calc(100vh - #{v.$header-height});
   transition: margin-left v.$transition-normal;
+  box-sizing: border-box;
 }
 
 .sidebar-collapsed .main-content {
