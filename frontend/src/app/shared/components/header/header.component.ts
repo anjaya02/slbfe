@@ -2,6 +2,8 @@ import { Component, ElementRef, EventEmitter, HostListener, Output } from "@angu
 import { trigger, transition, style, animate } from "@angular/animations";
 import { AuthService } from "../../../core/services/auth.service";
 import { NotificationService } from "../../../core/services/notification.service";
+import { MatDialog } from "@angular/material/dialog";
+import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.component";
 
 @Component({
   selector: "app-header",
@@ -29,8 +31,29 @@ export class HeaderComponent {
   constructor(
     public auth: AuthService,
     public notificationService: NotificationService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private dialog: MatDialog
   ) {}
+
+  onLogout(): void {
+    this.closeUserMenu();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '360px',
+      panelClass: 'confirm-dialog-container',
+      data: {
+        title: 'Confirm Logout',
+        message: 'Are you sure you want to log out of your account?',
+        confirmText: 'Log Out',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.auth.logout();
+      }
+    });
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {

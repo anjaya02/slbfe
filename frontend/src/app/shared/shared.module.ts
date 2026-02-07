@@ -31,6 +31,7 @@ import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { StatusStepperComponent } from "./components/status-stepper/status-stepper.component";
 import { LoadingComponent } from "./components/loading/loading.component";
+import { ConfirmDialogComponent } from "./components/confirm-dialog/confirm-dialog.component";
 
 // Pipes & Directives
 import { TimeAgoPipe } from "./pipes/time-ago.pipe";
@@ -67,6 +68,7 @@ const MATERIAL_MODULES = [
     HeaderComponent,
     StatusStepperComponent,
     LoadingComponent,
+    ConfirmDialogComponent,
     TimeAgoPipe,
     StatusColorPipe,
     HasRoleDirective,

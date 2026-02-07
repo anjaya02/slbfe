@@ -98,6 +98,17 @@ a {
   overflow: hidden;
 }
 
+// ===== Dialog Backdrop Blur =====
+.cdk-overlay-backdrop-showing {
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.confirm-dialog-container .mat-mdc-dialog-container {
+  border-radius: v.$radius-lg !important;
+  padding: 0;
+}
+
 // ===== Utility Classes =====
 .text-primary {
   color: var(--accent-primary);
