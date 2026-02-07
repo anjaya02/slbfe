@@ -33,7 +33,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: v.$primary-blue;
+  background: v.$primary-light;
   color: v.$white;
   display: flex;
   align-items: center;
@@ -41,6 +41,12 @@
   font-size: v.$font-size-xl;
   font-weight: v.$font-weight-bold;
   flex-shrink: 0;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .avatar-img {

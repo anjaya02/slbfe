@@ -9,7 +9,9 @@
   <div class="modal-body">
     <!-- Avatar -->
     <div class="avatar-section">
-      <div class="avatar" *ngIf="!user?.avatar">{{ getInitials() }}</div>
+      <div class="avatar" *ngIf="!user?.avatar">
+        <mat-icon>person</mat-icon>
+      </div>
       <img
         *ngIf="user?.avatar"
         [src]="user!.avatar"
