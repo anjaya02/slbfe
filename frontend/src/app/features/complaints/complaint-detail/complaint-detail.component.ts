@@ -13,6 +13,7 @@ import {
 } from "../../../core/models/complaint.model";
 
 @Component({
+  standalone: false,
   selector: "app-complaint-detail",
   templateUrl: "./complaint-detail.component.html",
   styleUrls: ["./complaint-detail.component.scss"],

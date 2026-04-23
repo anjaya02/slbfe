@@ -5,6 +5,7 @@ import {
 } from "../../../core/models/complaint.model";
 
 @Component({
+  standalone: false,
   selector: "app-status-stepper",
   templateUrl: "./status-stepper.component.html",
   styleUrls: ["./status-stepper.component.scss"],

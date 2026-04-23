@@ -7,6 +7,7 @@ import { ProfileModalComponent } from "../features/profile/profile-modal/profile
 import { SettingsModalComponent } from "../features/profile/settings-modal/settings-modal.component";
 
 @Component({
+  standalone: false,
   selector: "app-layout",
   templateUrl: "./layout.component.html",
   styleUrls: ["./layout.component.scss"],

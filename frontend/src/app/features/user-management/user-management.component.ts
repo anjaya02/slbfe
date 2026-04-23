@@ -9,6 +9,7 @@ import { User, UserRole } from "../../core/models/user.model";
 import { UserFormDialogComponent } from "./user-form-dialog/user-form-dialog.component";
 
 @Component({
+  standalone: false,
   selector: "app-user-management",
   templateUrl: "./user-management.component.html",
   styleUrls: ["./user-management.component.scss"],

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from "@angular/core";
 import { ComplaintStatus } from "../../core/models/complaint.model";
 
-@Pipe({ name: "statusColor", pure: true })
+@Pipe({
+  standalone: false, name: "statusColor", pure: true })
 export class StatusColorPipe implements PipeTransform {
   transform(status: ComplaintStatus | string): string {
     const colorMap: Record<string, string> = {

@@ -6,6 +6,7 @@ import { SettingsService } from "../../../core/services/theme.service";
 import { AuthService } from "../../../core/services/auth.service";
 
 @Component({
+  standalone: false,
   selector: "app-settings-modal",
   templateUrl: "./settings-modal.component.html",
   styleUrls: ["./settings-modal.component.scss"],

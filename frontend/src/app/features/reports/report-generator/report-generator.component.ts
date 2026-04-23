@@ -11,6 +11,7 @@ import {
 } from "../../../core/models/report.model";
 
 @Component({
+  standalone: false,
   selector: "app-report-generator",
   templateUrl: "./report-generator.component.html",
   styleUrls: ["./report-generator.component.scss"],

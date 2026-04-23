@@ -10,6 +10,7 @@ import {
 import { ChartConfiguration } from "chart.js";
 
 @Component({
+  standalone: false,
   selector: "app-dashboard",
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"],

@@ -9,6 +9,7 @@ export interface UserFormDialogData {
 }
 
 @Component({
+  standalone: false,
   selector: "app-user-form-dialog",
   templateUrl: "./user-form-dialog.component.html",
   styleUrls: ["./user-form-dialog.component.scss"],

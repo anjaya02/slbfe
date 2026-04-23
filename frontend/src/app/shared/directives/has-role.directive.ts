@@ -7,7 +7,8 @@ import {
 } from "@angular/core";
 import { AuthService } from "../../core/services/auth.service";
 
-@Directive({ selector: "[appHasRole]" })
+@Directive({
+  standalone: false, selector: "[appHasRole]" })
 export class HasRoleDirective implements OnInit {
   @Input("appHasRole") roles: string[] = [];
 

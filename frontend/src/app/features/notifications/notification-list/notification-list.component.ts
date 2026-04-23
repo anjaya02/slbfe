@@ -6,6 +6,7 @@ import { NotificationService } from "../../../core/services/notification.service
 import { AppNotification } from "../../../core/models/notification.model";
 
 @Component({
+  standalone: false,
   selector: "app-notification-list",
   templateUrl: "./notification-list.component.html",
   styleUrls: ["./notification-list.component.scss"],

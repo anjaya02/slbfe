@@ -6,6 +6,7 @@ import { AuthService } from "../../../core/services/auth.service";
 import { User } from "../../../core/models/user.model";
 
 @Component({
+  standalone: false,
   selector: "app-profile-modal",
   templateUrl: "./profile-modal.component.html",
   styleUrls: ["./profile-modal.component.scss"],
