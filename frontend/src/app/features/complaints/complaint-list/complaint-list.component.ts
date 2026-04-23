@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
+import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
@@ -8,6 +8,7 @@ import { takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../../core/services/complaint.service";
 import {
   Complaint,
+  ComplaintStatus,
   COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
 import { AuthService } from "../../../core/services/auth.service";
@@ -34,6 +35,11 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   error = false;
   typeLabels = COMPLAINT_TYPE_LABELS;
   searchValue = "";
+  selectedStatus = "ALL";
+  statusOptions: string[] = Object.values(ComplaintStatus);
+  filteredStatusOptions: string[] = [];
+  statusSearchOpen = false;
+  statusSearchTerm = "";
   caseOfficers: User[] = [];
   assigningId: string | null = null;
   isSupervisor = false;
@@ -41,6 +47,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild("statusSearchInput") statusSearchInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private complaintService: ComplaintService,
@@ -50,6 +57,22 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isSupervisor = this.authService.currentUser?.role === "SUPERVISOR";
+    this.filteredStatusOptions = [...this.statusOptions];
+    this.dataSource.filterPredicate = (complaint, rawFilter) => {
+      const filter = JSON.parse(rawFilter) as {
+        search: string;
+        status: string;
+      };
+      const matchesSearch = !filter.search
+        ? true
+        : [complaint.workerName, complaint.referenceNo]
+            .join(" ")
+            .toLowerCase()
+            .includes(filter.search);
+      const matchesStatus =
+        filter.status === "ALL" ? true : complaint.status === filter.status;
+      return matchesSearch && matchesStatus;
+    };
     this.loadComplaints();
     this.authService
       .getCaseOfficers()
@@ -85,7 +108,51 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   }
 
   applyFilter(): void {
-    this.dataSource.filter = this.searchValue.trim().toLowerCase();
+    this.dataSource.filter = JSON.stringify({
+      search: this.searchValue.trim().toLowerCase(),
+      status: this.selectedStatus,
+    });
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
+  // ===== Inline Status Search =====
+
+  openStatusSearch(event: Event): void {
+    event.stopPropagation();
+    this.statusSearchOpen = true;
+    this.statusSearchTerm = "";
+    this.filteredStatusOptions = [...this.statusOptions];
+    // Focus the input after Angular renders it
+    setTimeout(() => {
+      this.statusSearchInput?.nativeElement?.focus();
+    }, 50);
+  }
+
+  closeStatusSearch(): void {
+    this.statusSearchOpen = false;
+    this.statusSearchTerm = "";
+  }
+
+  filterStatusOptions(): void {
+    const term = this.statusSearchTerm.toLowerCase();
+    this.filteredStatusOptions = this.statusOptions.filter((s) =>
+      s.toLowerCase().includes(term),
+    );
+  }
+
+  selectStatusFilter(value: string): void {
+    this.selectedStatus = value;
+    this.statusSearchOpen = false;
+    this.statusSearchTerm = "";
+    this.applyFilter();
+  }
+
+  clearStatusFilter(): void {
+    this.selectedStatus = "ALL";
+    this.applyFilter();
   }
 
   viewComplaint(complaint: Complaint): void {

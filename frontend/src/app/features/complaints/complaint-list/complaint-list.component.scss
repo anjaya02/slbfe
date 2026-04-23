@@ -26,6 +26,10 @@
 }
 
 .filters-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 16px;
 }
 
@@ -34,6 +38,109 @@
   ::ng-deep .mat-mdc-form-field-subscript-wrapper {
     display: none;
   }
+}
+
+// ===== Incident Category Inline Search =====
+.incident-header {
+  position: relative;
+  overflow: visible !important;
+}
+
+.incident-header-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.incident-header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.header-search-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: v.$gray-400;
+  cursor: pointer;
+  transition: color v.$transition-fast;
+  vertical-align: middle;
+
+  &:hover {
+    color: v.$primary-blue;
+  }
+}
+
+.header-search-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: v.$white;
+  border: 1.5px solid v.$primary-light;
+  border-radius: v.$radius-md;
+  padding: 2px 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-width: 150px;
+  max-width: 180px;
+}
+
+.header-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: v.$font-size-xs;
+  font-family: inherit;
+  color: var(--text-primary);
+  width: 100%;
+  padding: 3px 0;
+
+  &::placeholder {
+    color: v.$gray-400;
+  }
+}
+
+.header-search-close {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: v.$gray-400;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    color: v.$danger-red;
+  }
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: v.$radius-full;
+  background: #dbeafe;
+  color: v.$primary-blue;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  cursor: pointer;
+  transition: all v.$transition-fast;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    background: #bfdbfe;
+  }
+}
+
+.chip-clear {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .table-card {
@@ -218,6 +325,10 @@ td .assign-cell {
 }
 
 @media (max-width: v.$bp-tablet) {
+  .filters-bar {
+    flex-direction: column;
+  }
+
   .search-field {
     width: 100%;
   }

@@ -158,6 +158,19 @@ a {
   }
 }
 
+// ===== Status Autocomplete Panel =====
+.status-autocomplete-panel {
+  border-radius: v.$radius-md !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+  max-height: 220px !important;
+
+  .mat-mdc-option {
+    font-size: v.$font-size-sm;
+    min-height: 36px;
+    padding: 0 14px;
+  }
+}
+
 .custom-dialog .mat-mdc-dialog-container {
   padding: 0;
   border-radius: v.$radius-xl !important;

@@ -10,6 +10,7 @@
       <mat-label>Search by name or reference...</mat-label>
       <input matInput [(ngModel)]="searchValue" (keyup)="applyFilter()" />
     </mat-form-field>
+
   </div>
 
   <!-- Table -->
@@ -71,13 +72,64 @@
 
       <!-- Type -->
       <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+        <th mat-header-cell *matHeaderCellDef>Type</th>
         <td mat-cell *matCellDef="let row">{{ $any(typeLabels)[row.type] }}</td>
       </ng-container>
 
-      <!-- Status -->
+      <!-- Incident Category -->
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <th mat-header-cell *matHeaderCellDef class="incident-header">
+          <div class="incident-header-wrapper">
+            <div class="incident-header-row">
+              <!-- Default state: label + search icon -->
+              <ng-container *ngIf="!statusSearchOpen">
+                <span>Incident Category</span>
+                <mat-icon
+                  class="header-search-icon"
+                  (click)="openStatusSearch($event)"
+                  matTooltip="Search categories"
+                >search</mat-icon>
+              </ng-container>
+
+              <!-- Search state: input with autocomplete -->
+              <div class="header-search-box" *ngIf="statusSearchOpen">
+                <input
+                  #statusSearchInput
+                  class="header-search-input"
+                  placeholder="Type to filter..."
+                  [(ngModel)]="statusSearchTerm"
+                  [matAutocomplete]="statusAuto"
+                  (input)="filterStatusOptions()"
+                  (keydown.escape)="closeStatusSearch()"
+                />
+                <mat-icon class="header-search-close" (click)="closeStatusSearch()">close</mat-icon>
+                <mat-autocomplete
+                  #statusAuto="matAutocomplete"
+                  (optionSelected)="selectStatusFilter($event.option.value)"
+                  panelClass="status-autocomplete-panel"
+                >
+                  <mat-option value="ALL">
+                    <span class="autocomplete-option-all">All Categories</span>
+                  </mat-option>
+                  <mat-option *ngFor="let s of filteredStatusOptions" [value]="s">
+                    {{ s }}
+                  </mat-option>
+                </mat-autocomplete>
+              </div>
+            </div>
+
+            <!-- Active filter chip — sits below the header label -->
+            <span
+              class="active-filter-chip"
+              *ngIf="!statusSearchOpen && selectedStatus !== 'ALL'"
+              (click)="clearStatusFilter()"
+              matTooltip="Click to clear filter"
+            >
+              {{ selectedStatus }}
+              <mat-icon class="chip-clear">close</mat-icon>
+            </span>
+          </div>
+        </th>
         <td mat-cell *matCellDef="let row">
           <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{
             row.status

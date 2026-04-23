@@ -46,8 +46,19 @@
           <div class="profile-input-card">
             <mat-icon class="profile-field-icon">person_outline</mat-icon>
             <div class="profile-field-copy">
-              <span class="field-label">NAME</span>
-              <span class="field-value">{{ complaint.workerName }}</span>
+              <span class="field-label">FIRST NAME</span>
+              <span class="field-value">{{
+                getWorkerFirstName(complaint.workerName)
+              }}</span>
+            </div>
+          </div>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">person_outline</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">LAST NAME</span>
+              <span class="field-value">{{
+                getWorkerLastName(complaint.workerName)
+              }}</span>
             </div>
           </div>
           <div class="profile-input-card">
@@ -72,24 +83,21 @@
             </div>
           </div>
           <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">location_on</mat-icon>
+            <mat-icon class="profile-field-icon">mail_outline</mat-icon>
             <div class="profile-field-copy">
-              <span class="field-label">ADDRESS</span>
-              <span class="field-value">{{ complaint.workerAddress }}</span>
+              <span class="field-label">EMAIL</span>
+              <span class="field-value field-value--placeholder">{{
+                unavailableFieldText
+              }}</span>
             </div>
           </div>
           <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">badge</mat-icon>
+            <mat-icon class="profile-field-icon">where_to_vote</mat-icon>
             <div class="profile-field-copy">
-              <span class="field-label">SERVICE ID</span>
-              <span class="field-value">{{ complaint.serviceId }}</span>
-            </div>
-          </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">public</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">BRANCH</span>
-              <span class="field-value">{{ complaint.branch }}</span>
+              <span class="field-label">WORK COUNTRY</span>
+              <span class="field-value field-value--placeholder">{{
+                unavailableFieldText
+              }}</span>
             </div>
           </div>
           <div class="field" *ngIf="complaint.assignedToName">

@@ -25,6 +25,7 @@ import { MatNativeDateModule } from "@angular/material/core";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
 
 // Shared Components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
@@ -60,6 +61,7 @@ const MATERIAL_MODULES = [
   MatSlideToggleModule,
   MatTabsModule,
   MatProgressBarModule,
+  MatAutocompleteModule,
 ];
 
 @NgModule({

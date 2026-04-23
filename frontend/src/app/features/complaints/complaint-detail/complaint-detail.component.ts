@@ -22,6 +22,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   complaint: Complaint | null = null;
   loading = true;
   typeLabels = COMPLAINT_TYPE_LABELS;
+  readonly unavailableFieldText = "Not provided";
   private destroy$ = new Subject<void>();
 
   // Update panel
@@ -192,5 +193,35 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
   printCase(): void {
     window.print();
+  }
+
+  getWorkerFirstName(fullName: string): string {
+    const parts = this.getNameParts(fullName);
+    return parts.firstName || this.unavailableFieldText;
+  }
+
+  getWorkerLastName(fullName: string): string {
+    const parts = this.getNameParts(fullName);
+    return parts.lastName || this.unavailableFieldText;
+  }
+
+  private getNameParts(fullName: string): {
+    firstName: string;
+    lastName: string;
+  } {
+    const normalizedName = fullName.trim().replace(/\s+/g, " ");
+    if (!normalizedName) {
+      return { firstName: "", lastName: "" };
+    }
+
+    const parts = normalizedName.split(" ");
+    if (parts.length === 1) {
+      return { firstName: parts[0], lastName: "" };
+    }
+
+    return {
+      firstName: parts.slice(0, -1).join(" "),
+      lastName: parts[parts.length - 1],
+    };
   }
 }
