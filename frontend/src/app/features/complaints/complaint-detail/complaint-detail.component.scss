@@ -45,6 +45,69 @@
   gap: 24px;
 }
 
+// ===== Assignment Banner =====
+.assignment-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  border: 1px solid #c7d2fe;
+  border-radius: v.$radius-lg;
+  padding: 14px 24px;
+  margin-bottom: 24px;
+}
+
+.assignment-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.assignment-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: v.$primary-blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 64, 128, 0.2);
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: v.$white;
+  }
+}
+
+.assignment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assignment-label {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$gray-500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assignment-name {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-bold;
+  color: v.$primary-blue;
+}
+
+.assignment-unassigned {
+  color: v.$gray-400;
+  font-style: italic;
+  font-weight: v.$font-weight-medium;
+}
+
+
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

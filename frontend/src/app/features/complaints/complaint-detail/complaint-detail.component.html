@@ -14,6 +14,20 @@
     </div>
   </div>
 
+  <!-- Assignment Banner -->
+  <div class="assignment-banner">
+    <div class="assignment-info">
+      <div class="assignment-avatar">
+        <mat-icon>support_agent</mat-icon>
+      </div>
+      <div class="assignment-details">
+        <span class="assignment-label">Assigned Officer</span>
+        <span class="assignment-name" *ngIf="complaint.assignedToName">{{ complaint.assignedToName }}</span>
+        <span class="assignment-name assignment-unassigned" *ngIf="!complaint.assignedToName">Unassigned</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Detail / Update Toggle -->
   <div class="content-area" *ngIf="!showUpdatePanel">
     <!-- Top Row: Worker Profile + Incident -->
@@ -99,10 +113,6 @@
                 unavailableFieldText
               }}</span>
             </div>
-          </div>
-          <div class="field" *ngIf="complaint.assignedToName">
-            <span class="field-label">ASSIGNED TO</span
-            ><span class="field-value">{{ complaint.assignedToName }}</span>
           </div>
         </div>
       </div>
