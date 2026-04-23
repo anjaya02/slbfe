@@ -10,6 +10,8 @@ import {
   Complaint,
   COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
+import { AuthService } from "../../../core/services/auth.service";
+import { User } from "../../../core/models/user.model";
 
 @Component({
   standalone: false,
@@ -24,6 +26,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
     "dateSubmitted",
     "type",
     "status",
+    "assignedTo",
     "action",
   ];
   dataSource = new MatTableDataSource<Complaint>([]);
@@ -31,6 +34,9 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   error = false;
   typeLabels = COMPLAINT_TYPE_LABELS;
   searchValue = "";
+  caseOfficers: User[] = [];
+  assigningId: string | null = null;
+  isSupervisor = false;
   private destroy$ = new Subject<void>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -39,10 +45,16 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   constructor(
     private complaintService: ComplaintService,
     private router: Router,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
+    this.isSupervisor = this.authService.currentUser?.role === "SUPERVISOR";
     this.loadComplaints();
+    this.authService
+      .getCaseOfficers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((officers) => (this.caseOfficers = officers));
   }
 
   loadComplaints(): void {
@@ -78,6 +90,24 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   viewComplaint(complaint: Complaint): void {
     this.router.navigate(["/complaints", complaint.id]);
+  }
+
+  assignOfficer(complaint: Complaint, officerId: string): void {
+    const officer = this.caseOfficers.find((o) => o.id === officerId);
+    if (!officer || officerId === complaint.assignedTo) return;
+    this.assigningId = complaint.id;
+    this.complaintService
+      .assignComplaint(complaint.id, officer.id, officer.name)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.assigningId = null;
+          this.loadComplaints();
+        },
+        error: () => {
+          this.assigningId = null;
+        },
+      });
   }
 
   getStatusClass(status: string): string {

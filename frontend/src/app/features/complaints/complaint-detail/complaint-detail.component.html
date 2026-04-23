@@ -43,29 +43,54 @@
           </span>
         </div>
         <div class="profile-fields">
-          <div class="field">
-            <span class="field-label">NAME</span
-            ><span class="field-value">{{
-              complaint.workerName | uppercase
-            }}</span>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">person_outline</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">NAME</span>
+              <span class="field-value">{{ complaint.workerName }}</span>
+            </div>
           </div>
-          <div class="field">
-            <span class="field-label">ADDRESS</span
-            ><span class="field-value">{{
-              complaint.workerAddress | uppercase
-            }}</span>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">badge</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">NIC</span>
+              <span class="field-value">{{ complaint.workerNIC }}</span>
+            </div>
           </div>
-          <div class="field">
-            <span class="field-label">CONTACT</span
-            ><span class="field-value">{{ complaint.workerContact }}</span>
+          <div class="profile-input-card" *ngIf="complaint.workerPassport">
+            <mat-icon class="profile-field-icon">credit_card</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">PASSPORT</span>
+              <span class="field-value">{{ complaint.workerPassport }}</span>
+            </div>
           </div>
-          <div class="field">
-            <span class="field-label">SERVICE ID</span
-            ><span class="field-value">{{ complaint.serviceId }}</span>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">smartphone</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">MOBILE NUMBER</span>
+              <span class="field-value">{{ complaint.workerContact }}</span>
+            </div>
           </div>
-          <div class="field">
-            <span class="field-label">BRANCH</span
-            ><span class="field-value">{{ complaint.branch | uppercase }}</span>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">location_on</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">ADDRESS</span>
+              <span class="field-value">{{ complaint.workerAddress }}</span>
+            </div>
+          </div>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">badge</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">SERVICE ID</span>
+              <span class="field-value">{{ complaint.serviceId }}</span>
+            </div>
+          </div>
+          <div class="profile-input-card">
+            <mat-icon class="profile-field-icon">public</mat-icon>
+            <div class="profile-field-copy">
+              <span class="field-label">BRANCH</span>
+              <span class="field-value">{{ complaint.branch }}</span>
+            </div>
           </div>
           <div class="field" *ngIf="complaint.assignedToName">
             <span class="field-label">ASSIGNED TO</span
@@ -247,7 +272,11 @@
 </div>
 
 <!-- Loading -->
-<app-loading *ngIf="loading" mode="full-page" message="Loading case documentation..."></app-loading>
+<app-loading
+  *ngIf="loading"
+  mode="full-page"
+  message="Loading case documentation..."
+></app-loading>
 
 <!-- Not Found -->
 <div class="not-found-page" *ngIf="!loading && !complaint">

@@ -74,8 +74,89 @@ th.mat-mdc-header-cell {
 }
 
 .ref-no {
-  font-family: v.$font-mono;
   font-weight: v.$font-weight-medium;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.assign-cell {
+  min-width: 140px;
+  max-width: 180px;
+}
+
+td.assign-cell {
+  vertical-align: middle;
+}
+
+// Inner wrapper div inside the td
+td .assign-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assign-select {
+  width: 100%;
+  max-width: 160px;
+
+  // Strip all mat-select form-field chrome so it blends into the table row
+  ::ng-deep .mat-mdc-select-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: v.$radius-md;
+    font-size: v.$font-size-sm;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background v.$transition-fast;
+    background: transparent;
+
+    &:hover {
+      background: v.$gray-100;
+    }
+  }
+
+  ::ng-deep .mat-mdc-select-value {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Hide the default underline / ripple / wrapper chrome
+  ::ng-deep .mdc-line-ripple,
+  ::ng-deep .mat-mdc-form-field-infix,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-mdc-form-field-bottom-align {
+    display: none !important;
+  }
+
+  ::ng-deep .mat-mdc-select-arrow {
+    color: var(--text-secondary);
+  }
+
+  ::ng-deep .mat-mdc-select-placeholder {
+    color: v.$gray-400;
+    font-style: italic;
+    font-size: v.$font-size-sm;
+  }
+
+  // Remove the outer wrapper padding/border
+  &.mat-mdc-select {
+    display: inline-flex;
+    border: none;
+    background: none;
+  }
+}
+
+.assign-spinner {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.officer-name {
+  font-size: v.$font-size-sm;
   color: var(--text-secondary);
 }
 
@@ -114,7 +195,11 @@ th.mat-mdc-header-cell {
 }
 
 .btn-view {
-  background: linear-gradient(135deg, v.$primary-blue, v.$primary-dark) !important;
+  background: linear-gradient(
+    135deg,
+    v.$primary-blue,
+    v.$primary-dark
+  ) !important;
   color: v.$white !important;
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;

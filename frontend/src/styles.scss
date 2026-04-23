@@ -54,15 +54,47 @@ a {
   }
 }
 
-// ===== Angular Material Overrides =====
-.mat-mdc-form-field {
-  font-family: "Inter", sans-serif !important;
+// ===== Angular Material – Force Inter everywhere =====
+// Material's prebuilt theme injects Roboto. This blanket rule
+// ensures every Material component inherits Inter instead.
+.mat-mdc-form-field,
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-stroked-button,
+.mat-mdc-icon-button,
+.mat-mdc-fab,
+.mat-mdc-mini-fab,
+.mat-mdc-table,
+.mat-mdc-header-cell,
+.mat-mdc-cell,
+.mat-mdc-row,
+.mat-mdc-header-row,
+.mat-mdc-paginator,
+.mat-mdc-select,
+.mat-mdc-select-trigger,
+.mat-mdc-option,
+.mat-mdc-optgroup-label,
+.mat-mdc-menu-item,
+.mat-mdc-menu-content,
+.mat-mdc-dialog-title,
+.mat-mdc-dialog-content,
+.mat-mdc-dialog-actions,
+.mat-mdc-tab,
+.mat-mdc-tab-label,
+.mat-mdc-chip,
+.mat-mdc-tooltip,
+.mat-mdc-card,
+.mat-mdc-card-title,
+.mat-mdc-card-subtitle,
+.mat-mdc-card-content,
+.mat-mdc-list-item,
+.mat-mdc-snack-bar-label {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .mat-mdc-button,
 .mat-mdc-raised-button,
 .mat-mdc-stroked-button {
-  font-family: "Inter", sans-serif !important;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -90,6 +122,40 @@ a {
 
 .mat-mdc-table {
   background: transparent !important;
+}
+
+// ===== Assign Officer Dropdown Panel =====
+.assign-officer-panel {
+  border-radius: v.$radius-md !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  max-height: 240px !important;
+  overflow-y: auto;
+
+  // Slim scrollbar inside the panel
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: v.$gray-300;
+    border-radius: 2px;
+  }
+
+  .mat-mdc-option {
+    font-size: v.$font-size-sm;
+    min-height: 40px;
+    padding: 0 16px;
+    transition: background v.$transition-fast;
+
+    &:hover {
+      background: v.$gray-50;
+    }
+
+    &.mdc-list-item--selected {
+      background: #dbeafe;
+      color: v.$primary-blue;
+      font-weight: v.$font-weight-medium;
+    }
+  }
 }
 
 .custom-dialog .mat-mdc-dialog-container {

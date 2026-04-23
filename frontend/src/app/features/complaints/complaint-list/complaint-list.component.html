@@ -15,7 +15,11 @@
   <!-- Table -->
   <div class="table-card">
     <!-- Loading -->
-    <app-loading *ngIf="loading" mode="inline" message="Fetching complaints..."></app-loading>
+    <app-loading
+      *ngIf="loading"
+      mode="inline"
+      message="Fetching complaints..."
+    ></app-loading>
 
     <!-- Error -->
     <div
@@ -78,6 +82,43 @@
           <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{
             row.status
           }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Assigned To -->
+      <ng-container matColumnDef="assignedTo">
+        <th mat-header-cell *matHeaderCellDef>Assigned To</th>
+        <td mat-cell *matCellDef="let row" class="assign-cell">
+          <!-- Supervisor: inline select to assign/reassign -->
+          <ng-container *ngIf="isSupervisor; else readonlyOfficer">
+            <div class="assign-cell">
+              <mat-select
+                class="assign-select"
+                [value]="row.assignedTo || null"
+                [disabled]="assigningId === row.id"
+                (selectionChange)="assignOfficer(row, $event.value)"
+                panelClass="assign-officer-panel"
+                placeholder="Unassigned"
+              >
+                <mat-option
+                  *ngFor="let officer of caseOfficers"
+                  [value]="officer.id"
+                >
+                  {{ officer.name }}
+                </mat-option>
+              </mat-select>
+              <mat-progress-spinner
+                *ngIf="assigningId === row.id"
+                diameter="14"
+                mode="indeterminate"
+                class="assign-spinner"
+              ></mat-progress-spinner>
+            </div>
+          </ng-container>
+          <!-- Case officer: read-only name -->
+          <ng-template #readonlyOfficer>
+            <span class="officer-name">{{ row.assignedToName || "—" }}</span>
+          </ng-template>
         </td>
       </ng-container>
 
