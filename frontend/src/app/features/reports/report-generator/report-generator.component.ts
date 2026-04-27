@@ -4,6 +4,7 @@ import { BaseChartDirective } from "ng2-charts";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ReportService } from "../../../core/services/report.service";
+import { ToastService } from "../../../core/services/toast.service";
 import {
   ReportData,
   ReportFilter,
@@ -53,7 +54,10 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
   };
   displayedColumns = ["name", "totalCases", "resolved", "avgDays"];
 
-  constructor(private reportService: ReportService) {}
+  constructor(
+    private reportService: ReportService,
+    private toast: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.generateReport();
@@ -148,5 +152,6 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     a.download = `report-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    this.toast.success("Report exported successfully");
   }
 }

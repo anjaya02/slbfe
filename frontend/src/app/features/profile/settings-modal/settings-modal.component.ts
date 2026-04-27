@@ -4,6 +4,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { SettingsService } from "../../../core/services/theme.service";
 import { AuthService } from "../../../core/services/auth.service";
+import { ToastService } from "../../../core/services/toast.service";
 
 @Component({
   standalone: false,
@@ -26,6 +27,7 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
     private dialogRef: MatDialogRef<SettingsModalComponent>,
     private settingsService: SettingsService,
     private authService: AuthService,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +53,9 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
     const previousFormat = this.selectedDateFormat;
     this.settingsService.setDateFormat(format);
     this.authService.updatePreferences({ dateFormat: format }).subscribe({
+      next: () => {
+        this.toast.success("Date format updated");
+      },
       error: () => {
         this.settingsService.setDateFormat(previousFormat);
       },
@@ -63,6 +68,13 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
     this.authService
       .updatePreferences({ notificationsEnabled: this.notificationsEnabled })
       .subscribe({
+        next: () => {
+          this.toast.success(
+            this.notificationsEnabled
+              ? "Notifications enabled"
+              : "Notifications disabled",
+          );
+        },
         error: () => {
           this.notificationsEnabled = previousValue;
         },

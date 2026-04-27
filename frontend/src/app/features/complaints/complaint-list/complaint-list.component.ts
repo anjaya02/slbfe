@@ -18,6 +18,7 @@ import {
   COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
 import { AuthService } from "../../../core/services/auth.service";
+import { ToastService } from "../../../core/services/toast.service";
 import { User } from "../../../core/models/user.model";
 
 @Component({
@@ -60,6 +61,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
     private complaintService: ComplaintService,
     private router: Router,
     private authService: AuthService,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -176,6 +178,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.assigningId = null;
+          this.toast.success(`Assigned to ${officer.name}`);
           this.loadComplaints();
         },
         error: () => {
