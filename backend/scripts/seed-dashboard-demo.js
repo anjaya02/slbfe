@@ -1,4 +1,6 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "..", ".env") });
+require("dotenv").config({
+  path: require("path").resolve(__dirname, "..", ".env"),
+});
 
 const mysql = require("mysql2/promise");
 
@@ -11,55 +13,120 @@ async function main() {
     database: process.env.DB_NAME,
   });
 
+  const complaintId = "C005";
+
   try {
+    await connection.beginTransaction();
+
+    await connection.execute("DELETE FROM complain_comments WHERE complain_id = ?", [
+      complaintId,
+    ]);
+    await connection.execute("DELETE FROM complain_logs WHERE complain_id = ?", [
+      complaintId,
+    ]);
+    await connection.execute(
+      "DELETE FROM complaint_assignments WHERE complaint_id = ?",
+      [complaintId],
+    );
+    await connection.execute("DELETE FROM complain_details WHERE complain_id = ?", [
+      complaintId,
+    ]);
+
     await connection.execute(
       `
-        INSERT IGNORE INTO complaints (
-          id,
-          reference_no,
-          worker_name,
-          worker_nic,
-          worker_passport,
-          worker_address,
-          worker_contact,
-          service_id,
-          branch,
-          complaint_type,
-          status,
-          priority,
-          registration_path,
-          description,
-          assigned_to_user_id,
-          date_submitted,
-          date_updated,
-          created_at,
-          updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO complain_details (
+          complain_id,
+          complain_type,
+          complain_user,
+          behalf_user,
+          mobile_no,
+          passport_no,
+          nic_no,
+          work_country,
+          reported_time,
+          complain_catagory,
+          resolution_catagory,
+          complain_status,
+          updated_time,
+          updated_user
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
-        "C002",
-        "R10002",
-        "Aman Bey",
-        "198876543210",
-        null,
-        "Block C, Worker Housing, Riyadh",
-        "0912345678",
-        "088-5678",
-        "Riyadh",
+        complaintId,
         "LACK_OF_COMMUNICATION",
+        "Aman Bey",
+        null,
+        "0912345678",
+        null,
+        "198876543210",
+        "Riyadh",
+        "2026-04-21 10:15:00",
+        "LACK_OF_COMMUNICATION",
+        "RESOLVED",
         "Resolved",
-        "MEDIUM",
-        "CONSULAR",
+        "2026-04-23 11:20:00",
+        "USR002",
+      ],
+    );
+
+    await connection.execute(
+      `
+        INSERT INTO complain_comments (
+          complain_id,
+          complain_msg,
+          updated_user,
+          updated_time
+        ) VALUES (?, ?, ?, ?)
+      `,
+      [
+        complaintId,
         "Worker reported not receiving annual leave for two years. The issue was resolved after consular intervention and employer confirmation.",
         null,
         "2026-04-21 10:15:00",
-        "2026-04-23 11:20:00",
-        "2026-04-21 10:15:00",
+      ],
+    );
+
+    await connection.execute(
+      `
+        INSERT INTO complain_logs (
+          complain_id,
+          complain_msg,
+          updated_user,
+          updated_time
+        ) VALUES (?, ?, ?, ?)
+      `,
+      [
+        complaintId,
+        "Status Changed: Resolved",
+        "USR002",
         "2026-04-23 11:20:00",
       ],
     );
 
+    await connection.execute(
+      `
+        INSERT INTO complaint_assignments (
+          complaint_id,
+          assigned_to_user_id,
+          assigned_by_user_id,
+          assigned_at,
+          updated_at
+        ) VALUES (?, ?, ?, ?, ?)
+      `,
+      [
+        complaintId,
+        "USR002",
+        "USR001",
+        "2026-04-21 10:20:00",
+        "2026-04-21 10:20:00",
+      ],
+    );
+
+    await connection.commit();
     console.log("dashboard-demo-seed-ok");
+  } catch (error) {
+    await connection.rollback();
+    throw error;
   } finally {
     await connection.end();
   }

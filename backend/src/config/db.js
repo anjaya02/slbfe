@@ -64,6 +64,68 @@ async function ensureRuntimeTables() {
       )
     `,
   );
+
+  await query(
+    `
+      CREATE TABLE IF NOT EXISTS complaint_assignments (
+        complaint_id VARCHAR(30) NOT NULL,
+        assigned_to_user_id VARCHAR(20) NOT NULL,
+        assigned_by_user_id VARCHAR(20) NULL,
+        assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (complaint_id),
+        KEY idx_assignments_user (assigned_to_user_id),
+        KEY idx_assignments_assigned_at (assigned_at),
+        CONSTRAINT fk_assignments_user FOREIGN KEY (assigned_to_user_id) REFERENCES users(id),
+        CONSTRAINT fk_assignments_by_user FOREIGN KEY (assigned_by_user_id) REFERENCES users(id)
+      )
+    `,
+  );
+
+  await query(
+    `
+      CREATE TABLE IF NOT EXISTS complaint_attachments (
+        id VARCHAR(20) NOT NULL,
+        complaint_id VARCHAR(30) NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(100) NOT NULL,
+        file_size BIGINT UNSIGNED NOT NULL,
+        storage_url VARCHAR(500) NOT NULL,
+        uploaded_by_user_id VARCHAR(20) NULL,
+        uploaded_by_name VARCHAR(150) NOT NULL,
+        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_attachments_complaint (complaint_id),
+        KEY idx_attachments_uploaded_at (uploaded_at),
+        CONSTRAINT fk_attachments_user_runtime FOREIGN KEY (uploaded_by_user_id) REFERENCES users(id)
+      )
+    `,
+  );
+
+  await query(
+    `
+      CREATE TABLE IF NOT EXISTS notifications (
+        id VARCHAR(20) NOT NULL,
+        recipient_user_id VARCHAR(20) NOT NULL,
+        notification_type ENUM('CASE_UPDATE','SYSTEM_ALERT','MENTION','ASSIGNMENT') NOT NULL,
+        title VARCHAR(200) NOT NULL,
+        message TEXT NOT NULL,
+        is_read TINYINT(1) NOT NULL DEFAULT 0,
+        link_url VARCHAR(255) NULL,
+        related_complaint_id VARCHAR(30) NULL,
+        complaint_id VARCHAR(30) GENERATED ALWAYS AS (related_complaint_id) VIRTUAL,
+        read_at DATETIME NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        deleted_at DATETIME NULL,
+        PRIMARY KEY (id),
+        KEY idx_notif_recipient (recipient_user_id),
+        KEY idx_notif_is_read (is_read),
+        KEY idx_notif_recipient_read_date (recipient_user_id, is_read, created_at),
+        CONSTRAINT fk_notif_recipient_runtime FOREIGN KEY (recipient_user_id) REFERENCES users(id)
+      )
+    `,
+  );
 }
 
 module.exports = {

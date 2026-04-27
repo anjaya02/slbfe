@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "db:reset": "node scripts/reset-database.js",
     "test": "node --test"
   },
   "keywords": [

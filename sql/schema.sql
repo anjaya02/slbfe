@@ -1,179 +1,184 @@
 -- ============================================================
--- SLBFE Complaint Management System - MySQL Schema
--- ============================================================
--- Run this file to create all tables
+-- SLBFE Complaint Management System - MySQL reset and seed
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS slbfe;
+DROP DATABASE IF EXISTS slbfe;
+CREATE DATABASE slbfe
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_0900_ai_ci;
 USE slbfe;
 
 -- ------------------------------------------------------------
--- 1. USERS
+-- AUTH TABLES
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS users (
-  id                    VARCHAR(20)   NOT NULL,
-  name                  VARCHAR(150)  NOT NULL,
-  email                 VARCHAR(255)  NOT NULL,
-  password_hash         VARCHAR(255)  NOT NULL,
-  role                  ENUM('CASE_OFFICER','SUPERVISOR') NOT NULL,
-  avatar_url            VARCHAR(500)  NULL,
-  phone                 VARCHAR(30)   NULL,
-  location              VARCHAR(120)  NULL,
-  notifications_enabled TINYINT(1)   NOT NULL DEFAULT 1,
-  date_format           ENUM('DD/MM/YYYY','MM/DD/YYYY','YYYY-MM-DD') NULL DEFAULT 'DD/MM/YYYY',
-  is_active             TINYINT(1)   NOT NULL DEFAULT 1,
-  created_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  last_login_at         DATETIME     NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_users_email (email),
-  INDEX idx_users_role (role),
-  INDEX idx_users_is_active (is_active)
-);
+CREATE TABLE `users` (
+  `id` varchar(20) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` enum('CASE_OFFICER','SUPERVISOR') NOT NULL,
+  `avatar_url` varchar(500) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `location` varchar(120) DEFAULT NULL,
+  `notifications_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `date_format` enum('DD/MM/YYYY','MM/DD/YYYY','YYYY-MM-DD') DEFAULT 'DD/MM/YYYY',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_login_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_users_email` (`email`),
+  KEY `idx_users_role` (`role`),
+  KEY `idx_users_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `auth_refresh_tokens` (
+  `id` varchar(40) NOT NULL,
+  `user_id` varchar(20) NOT NULL,
+  `token_hash` char(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `revoked_at` datetime DEFAULT NULL,
+  `replaced_by_token_id` varchar(40) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_auth_refresh_tokens_hash` (`token_hash`),
+  KEY `idx_auth_refresh_tokens_user` (`user_id`),
+  KEY `idx_auth_refresh_tokens_expiry` (`expires_at`),
+  CONSTRAINT `fk_auth_refresh_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
--- 1A. AUTH REFRESH TOKENS
+-- COMPLAINT TABLES
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
-  id                    VARCHAR(40)   NOT NULL,
-  user_id               VARCHAR(20)   NOT NULL,
-  token_hash            CHAR(64)      NOT NULL,
-  expires_at            DATETIME      NOT NULL,
-  revoked_at            DATETIME      NULL,
-  replaced_by_token_id  VARCHAR(40)   NULL,
-  created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_auth_refresh_tokens_hash (token_hash),
-  INDEX idx_auth_refresh_tokens_user (user_id),
-  INDEX idx_auth_refresh_tokens_expiry (expires_at),
-  FOREIGN KEY fk_auth_refresh_tokens_user (user_id) REFERENCES users(id)
-);
+CREATE TABLE `complain_catagory` (
+  `category_id` varchar(30) DEFAULT NULL,
+  `category_name` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `complain_comments` (
+  `complain_id` varchar(30) DEFAULT NULL,
+  `complain_msg` varchar(1000) DEFAULT NULL,
+  `updated_user` varchar(30) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `complain_details` (
+  `complain_id` varchar(30) DEFAULT NULL,
+  `complain_type` varchar(30) DEFAULT NULL,
+  `complain_user` varchar(30) DEFAULT NULL,
+  `behalf_user` varchar(30) DEFAULT NULL,
+  `mobile_no` varchar(500) DEFAULT NULL,
+  `passport_no` varchar(30) DEFAULT NULL,
+  `nic_no` varchar(30) DEFAULT NULL,
+  `work_country` varchar(30) DEFAULT NULL,
+  `reported_time` datetime DEFAULT NULL,
+  `complain_catagory` varchar(50) DEFAULT NULL,
+  `resolution_catagory` varchar(50) DEFAULT NULL,
+  `complain_status` varchar(30) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `updated_user` varchar(30) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `complain_logs` (
+  `complain_id` varchar(30) DEFAULT NULL,
+  `complain_msg` varchar(100) DEFAULT NULL,
+  `updated_user` varchar(30) DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `migrant_employees` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fname` varchar(50) DEFAULT NULL,
+  `lname` varchar(50) DEFAULT NULL,
+  `nic` varchar(20) DEFAULT NULL,
+  `passport` varchar(20) DEFAULT NULL,
+  `mobile` varchar(20) DEFAULT NULL,
+  `empcountry` varchar(50) DEFAULT NULL,
+  `username` varchar(100) NOT NULL,
+  `pwdhash` varchar(255) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `create_date` datetime DEFAULT NULL,
+  `modify_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_username` (`username`),
+  UNIQUE KEY `unique_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `resolution_catagory` (
+  `category_id` varchar(30) DEFAULT NULL,
+  `category_name` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
--- 2. COMPLAINTS
+-- SUPPORT TABLES
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS complaints (
-  id                    VARCHAR(20)   NOT NULL,
-  reference_no          VARCHAR(50)   NOT NULL,
-  worker_name           VARCHAR(200)  NOT NULL,
-  worker_nic            VARCHAR(20)   NOT NULL,
-  worker_passport       VARCHAR(30)   NULL,
-  worker_address        VARCHAR(255)  NOT NULL,
-  worker_contact        VARCHAR(30)   NOT NULL,
-  service_id            VARCHAR(50)   NOT NULL,
-  branch                VARCHAR(120)  NOT NULL,
-  complaint_type        ENUM('BREACH_OF_CONTRACT','LACK_OF_COMMUNICATION','SICK','BEING_JAILED','BEING_REMANDED_BY_POLICE','BEING_STRANDED','PROBLEMS_AT_HOME','DEATH','BEING_RETAINED','OTHER') NOT NULL,
-  status                ENUM('Submitted','Under Review','In Progress','Awaiting Info','Resolved','Closed') NOT NULL DEFAULT 'Submitted',
-  priority              ENUM('LOW','MEDIUM','HIGH','CRITICAL') NOT NULL DEFAULT 'MEDIUM',
-  registration_path     ENUM('SLBFE','CONSULAR') NOT NULL,
-  description           TEXT          NOT NULL,
-  assigned_to_user_id   VARCHAR(20)   NULL,
-  date_submitted        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  date_updated          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_complaints_reference_no (reference_no),
-  INDEX idx_complaints_status (status),
-  INDEX idx_complaints_assigned (assigned_to_user_id),
-  INDEX idx_complaints_type (complaint_type),
-  INDEX idx_complaints_branch (branch),
-  INDEX idx_complaints_status_date (status, date_submitted),
-  FOREIGN KEY fk_complaints_assigned (assigned_to_user_id) REFERENCES users(id)
-);
+CREATE TABLE `complaint_assignments` (
+  `complaint_id` varchar(30) NOT NULL,
+  `assigned_to_user_id` varchar(20) NOT NULL,
+  `assigned_by_user_id` varchar(20) DEFAULT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`complaint_id`),
+  KEY `idx_assignments_user` (`assigned_to_user_id`),
+  KEY `idx_assignments_assigned_at` (`assigned_at`),
+  CONSTRAINT `fk_assignments_user` FOREIGN KEY (`assigned_to_user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `fk_assignments_by_user` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `complaint_attachments` (
+  `id` varchar(20) NOT NULL,
+  `complaint_id` varchar(30) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_type` varchar(100) NOT NULL,
+  `file_size` bigint unsigned NOT NULL,
+  `storage_url` varchar(500) NOT NULL,
+  `uploaded_by_user_id` varchar(20) DEFAULT NULL,
+  `uploaded_by_name` varchar(150) NOT NULL,
+  `uploaded_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_attachments_complaint` (`complaint_id`),
+  KEY `idx_attachments_uploaded_at` (`uploaded_at`),
+  CONSTRAINT `fk_attachments_user` FOREIGN KEY (`uploaded_by_user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `notifications` (
+  `id` varchar(20) NOT NULL,
+  `recipient_user_id` varchar(20) NOT NULL,
+  `notification_type` enum('CASE_UPDATE','SYSTEM_ALERT','MENTION','ASSIGNMENT') NOT NULL,
+  `title` varchar(200) NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `link_url` varchar(255) DEFAULT NULL,
+  `related_complaint_id` varchar(30) DEFAULT NULL,
+  `complaint_id` varchar(30) GENERATED ALWAYS AS (`related_complaint_id`) VIRTUAL,
+  `read_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_notif_recipient` (`recipient_user_id`),
+  KEY `idx_notif_is_read` (`is_read`),
+  KEY `idx_notif_recipient_read_date` (`recipient_user_id`,`is_read`,`created_at`),
+  CONSTRAINT `fk_notif_recipient` FOREIGN KEY (`recipient_user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
--- 3. COMPLAINT ATTACHMENTS
+-- USER SEED DATA
+-- Supervisor password: Admin@1234
+-- Case Officer password: Officer@1234
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS complaint_attachments (
-  id                    VARCHAR(20)   NOT NULL,
-  complaint_id          VARCHAR(20)   NOT NULL,
-  file_name             VARCHAR(255)  NOT NULL,
-  file_type             VARCHAR(100)  NOT NULL,
-  file_size             BIGINT UNSIGNED NOT NULL,
-  storage_url           VARCHAR(500)  NOT NULL,
-  uploaded_by_user_id   VARCHAR(20)   NULL,
-  uploaded_by_name      VARCHAR(150)  NOT NULL,
-  uploaded_at           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  INDEX idx_attachments_complaint (complaint_id),
-  INDEX idx_attachments_uploaded_at (uploaded_at),
-  FOREIGN KEY fk_attachments_complaint (complaint_id) REFERENCES complaints(id),
-  FOREIGN KEY fk_attachments_user (uploaded_by_user_id) REFERENCES users(id)
-);
-
--- ------------------------------------------------------------
--- 4. COMPLAINT HISTORY (append-only audit log)
--- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS complaint_history (
-  id                    VARCHAR(20)   NOT NULL,
-  complaint_id          VARCHAR(20)   NOT NULL,
-  action                VARCHAR(200)  NOT NULL,
-  description           TEXT          NOT NULL,
-  performed_by_user_id  VARCHAR(20)   NULL,
-  performed_by_name     VARCHAR(150)  NOT NULL,
-  previous_status       ENUM('Submitted','Under Review','In Progress','Awaiting Info','Resolved','Closed') NULL,
-  new_status            ENUM('Submitted','Under Review','In Progress','Awaiting Info','Resolved','Closed') NULL,
-  event_timestamp       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  INDEX idx_history_complaint (complaint_id),
-  INDEX idx_history_timestamp (event_timestamp),
-  FOREIGN KEY fk_history_complaint (complaint_id) REFERENCES complaints(id),
-  FOREIGN KEY fk_history_user (performed_by_user_id) REFERENCES users(id)
-);
-
--- ------------------------------------------------------------
--- 5. COMPLAINT NOTES
--- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS complaint_notes (
-  id                    VARCHAR(20)   NOT NULL,
-  complaint_id          VARCHAR(20)   NOT NULL,
-  note_type             ENUM('WORKER_UPDATE','INTERNAL_NOTE','SYSTEM_LOG') NOT NULL,
-  content               TEXT          NOT NULL,
-  author_user_id        VARCHAR(20)   NULL,
-  author_name           VARCHAR(150)  NOT NULL,
-  is_internal           TINYINT(1)   NOT NULL DEFAULT 0,
-  created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at            DATETIME      NULL,
-  PRIMARY KEY (id),
-  INDEX idx_notes_complaint (complaint_id),
-  INDEX idx_notes_is_internal (is_internal),
-  FOREIGN KEY fk_notes_complaint (complaint_id) REFERENCES complaints(id),
-  FOREIGN KEY fk_notes_user (author_user_id) REFERENCES users(id)
-);
-
--- ------------------------------------------------------------
--- 6. NOTIFICATIONS
--- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS notifications (
-  id                    VARCHAR(20)   NOT NULL,
-  recipient_user_id     VARCHAR(20)   NOT NULL,
-  notification_type     ENUM('CASE_UPDATE','SYSTEM_ALERT','MENTION','ASSIGNMENT') NOT NULL,
-  title                 VARCHAR(200)  NOT NULL,
-  message               TEXT          NOT NULL,
-  is_read               TINYINT(1)   NOT NULL DEFAULT 0,
-  link_url              VARCHAR(255)  NULL,
-  related_complaint_id  VARCHAR(20)   NULL,
-  complaint_id          VARCHAR(20) GENERATED ALWAYS AS (related_complaint_id) VIRTUAL,
-  read_at               DATETIME      NULL,
-  created_at            DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  deleted_at            DATETIME      NULL,
-  PRIMARY KEY (id),
-  INDEX idx_notif_recipient (recipient_user_id),
-  INDEX idx_notif_is_read (is_read),
-  INDEX idx_notif_recipient_read_date (recipient_user_id, is_read, created_at),
-  FOREIGN KEY fk_notif_recipient (recipient_user_id) REFERENCES users(id),
-  FOREIGN KEY fk_notif_complaint (related_complaint_id) REFERENCES complaints(id)
-);
-
--- ============================================================
--- SEED DATA - Default supervisor account
--- Password: Admin@1234 (bcrypt hashed)
--- ============================================================
-INSERT IGNORE INTO users (id, name, email, password_hash, role, phone, location, is_active, created_at, updated_at)
-VALUES (
+INSERT INTO `users` (
+  `id`,
+  `name`,
+  `email`,
+  `password_hash`,
+  `role`,
+  `phone`,
+  `location`,
+  `is_active`,
+  `created_at`,
+  `updated_at`
+) VALUES (
   'USR001',
   'Admin Supervisor',
   'admin@slbfe.gov.lk',
@@ -184,27 +189,7 @@ VALUES (
   1,
   NOW(),
   NOW()
-);
-
--- ============================================================
--- DEMO SEED DATA - Shared database examples
--- Complaints below are written as worker-submitted narratives.
--- Case Officer Password: Officer@1234
--- ============================================================
-INSERT IGNORE INTO users (
-  id,
-  name,
-  email,
-  password_hash,
-  role,
-  phone,
-  location,
-  notifications_enabled,
-  date_format,
-  is_active,
-  created_at,
-  updated_at
-) VALUES (
+), (
   'USR002',
   'Iman Fernando',
   'officer@slbfe.gov.lk',
@@ -213,292 +198,280 @@ INSERT IGNORE INTO users (
   '+94 77 234 5678',
   'Colombo',
   1,
-  'DD/MM/YYYY',
-  1,
   NOW(),
   NOW()
 );
 
-INSERT IGNORE INTO complaints (
-  id,
-  reference_no,
-  worker_name,
-  worker_nic,
-  worker_passport,
-  worker_address,
-  worker_contact,
-  service_id,
-  branch,
-  complaint_type,
-  status,
-  priority,
-  registration_path,
-  description,
-  assigned_to_user_id,
-  date_submitted,
-  date_updated,
-  created_at,
-  updated_at
+-- ------------------------------------------------------------
+-- LOOKUP SEED DATA
+-- ------------------------------------------------------------
+INSERT INTO `complain_catagory` (`category_id`, `category_name`) VALUES
+  ('BREACH_OF_CONTRACT', 'Breach of Employment Contract'),
+  ('LACK_OF_COMMUNICATION', 'Lack of Communication'),
+  ('SICK', 'Sick'),
+  ('BEING_JAILED', 'Being Jailed'),
+  ('BEING_REMANDED_BY_POLICE', 'Being Remanded by Police'),
+  ('BEING_STRANDED', 'Being Stranded without Employment'),
+  ('PROBLEMS_AT_HOME', 'Problems at Employee''s Home (Sri Lanka)'),
+  ('DEATH', 'Death'),
+  ('BEING_RETAINED', 'Being Retained by Unknown Person'),
+  ('OTHER', 'Other');
+
+INSERT INTO `resolution_catagory` (`category_id`, `category_name`) VALUES
+  ('RESOLVED', 'Resolved'),
+  ('CLOSED', 'Closed'),
+  ('REFERRED_TO_MISSION', 'Referred to Mission'),
+  ('REFERRED_TO_AGENCY', 'Referred to Recruitment Agency'),
+  ('EMPLOYER_CONTACTED', 'Employer Contacted'),
+  ('WORKER_UPDATED', 'Worker Updated');
+
+-- ------------------------------------------------------------
+-- MIGRANT EMPLOYEE SEED DATA
+-- Password: Worker@1234
+-- ------------------------------------------------------------
+INSERT INTO `migrant_employees` (
+  `fname`,
+  `lname`,
+  `nic`,
+  `passport`,
+  `mobile`,
+  `empcountry`,
+  `username`,
+  `pwdhash`,
+  `email`,
+  `create_date`,
+  `modify_date`
 ) VALUES (
-  'C001',
-  'R10001',
-  'Saman Chathuranga Perera',
+  'Saman Chathuranga',
+  'Perera',
   '199234567890',
   'N7684521',
-  'Room 14, Al Jleeb Labour Accommodation, Kuwait City',
-  '+965 66234198',
-  'SLBFE-KWT-2214',
+  '+96566234198',
   'Kuwait',
-  'BREACH_OF_CONTRACT',
-  'In Progress',
-  'HIGH',
-  'CONSULAR',
-  'I have not received my salary for the last three months. My employer is also forcing me to work overtime without payment and my passport has been kept in the office. I am unable to leave the work site or change my job because they are refusing to return my passport.',
-  'USR002',
-  '2026-04-18 08:40:00',
-  '2026-04-21 11:10:00',
-  '2026-04-18 08:40:00',
-  '2026-04-21 11:10:00'
+  'saman.perera',
+  '$2a$10$grcCwzAB0uJKkZ7dQfJvMOoufyJaAz.COAERwQtrcxJyRhD1.dB4a',
+  'saman.perera@example.com',
+  NOW(),
+  NOW()
 ), (
-  'C002',
-  'R10002',
-  'Tharindu Lakmal Silva',
+  'Tharindu Lakmal',
+  'Silva',
   '198765432145',
   'OL5432189',
-  'Building 8, Exit 18 Staff Quarters, Riyadh',
-  '+966 558732104',
-  'SLBFE-RYD-1183',
-  'Riyadh',
-  'LACK_OF_COMMUNICATION',
-  'Awaiting Info',
-  'MEDIUM',
-  'CONSULAR',
-  'I came to Saudi Arabia nearly two years ago and my company has not given me any annual leave even though it is mentioned in my contract. When I asked for leave to come home because my mother is sick, the supervisor said I can go only if I buy my own ticket and sign a paper saying I have no claims. Please help me to get my leave properly.',
-  'USR002',
-  '2026-04-17 19:25:00',
-  '2026-04-20 14:05:00',
-  '2026-04-17 19:25:00',
-  '2026-04-20 14:05:00'
+  '+966558732104',
+  'Saudi Arabia',
+  'tharindu.silva',
+  '$2a$10$grcCwzAB0uJKkZ7dQfJvMOoufyJaAz.COAERwQtrcxJyRhD1.dB4a',
+  'tharindu.silva@example.com',
+  NOW(),
+  NOW()
 ), (
-  'C003',
-  'R10003',
-  'Nadeesha Kumari Jayawardena',
+  'Nadeesha Kumari',
+  'Jayawardena',
   '199678901234',
   'P9843216',
-  'Villa 22, Al Nahda, Dubai',
-  '+971 551183624',
-  'SLBFE-DXB-4402',
-  'Dubai',
-  'BEING_RETAINED',
-  'In Progress',
-  'CRITICAL',
-  'CONSULAR',
-  'I am working as a housemaid in Dubai. Madam has taken my passport and phone and does not allow me to contact my family freely. I am shouted at daily and I have not been allowed to leave the house alone. Last week I was pushed during an argument and I am now scared to stay here. Please help me urgently.',
-  NULL,
-  '2026-04-16 06:50:00',
-  '2026-04-19 09:40:00',
-  '2026-04-16 06:50:00',
-  '2026-04-19 09:40:00'
+  '+971551183624',
+  'United Arab Emirates',
+  'nadeesha.jayawardena',
+  '$2a$10$grcCwzAB0uJKkZ7dQfJvMOoufyJaAz.COAERwQtrcxJyRhD1.dB4a',
+  'nadeesha.jayawardena@example.com',
+  NOW(),
+  NOW()
 ), (
-  'C004',
-  'R10004',
-  'Kasun Madushanka Ranasinghe',
+  'Kasun Madushanka',
+  'Ranasinghe',
   '199045612378',
   'N5439872',
-  'Camp 3, Industrial Area, Doha',
-  '+974 66554821',
-  'SLBFE-DOH-7820',
-  'Doha',
-  'BREACH_OF_CONTRACT',
-  'Resolved',
-  'HIGH',
-  'SLBFE',
-  'I am working in a construction company in Doha. For the last several weeks we have been taken to work in the afternoon heat without proper drinking water or safety equipment. Two workers fainted on site. After I complained, the site supervisor threatened to send me back to Sri Lanka. I need help because the conditions are not safe.',
-  'USR002',
-  '2026-04-10 12:15:00',
-  '2026-04-15 17:20:00',
-  '2026-04-10 12:15:00',
-  '2026-04-15 17:20:00'
+  '+97466554821',
+  'Qatar',
+  'kasun.ranasinghe',
+  '$2a$10$grcCwzAB0uJKkZ7dQfJvMOoufyJaAz.COAERwQtrcxJyRhD1.dB4a',
+  'kasun.ranasinghe@example.com',
+  NOW(),
+  NOW()
 );
 
-INSERT IGNORE INTO complaint_history (
-  id,
-  complaint_id,
-  action,
-  description,
-  performed_by_user_id,
-  performed_by_name,
-  previous_status,
-  new_status,
-  event_timestamp,
-  created_at
+-- ------------------------------------------------------------
+-- COMPLAINT SEED DATA
+-- ------------------------------------------------------------
+INSERT INTO `complain_details` (
+  `complain_id`,
+  `complain_type`,
+  `complain_user`,
+  `behalf_user`,
+  `mobile_no`,
+  `passport_no`,
+  `nic_no`,
+  `work_country`,
+  `reported_time`,
+  `complain_catagory`,
+  `resolution_catagory`,
+  `complain_status`,
+  `updated_time`,
+  `updated_user`
 ) VALUES (
-  'H001',
   'C001',
-  'Status Changed: Under Review',
-  'Case moved from Submitted to Under Review after initial complaint screening.',
-  'USR001',
-  'Admin Supervisor',
-  'Submitted',
-  'Under Review',
-  '2026-04-18 10:10:00',
-  '2026-04-18 10:10:00'
-), (
-  'H002',
-  'C001',
-  'Status Changed: In Progress',
-  'Case moved from Under Review to In Progress after salary and passport retention concerns were confirmed for follow-up.',
-  'USR002',
-  'Iman Fernando',
-  'Under Review',
+  'BREACH_OF_CONTRACT',
+  'Saman Chathuranga Perera',
+  NULL,
+  '+965 66234198',
+  'N7684521',
+  '199234567890',
+  'Kuwait',
+  '2026-04-18 08:40:00',
+  'BREACH_OF_CONTRACT',
+  NULL,
   'In Progress',
   '2026-04-21 11:10:00',
-  '2026-04-21 11:10:00'
+  'USR002'
 ), (
-  'H003',
   'C002',
-  'Status Changed: Awaiting Info',
-  'Requested supporting contract pages and leave records from the worker before contacting the employer.',
-  'USR002',
-  'Iman Fernando',
-  'Submitted',
+  'LACK_OF_COMMUNICATION',
+  'Tharindu Lakmal Silva',
+  NULL,
+  '+966 558732104',
+  'OL5432189',
+  '198765432145',
+  'Riyadh',
+  '2026-04-17 19:25:00',
+  'LACK_OF_COMMUNICATION',
+  NULL,
   'Awaiting Info',
   '2026-04-20 14:05:00',
-  '2026-04-20 14:05:00'
+  'USR002'
 ), (
-  'H004',
   'C003',
-  'Status Changed: In Progress',
-  'Case moved to In Progress for urgent handling due to alleged confinement, passport confiscation, and physical intimidation.',
-  'USR001',
-  'Admin Supervisor',
-  'Under Review',
+  'BEING_RETAINED',
+  'Nadeesha Kumari Jayawardena',
+  NULL,
+  '+971 551183624',
+  'P9843216',
+  '199678901234',
+  'Dubai',
+  '2026-04-16 06:50:00',
+  'BEING_RETAINED',
+  NULL,
   'In Progress',
   '2026-04-19 09:40:00',
-  '2026-04-19 09:40:00'
+  'USR001'
 ), (
-  'H005',
   'C004',
-  'Assigned to Iman Fernando',
-  'Case assigned for follow-up with the Qatar labour welfare officer and employer representative.',
-  'USR001',
-  'Admin Supervisor',
-  'Submitted',
-  'Under Review',
-  '2026-04-11 09:00:00',
-  '2026-04-11 09:00:00'
-), (
-  'H006',
-  'C004',
-  'Status Changed: Resolved',
-  'Case marked resolved after the employer agreed to improve site conditions and the worker confirmed the immediate issue was addressed.',
-  'USR002',
-  'Iman Fernando',
-  'Under Review',
+  'BREACH_OF_CONTRACT',
+  'Kasun Madushanka Ranasinghe',
+  NULL,
+  '+974 66554821',
+  'N5439872',
+  '199045612378',
+  'Doha',
+  '2026-04-10 12:15:00',
+  'BREACH_OF_CONTRACT',
+  'RESOLVED',
   'Resolved',
   '2026-04-15 17:20:00',
-  '2026-04-15 17:20:00'
+  'USR002'
 );
 
-INSERT IGNORE INTO complaint_notes (
-  id,
-  complaint_id,
-  note_type,
-  content,
-  author_user_id,
-  author_name,
-  is_internal,
-  created_at,
-  updated_at
+INSERT INTO `complaint_assignments` (
+  `complaint_id`,
+  `assigned_to_user_id`,
+  `assigned_by_user_id`,
+  `assigned_at`,
+  `updated_at`
 ) VALUES (
-  'N001',
   'C001',
-  'WORKER_UPDATE',
-  'I spoke to another Sri Lankan worker in the same camp and he said the company also kept his passport. I can send my salary slips and my contract if needed.',
-  NULL,
-  'Saman Chathuranga Perera',
-  0,
-  '2026-04-19 07:20:00',
-  '2026-04-19 07:20:00'
-), (
-  'N002',
-  'C001',
-  'INTERNAL_NOTE',
-  'Employer contact details were verified. Salary slips received from the worker will be checked with the recruiting agency before formal employer outreach.',
   'USR002',
-  'Iman Fernando',
-  1,
-  '2026-04-21 11:30:00',
-  '2026-04-21 11:30:00'
-), (
-  'N003',
-  'C002',
-  'WORKER_UPDATE',
-  'I uploaded the page from my contract that says I should get annual leave after one year. I also attached the message where my supervisor told me to buy my own ticket.',
-  NULL,
-  'Tharindu Lakmal Silva',
-  0,
-  '2026-04-19 18:10:00',
-  '2026-04-19 18:10:00'
-), (
-  'N004',
-  'C002',
-  'INTERNAL_NOTE',
-  'Waiting for a clearer copy of the passport bio page and employer contact number before proceeding through Riyadh mission channels.',
-  'USR002',
-  'Iman Fernando',
-  1,
-  '2026-04-20 14:20:00',
-  '2026-04-20 14:20:00'
-), (
-  'N005',
-  'C003',
-  'INTERNAL_NOTE',
-  'Risk indicators are high. Supervisor instructed immediate coordination with the Dubai mission because the complaint includes confinement and physical intimidation.',
   'USR001',
-  'Admin Supervisor',
-  1,
-  '2026-04-19 10:05:00',
-  '2026-04-19 10:05:00'
+  '2026-04-18 10:15:00',
+  '2026-04-18 10:15:00'
 ), (
-  'N006',
-  'C004',
-  'WORKER_UPDATE',
-  'After the labour officer visited the site, the company started giving us drinking water and safety belts. They also changed the afternoon shift timing. I am sending this update to confirm the situation is better now.',
-  NULL,
-  'Kasun Madushanka Ranasinghe',
-  0,
-  '2026-04-15 15:45:00',
-  '2026-04-15 15:45:00'
-), (
-  'N007',
-  'C004',
-  'INTERNAL_NOTE',
-  'Worker confirmed improved site conditions and no further threats from the supervisor. Case can be closed if there are no further complaints within a week.',
+  'C002',
   'USR002',
-  'Iman Fernando',
-  1,
-  '2026-04-15 16:10:00',
-  '2026-04-15 16:10:00'
+  'USR001',
+  '2026-04-18 10:20:00',
+  '2026-04-18 10:20:00'
+), (
+  'C004',
+  'USR002',
+  'USR001',
+  '2026-04-11 09:00:00',
+  '2026-04-11 09:00:00'
 );
 
-INSERT IGNORE INTO notifications (
-  id,
-  recipient_user_id,
-  notification_type,
-  title,
-  message,
-  is_read,
-  link_url,
-  related_complaint_id,
-  created_at,
-  deleted_at
+INSERT INTO `complain_comments` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
+  (
+    'C001',
+    'I have not received my salary for the last three months. My employer is also forcing me to work overtime without payment and my passport has been kept in the office. I am unable to leave the work site or change my job because they are refusing to return my passport.',
+    NULL,
+    '2026-04-18 08:40:00'
+  ),
+  (
+    'C001',
+    'Employer contact details were verified. Salary slips received from the worker will be checked with the recruiting agency before formal employer outreach.',
+    'USR002',
+    '2026-04-21 11:30:00'
+  ),
+  (
+    'C002',
+    'I came to Saudi Arabia nearly two years ago and my company has not given me any annual leave even though it is mentioned in my contract. When I asked for leave to come home because my mother is sick, the supervisor said I can go only if I buy my own ticket and sign a paper saying I have no claims.',
+    NULL,
+    '2026-04-17 19:25:00'
+  ),
+  (
+    'C002',
+    'Waiting for a clearer copy of the passport bio page and employer contact number before proceeding through Riyadh mission channels.',
+    'USR002',
+    '2026-04-20 14:20:00'
+  ),
+  (
+    'C003',
+    'I am working as a housemaid in Dubai. Madam has taken my passport and phone and does not allow me to contact my family freely. I am shouted at daily and I have not been allowed to leave the house alone. Last week I was pushed during an argument and I am now scared to stay here. Please help me urgently.',
+    NULL,
+    '2026-04-16 06:50:00'
+  ),
+  (
+    'C003',
+    'Risk indicators are high. Supervisor instructed immediate coordination with the Dubai mission because the complaint includes confinement and physical intimidation.',
+    'USR001',
+    '2026-04-19 10:05:00'
+  ),
+  (
+    'C004',
+    'I am working in a construction company in Doha. For the last several weeks we have been taken to work in the afternoon heat without proper drinking water or safety equipment. Two workers fainted on site. After I complained, the site supervisor threatened to send me back to Sri Lanka.',
+    NULL,
+    '2026-04-10 12:15:00'
+  ),
+  (
+    'C004',
+    'Worker confirmed improved site conditions and no further threats from the supervisor. Case can be closed if there are no further complaints within a week.',
+    'USR002',
+    '2026-04-15 16:10:00'
+  );
+
+INSERT INTO `complain_logs` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
+  ('C001', 'Status Changed: Under Review', 'USR001', '2026-04-18 10:10:00'),
+  ('C001', 'Status Changed: In Progress', 'USR002', '2026-04-21 11:10:00'),
+  ('C002', 'Status Changed: Awaiting Info', 'USR002', '2026-04-20 14:05:00'),
+  ('C003', 'Status Changed: In Progress', 'USR001', '2026-04-19 09:40:00'),
+  ('C004', 'Assigned to Iman Fernando', 'USR001', '2026-04-11 09:00:00'),
+  ('C004', 'Status Changed: Resolved', 'USR002', '2026-04-15 17:20:00');
+
+INSERT INTO `notifications` (
+  `id`,
+  `recipient_user_id`,
+  `notification_type`,
+  `title`,
+  `message`,
+  `is_read`,
+  `link_url`,
+  `related_complaint_id`,
+  `created_at`,
+  `deleted_at`
 ) VALUES (
   'NTF001',
   'USR001',
   'CASE_UPDATE',
-  'Case R10001 Updated',
-  'Status changed to In Progress for complaint R10001.',
+  'Case C001 Updated',
+  'Status changed to In Progress for complaint C001.',
   0,
   '/complaints/C001',
   'C001',
@@ -509,7 +482,7 @@ INSERT IGNORE INTO notifications (
   'USR002',
   'ASSIGNMENT',
   'New Case Assigned',
-  'Case R10001 has been assigned to you.',
+  'Case C001 has been assigned to you.',
   0,
   '/complaints/C001',
   'C001',
@@ -519,8 +492,8 @@ INSERT IGNORE INTO notifications (
   'NTF003',
   'USR002',
   'CASE_UPDATE',
-  'Case R10004 Updated',
-  'Status changed to Resolved for complaint R10004.',
+  'Case C004 Updated',
+  'Status changed to Resolved for complaint C004.',
   1,
   '/complaints/C004',
   'C004',
@@ -531,7 +504,7 @@ INSERT IGNORE INTO notifications (
   'USR001',
   'SYSTEM_ALERT',
   'Urgent Case In Progress',
-  'Complaint R10003 was moved to In Progress for urgent intervention.',
+  'Complaint C003 was moved to In Progress for urgent intervention.',
   0,
   '/complaints/C003',
   'C003',

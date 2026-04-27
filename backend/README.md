@@ -77,33 +77,43 @@ Important:
 - if you change the MySQL port, update `DB_PORT`
 - XAMPP is not required for this project unless you specifically want to use its MySQL instance
 
-### 3. Create the database
+### 3. Reset and seed the database
 
-Run [../sql/schema.sql](../sql/schema.sql) in MySQL Workbench or another MySQL client.
+From the `backend/` folder you can drop, recreate, and seed the local `slbfe` database:
+
+```bash
+npm run db:reset
+```
+
+You can also run [../sql/schema.sql](../sql/schema.sql) directly in MySQL Workbench or another MySQL client.
 
 This creates:
 
 - `users`
 - `auth_refresh_tokens`
-- `complaints`
+- `complain_details`
+- `complain_comments`
+- `complain_logs`
+- `complain_catagory`
+- `resolution_catagory`
+- `migrant_employees`
+- `complaint_assignments`
 - `complaint_attachments`
-- `complaint_history`
-- `complaint_notes`
 - `notifications`
 
-The backend also auto-creates the refresh-token table at startup if it does not exist yet, so existing local environments do not need a manual migration just for token persistence.
+The backend auto-creates runtime support tables at startup if they do not exist yet.
 
 It also seeds a default supervisor account:
 
 - email: `admin@slbfe.gov.lk`
 - password: `Admin@1234`
 
-It also seeds a default case officer account and demo complaint data:
+It also seeds a default case officer account, lookup rows, migrant employee rows, and demo complaint data:
 
 - email: `officer@slbfe.gov.lk`
 - password: `Officer@1234`
-- 4 demo complaints written as worker-submitted narratives
-- complaint history and complaint notes for each seeded complaint
+- 4 demo complaints in `complain_details`
+- complaint logs and comments for each seeded complaint
 - notification rows tied to seeded complaint activity
 
 ### 4. Start the server
@@ -216,7 +226,8 @@ The backend follows a simple layered structure:
 - Refresh tokens are stored server-side, rotated on refresh, and revoked on logout.
 - Role checks are enforced server-side for supervisor-only actions.
 - The backend uses a real MySQL pool with named placeholders.
-- Complaint history, notes, attachments, and notifications are stored in separate tables.
+- Complaint details, logs, and comments use `complain_details`, `complain_logs`, and `complain_comments`.
+- Assignments, attachments, notifications, and app users are stored in support tables.
 - Dashboard stats and reports are derived from complaint data, not stored as separate tables.
 - Complaint access is role-aware: supervisors can see all complaints, case officers are limited to complaints assigned to them.
 - Dashboard stats are role-aware: supervisors see global metrics, case officers see their assigned workload only.
