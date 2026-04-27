@@ -7,12 +7,12 @@
     </button>
   </div>
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="loading">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
+  <app-loading
+    *ngIf="loading"
+    mode="inline"
+    message="Loading users..."
+  ></app-loading>
 
-  <!-- Error -->
   <div class="error-state" *ngIf="!loading && error">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <h3>Failed to load users</h3>
@@ -22,10 +22,8 @@
     </button>
   </div>
 
-  <!-- Table -->
   <div class="table-card" *ngIf="!loading && !error">
     <table mat-table [dataSource]="dataSource" class="user-table">
-      <!-- Name -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Name</th>
         <td mat-cell *matCellDef="let row">
@@ -38,13 +36,11 @@
         </td>
       </ng-container>
 
-      <!-- Email -->
       <ng-container matColumnDef="email">
         <th mat-header-cell *matHeaderCellDef>Email</th>
         <td mat-cell *matCellDef="let row">{{ row.email }}</td>
       </ng-container>
 
-      <!-- Role -->
       <ng-container matColumnDef="role">
         <th mat-header-cell *matHeaderCellDef>Role</th>
         <td mat-cell *matCellDef="let row">
@@ -54,13 +50,11 @@
         </td>
       </ng-container>
 
-      <!-- Location -->
       <ng-container matColumnDef="location">
         <th mat-header-cell *matHeaderCellDef>Location</th>
         <td mat-cell *matCellDef="let row">{{ row.location || "—" }}</td>
       </ng-container>
 
-      <!-- Status -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row">
@@ -72,7 +66,6 @@
         </td>
       </ng-container>
 
-      <!-- Actions -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
@@ -101,7 +94,6 @@
       ></tr>
     </table>
 
-    <!-- Empty state -->
     <div class="empty-state" *ngIf="dataSource.data.length === 0">
       <mat-icon>group_off</mat-icon>
       <p>No users found</p>

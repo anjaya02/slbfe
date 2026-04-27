@@ -1,5 +1,4 @@
 <div class="detail-page" *ngIf="!loading && complaint">
-  <!-- Status Stepper -->
   <div class="stepper-section">
     <app-status-stepper [currentStatus]="complaint.status"></app-status-stepper>
     <div class="stepper-actions">
@@ -14,7 +13,6 @@
     </div>
   </div>
 
-  <!-- Assignment Banner -->
   <div class="assignment-banner">
     <div class="assignment-info">
       <div class="assignment-avatar">
@@ -22,17 +20,20 @@
       </div>
       <div class="assignment-details">
         <span class="assignment-label">Assigned Officer</span>
-        <span class="assignment-name" *ngIf="complaint.assignedToName">{{ complaint.assignedToName }}</span>
-        <span class="assignment-name assignment-unassigned" *ngIf="!complaint.assignedToName">Unassigned</span>
+        <span class="assignment-name" *ngIf="complaint.assignedToName">{{
+          complaint.assignedToName
+        }}</span>
+        <span
+          class="assignment-name assignment-unassigned"
+          *ngIf="!complaint.assignedToName"
+          >Unassigned</span
+        >
       </div>
     </div>
   </div>
 
-  <!-- Detail / Update Toggle -->
   <div class="content-area" *ngIf="!showUpdatePanel">
-    <!-- Top Row: Worker Profile + Incident -->
     <div class="detail-grid">
-      <!-- Worker Profile Card -->
       <div class="card worker-card">
         <div class="card-title-row">
           <h3 class="card-title">Worker profile</h3>
@@ -117,7 +118,6 @@
         </div>
       </div>
 
-      <!-- Incident Card -->
       <div class="card incident-card">
         <h3 class="card-title">Incident</h3>
         <p class="incident-description">{{ complaint.description }}</p>
@@ -140,14 +140,12 @@
           class="btn-solve"
           (click)="toggleUpdatePanel()"
         >
-          Solve
+          {{ canAssignComplaint ? "Solve" : "Update Case" }}
         </button>
       </div>
     </div>
 
-    <!-- Bottom Row: History + Notes -->
     <div class="detail-grid">
-      <!-- Case History -->
       <div class="card history-card">
         <h3 class="card-title">
           <mat-icon>history</mat-icon> Case management history
@@ -170,7 +168,6 @@
         </div>
       </div>
 
-      <!-- Worker / Complaint Notes -->
       <div class="card notes-card">
         <h3 class="card-title">
           <mat-icon>description</mat-icon> Worker / Complaint note
@@ -205,17 +202,16 @@
       </div>
     </div>
 
-    <!-- Add Note Section -->
     <div class="card note-input-card">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Add internal note</mat-label>
-        <textarea matInput [(ngModel)]="noteText" rows="3"></textarea>
+        <textarea matInput [(ngModel)]="internalNoteText" rows="3"></textarea>
       </mat-form-field>
       <button
         mat-raised-button
         class="btn-add-note"
         (click)="addNote()"
-        [disabled]="addingNote || !noteText.trim()"
+        [disabled]="addingNote || !internalNoteText.trim()"
       >
         <mat-spinner *ngIf="addingNote" diameter="18"></mat-spinner>
         <span *ngIf="!addingNote">ADD NOTE</span>
@@ -223,7 +219,6 @@
     </div>
   </div>
 
-  <!-- Update Panel (Screen 5) -->
   <div class="content-area" *ngIf="showUpdatePanel">
     <div class="card update-card">
       <h3 class="update-title">How to solve this?</h3>
@@ -238,11 +233,10 @@
           </mat-select>
         </mat-form-field>
 
-        <!-- Officer selection (shown when Assign is selected) -->
         <mat-form-field
           appearance="outline"
           class="action-select"
-          *ngIf="selectedAction === 'assign'"
+          *ngIf="canAssignComplaint && selectedAction === 'assign'"
         >
           <mat-label>Select Case Officer</mat-label>
           <mat-select [(ngModel)]="selectedOfficerId">
@@ -269,18 +263,9 @@
 
     <div class="card note-input-card">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Add internal note</mat-label>
-        <textarea matInput [(ngModel)]="noteText" rows="3"></textarea>
+        <mat-label>Add a note about this action (optional)</mat-label>
+        <textarea matInput [(ngModel)]="actionNote" rows="3"></textarea>
       </mat-form-field>
-      <button
-        mat-raised-button
-        class="btn-add-note"
-        (click)="addNote()"
-        [disabled]="addingNote || !noteText.trim()"
-      >
-        <mat-spinner *ngIf="addingNote" diameter="18"></mat-spinner>
-        <span *ngIf="!addingNote">ADD NOTE</span>
-      </button>
     </div>
 
     <button mat-button class="btn-back" (click)="toggleUpdatePanel()">
@@ -289,14 +274,12 @@
   </div>
 </div>
 
-<!-- Loading -->
 <app-loading
   *ngIf="loading"
-  mode="full-page"
+  mode="inline"
   message="Loading case documentation..."
 ></app-loading>
 
-<!-- Not Found -->
 <div class="not-found-page" *ngIf="!loading && !complaint">
   <mat-icon class="not-found-icon">search_off</mat-icon>
   <h2>Complaint Not Found</h2>

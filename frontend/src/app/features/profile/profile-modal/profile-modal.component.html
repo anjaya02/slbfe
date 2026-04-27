@@ -7,7 +7,6 @@
   </div>
 
   <div class="modal-body">
-    <!-- Avatar -->
     <div class="avatar-section">
       <div class="avatar" *ngIf="!user?.avatar">
         <mat-icon>person</mat-icon>
@@ -26,7 +25,6 @@
       </div>
     </div>
 
-    <!-- Form -->
     <form [formGroup]="profileForm" (ngSubmit)="save()">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Full Name</mat-label>

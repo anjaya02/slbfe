@@ -34,7 +34,11 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, v.$primary-blue, v.$primary-dark) !important;
+  background: linear-gradient(
+    135deg,
+    v.$primary-blue,
+    v.$primary-dark
+  ) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
@@ -59,7 +63,11 @@
 }
 
 .btn-generate {
-  background: linear-gradient(135deg, v.$success-green, v.$success-dark) !important;
+  background: linear-gradient(
+    135deg,
+    v.$success-green,
+    v.$success-dark
+  ) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
@@ -79,7 +87,6 @@
   min-height: 200px;
 }
 
-// Summary Cards
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -154,7 +161,6 @@
   }
 }
 
-// Charts
 .chart-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -180,7 +186,6 @@
   position: relative;
 }
 
-// Performance Table
 .card {
   background: var(--bg-card);
   border-radius: v.$radius-lg;
@@ -213,27 +218,10 @@
   }
 }
 
-.rating-bar {
-  display: inline-block;
-  width: 80px;
-  height: 6px;
-  background: v.$gray-200;
-  border-radius: 3px;
-  overflow: hidden;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-
-.rating-fill {
-  height: 100%;
-  background: v.$success-green;
-  border-radius: 3px;
-  transition: width 0.5s ease;
-}
-
-.rating-text {
-  font-size: v.$font-size-xs;
+.performance-empty {
+  margin: 0;
   color: var(--text-secondary);
+  font-size: v.$font-size-sm;
 }
 
 @media (max-width: v.$bp-tablet) {
@@ -250,5 +238,43 @@
   .filter-bar,
   .btn-generate {
     display: none !important;
+  }
+
+  .reports-page {
+    animation: none !important;
+  }
+
+  .summary-cards {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .summary-card,
+  .chart-card,
+  .card {
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+    break-inside: avoid;
+  }
+
+  .card-blue  { background: #eff6ff !important; }
+  .card-green { background: #ecfdf5 !important; }
+  .card-orange { background: #fffbeb !important; }
+  .card-purple { background: #f5f3ff !important; }
+
+  .card-label { color: #6b7280 !important; }
+  .card-value { color: #111827 !important; }
+
+  .performance-table th.mat-header-cell,
+  .performance-table td.mat-cell {
+    color: #111827 !important;
+  }
+
+  .chart-wrapper {
+    height: 220px !important;
   }
 }

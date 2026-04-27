@@ -31,7 +31,7 @@ export class UserFormDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.form = this.fb.group({
+    const controls: Record<string, any> = {
       name: [
         this.data.user?.name || "",
         [Validators.required, Validators.minLength(2)],
@@ -43,7 +43,16 @@ export class UserFormDialogComponent implements OnInit {
       role: [this.data.user?.role || "CASE_OFFICER", Validators.required],
       phone: [this.data.user?.phone || ""],
       location: [this.data.user?.location || ""],
-    });
+    };
+
+    if (this.mode === "create") {
+      controls["password"] = [
+        "",
+        [Validators.required, Validators.minLength(8)],
+      ];
+    }
+
+    this.form = this.fb.group(controls);
   }
 
   onSubmit(): void {

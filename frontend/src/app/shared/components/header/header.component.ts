@@ -91,7 +91,9 @@ export class HeaderComponent {
   toggleNotifications(): void {
     if (this.auth.currentUser) {
       const newState = !this.auth.currentUser.notificationsEnabled;
-      this.auth.updateProfile({ notificationsEnabled: newState }).subscribe();
+      this.auth
+        .updatePreferences({ notificationsEnabled: newState })
+        .subscribe();
     }
   }
 

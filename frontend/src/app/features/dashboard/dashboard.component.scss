@@ -18,7 +18,6 @@
   }
 }
 
-// ===== METRICS =====
 .metrics-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -42,16 +41,15 @@
   }
 
   &.blue {
-    background: linear-gradient(135deg, #1e40af, #3b82f6); // Single blue theme
-    // Subtle inner sheen
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), v.$shadow-md;
   }
   &.indigo {
-    background: linear-gradient(135deg, #4338ca, #6366f1); // Single indigo theme
+    background: linear-gradient(135deg, #4338ca, #6366f1);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), v.$shadow-md;
   }
   &.purple {
-    background: linear-gradient(135deg, #6d28d9, #8b5cf6); // Single purple theme
+    background: linear-gradient(135deg, #6d28d9, #8b5cf6);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), v.$shadow-md;
   }
 }
@@ -89,20 +87,17 @@
   }
 }
 
-// ===== HERO BANNER =====
 .hero-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  // More professional, less "deep" blue gradient
-  background: v.$primary-blue; // Solid blue for the banner
+  background: v.$primary-blue;
   border-radius: v.$radius-lg;
   padding: 40px 48px;
   color: v.$white;
   min-height: 220px;
   overflow: hidden;
   position: relative;
-  // Subtle pattern overlay could go here
   box-shadow: v.$shadow-lg;
 }
 
@@ -161,7 +156,6 @@
   }
 }
 
-// ===== CHARTS =====
 .charts-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -176,7 +170,6 @@
 
   &.weekly {
     background: v.$white;
-    // Removed heavy gradient, kept clean with slight border
     border: 1px solid v.$gray-200;
     
     .chart-title, .chart-value, .chart-icon {
@@ -232,7 +225,6 @@
   justify-content: center;
 }
 
-// ===== RESPONSIVE =====
 @media (max-width: v.$bp-laptop) {
   .metrics-row {
     grid-template-columns: repeat(3, 1fr);

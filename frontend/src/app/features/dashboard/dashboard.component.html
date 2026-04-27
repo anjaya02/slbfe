@@ -1,23 +1,22 @@
 <div class="dashboard" *ngIf="!loading && !error">
-  <!-- Metrics Row -->
   <div class="metrics-row">
     <div class="metric-card blue">
       <div class="metric-info">
-        <span class="metric-label">Total Cases</span>
+        <span class="metric-label">{{ totalCasesLabel }}</span>
         <span class="metric-value">{{ stats?.totalCases || 0 }}</span>
       </div>
       <div class="metric-icon"><mat-icon>visibility</mat-icon></div>
     </div>
     <div class="metric-card indigo">
       <div class="metric-info">
-        <span class="metric-label">Resolved Cases</span>
+        <span class="metric-label">{{ resolvedCasesLabel }}</span>
         <span class="metric-value">{{ stats?.resolvedCases || 0 }}</span>
       </div>
       <div class="metric-icon"><mat-icon>chat_bubble</mat-icon></div>
     </div>
     <div class="metric-card purple">
       <div class="metric-info">
-        <span class="metric-label">Pending Review</span>
+        <span class="metric-label">{{ pendingReviewLabel }}</span>
         <span class="metric-value">{{
           (stats?.pendingReview || 0).toString().padStart(2, "0")
         }}</span>
@@ -26,39 +25,40 @@
     </div>
   </div>
 
-  <!-- Hero Banner -->
   <div class="hero-banner">
     <div class="hero-text">
-      <h1>Manage Cases.</h1>
-      <h1>Track Progress.</h1>
-      <h1>Ensure Resolution.</h1>
+      <h1>{{ dashboardHeading }}</h1>
+      <h1>{{ dashboardSubheading }}</h1>
+      <h1>{{ dashboardTagline }}</h1>
     </div>
     <div class="hero-illustration">
       <div class="illustration-placeholder">
         <mat-icon class="hero-icon">assessment</mat-icon>
         <div class="mini-cards">
-          <div class="mini-card red"><mat-icon>flag</mat-icon> 10,500</div>
-          <div class="mini-card orange"><mat-icon>warning</mat-icon> 8,000</div>
+          <div class="mini-card red">
+            <mat-icon>flag</mat-icon> {{ stats?.totalCases || 0 }}
+          </div>
+          <div class="mini-card orange">
+            <mat-icon>warning</mat-icon> {{ stats?.pendingReview || 0 }}
+          </div>
           <div class="mini-card green">
-            <mat-icon>check_circle</mat-icon> 6,500
+            <mat-icon>check_circle</mat-icon> {{ stats?.resolvedCases || 0 }}
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Charts Row -->
   <div class="charts-row">
-    <!-- Weekly Chart -->
     <div class="chart-card weekly">
       <div class="chart-header">
         <div class="chart-title-group">
           <mat-icon>bar_chart</mat-icon>
-          <span class="chart-title">Weekly Case Overview</span>
+          <span class="chart-title">{{ weeklyChartTitle }}</span>
         </div>
-        <span class="chart-value">226</span>
+        <span class="chart-value">{{ weeklyChartSummary }}</span>
       </div>
-      <div class="chart-body" *ngIf="!loading">
+      <div class="chart-body">
         <canvas
           baseChart
           [data]="weeklyChartData"
@@ -67,21 +67,17 @@
         >
         </canvas>
       </div>
-      <div class="chart-loading" *ngIf="loading">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
     </div>
 
-    <!-- Yearly Chart -->
     <div class="chart-card yearly">
       <div class="chart-header">
         <div class="chart-title-group">
           <mat-icon>show_chart</mat-icon>
-          <span class="chart-title">Yearly Case Overview</span>
+          <span class="chart-title">{{ yearlyChartTitle }}</span>
         </div>
-        <span class="chart-value">4.38K</span>
+        <span class="chart-value">{{ yearlyChartSummary }}</span>
       </div>
-      <div class="chart-body" *ngIf="!loading">
+      <div class="chart-body">
         <canvas
           baseChart
           [data]="yearlyChartData"
@@ -90,17 +86,16 @@
         >
         </canvas>
       </div>
-      <div class="chart-loading" *ngIf="loading">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- Loading -->
-<app-loading *ngIf="loading" mode="full-page" message="Synchronizing dashboard data..."></app-loading>
+<app-loading
+  *ngIf="loading"
+  mode="inline"
+  message="Synchronizing dashboard data..."
+></app-loading>
 
-<!-- Error -->
 <div class="error-page" *ngIf="error">
   <mat-icon class="error-icon">error_outline</mat-icon>
   <h2>Failed to load dashboard</h2>

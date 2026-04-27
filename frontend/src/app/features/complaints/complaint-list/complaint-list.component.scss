@@ -40,7 +40,6 @@
   }
 }
 
-// ===== Incident Category Inline Search =====
 .incident-header {
   position: relative;
   overflow: visible !important;
@@ -278,6 +277,10 @@ td .assign-cell {
   &.badge-blue {
     background: #dbeafe;
     color: #1e40af;
+  }
+  &.badge-teal {
+    background: #ccfbf1;
+    color: #0f766e;
   }
   &.badge-purple {
     background: #ede9fe;

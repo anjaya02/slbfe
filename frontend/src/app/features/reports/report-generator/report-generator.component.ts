@@ -22,8 +22,6 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
   reportData: ReportData | null = null;
   loading = false;
   private destroy$ = new Subject<void>();
-
-  // Filter
   selectedReportType: ReportType = "MONTHLY";
   startDate: Date | null = null;
   endDate: Date | null = null;
@@ -34,8 +32,6 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     { value: "ANNUAL", label: "Annual Report" },
     { value: "CUSTOM", label: "Custom Range" },
   ];
-
-  // Status Pie Chart
   pieChartData: ChartConfiguration<"pie">["data"] = {
     labels: [],
     datasets: [{ data: [], backgroundColor: [] }],
@@ -45,8 +41,6 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     maintainAspectRatio: false,
     plugins: { legend: { position: "right", labels: { padding: 16 } } },
   };
-
-  // Monthly Trend Line Chart
   lineChartData: ChartConfiguration<"line">["data"] = {
     labels: [],
     datasets: [],
@@ -57,9 +51,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     scales: { y: { beginAtZero: true } },
     plugins: { legend: { display: true, position: "top" } },
   };
-
-  // Officer Performance columns
-  displayedColumns = ["name", "totalCases", "resolved", "avgDays", "rating"];
+  displayedColumns = ["name", "totalCases", "resolved", "avgDays"];
 
   constructor(private reportService: ReportService) {}
 
@@ -99,15 +91,11 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     const statusColors: Record<string, string> = {
       Submitted: "#6B7280",
       "Under Review": "#3B82F6",
-      Investigation: "#8B5CF6",
       "In Progress": "#A855F7",
       "Awaiting Info": "#F59E0B",
-      Escalated: "#EF4444",
       Resolved: "#10B981",
       Closed: "#1F2937",
     };
-
-    // Pie chart
     this.pieChartData = {
       labels: data.statusBreakdown.map((s) => s.status.replace(/_/g, " ")),
       datasets: [
@@ -119,8 +107,6 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
         },
       ],
     };
-
-    // Line chart
     this.lineChartData = {
       labels: data.monthlyTrend.map((m) => m.month),
       datasets: [
@@ -144,7 +130,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     };
   }
 
-  exportPDF(): void {
+  printReport(): void {
     window.print();
   }
 

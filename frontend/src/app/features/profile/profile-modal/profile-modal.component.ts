@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { ToastService } from "../../../core/services/toast.service";
 import { AuthService } from "../../../core/services/auth.service";
 import { User } from "../../../core/models/user.model";
 
@@ -20,7 +20,7 @@ export class ProfileModalComponent implements OnInit {
     private dialogRef: MatDialogRef<ProfileModalComponent>,
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -33,16 +33,6 @@ export class ProfileModalComponent implements OnInit {
     });
   }
 
-  getInitials(): string {
-    if (!this.user?.name) return "?";
-    return this.user.name
-      .split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  }
-
   save(): void {
     if (this.profileForm.invalid) return;
     this.saving = true;
@@ -50,18 +40,11 @@ export class ProfileModalComponent implements OnInit {
     this.authService.updateProfile(updates).subscribe({
       next: () => {
         this.saving = false;
-        this.snackBar.open("Profile updated successfully", "Close", {
-          duration: 3000,
-          panelClass: ["success-snackbar"],
-        });
+        this.toast.success("Profile updated successfully");
         this.dialogRef.close(true);
       },
       error: () => {
         this.saving = false;
-        this.snackBar.open("Failed to update profile", "Close", {
-          duration: 3000,
-          panelClass: ["error-snackbar"],
-        });
       },
     });
   }

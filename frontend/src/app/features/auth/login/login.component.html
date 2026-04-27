@@ -1,5 +1,4 @@
 <div class="login-page">
-  <!-- Left: Branding Panel -->
   <aside class="login-branding">
     <div class="branding-content">
       <div class="brand-emblem">
@@ -34,7 +33,6 @@
 
   </aside>
 
-  <!-- Right: Login Form -->
   <div class="login-content">
     <div class="login-card">
       <div class="card-header">
@@ -93,13 +91,8 @@
           >
         </mat-form-field>
 
-        <div class="form-options">
-          <mat-checkbox formControlName="rememberMe" color="primary"
-            >Remember Me</mat-checkbox
-          >
-          <a class="forgot-link" href="javascript:void(0)"
-            >Forgot Password?</a
-          >
+        <div class="login-options">
+          <mat-checkbox formControlName="rememberMe">Remember me</mat-checkbox>
         </div>
 
         <div class="form-actions">
@@ -113,10 +106,11 @@
             <span *ngIf="!loading">Login</span>
             <mat-icon *ngIf="!loading">arrow_forward</mat-icon>
           </button>
-          <button mat-stroked-button type="button" class="btn-signup">
-            Create Account
-          </button>
         </div>
+
+        <p class="form-help">
+          Use the staff credentials issued for your SLBFE account.
+        </p>
       </form>
     </div>
   </div>

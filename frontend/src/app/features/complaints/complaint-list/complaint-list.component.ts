@@ -1,4 +1,10 @@
-import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  OnDestroy,
+  ElementRef,
+} from "@angular/core";
 import { Router } from "@angular/router";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
@@ -47,7 +53,8 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild("statusSearchInput") statusSearchInput!: ElementRef<HTMLInputElement>;
+  @ViewChild("statusSearchInput")
+  statusSearchInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private complaintService: ComplaintService,
@@ -74,10 +81,12 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
       return matchesSearch && matchesStatus;
     };
     this.loadComplaints();
-    this.authService
-      .getCaseOfficers()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((officers) => (this.caseOfficers = officers));
+    if (this.isSupervisor) {
+      this.authService
+        .getCaseOfficers()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((officers) => (this.caseOfficers = officers));
+    }
   }
 
   loadComplaints(): void {
@@ -118,14 +127,12 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ===== Inline Status Search =====
-
   openStatusSearch(event: Event): void {
     event.stopPropagation();
     this.statusSearchOpen = true;
     this.statusSearchTerm = "";
     this.filteredStatusOptions = [...this.statusOptions];
-    // Focus the input after Angular renders it
+
     setTimeout(() => {
       this.statusSearchInput?.nativeElement?.focus();
     }, 50);
@@ -164,7 +171,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
     if (!officer || officerId === complaint.assignedTo) return;
     this.assigningId = complaint.id;
     this.complaintService
-      .assignComplaint(complaint.id, officer.id, officer.name)
+      .assignComplaint(complaint.id, officer.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -179,17 +186,17 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      "In Progress": "badge-blue",
+      "In Progress": "badge-teal",
       "Under Review": "badge-purple",
-      Investigation: "badge-orange",
-      Escalate: "badge-red",
       Resolved: "badge-green",
       Closed: "badge-gray",
       Submitted: "badge-blue",
-      "Pending Verification": "badge-orange",
-      Draft: "badge-gray",
       "Awaiting Info": "badge-orange",
     };
     return map[status] || "badge-gray";
+  }
+
+  get pageTitle(): string {
+    return this.isSupervisor ? "Problem List" : "My Assigned Cases";
   }
 }

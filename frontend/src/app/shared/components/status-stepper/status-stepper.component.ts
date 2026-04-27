@@ -1,8 +1,5 @@
 import { Component, Input } from "@angular/core";
-import {
-  ComplaintStatus,
-  STATUS_STEPS,
-} from "../../../core/models/complaint.model";
+import { ComplaintStatus } from "../../../core/models/complaint.model";
 
 @Component({
   standalone: false,
@@ -13,31 +10,17 @@ import {
 export class StatusStepperComponent {
   @Input() currentStatus: ComplaintStatus = ComplaintStatus.SUBMITTED;
 
-  steps = STATUS_STEPS;
+  steps: ComplaintStatus[] = [
+    ComplaintStatus.SUBMITTED,
+    ComplaintStatus.UNDER_REVIEW,
+    ComplaintStatus.IN_PROGRESS,
+    ComplaintStatus.AWAITING_INFO,
+    ComplaintStatus.RESOLVED,
+    ComplaintStatus.CLOSED,
+  ];
 
-  /**
-   * Maps any complaint status to an effective index within STATUS_STEPS.
-   * Statuses not directly in steps are mapped to their logical position:
-   *   DRAFT / PENDING_VERIFICATION → before SUBMITTED (index -1)
-   *   IN_PROGRESS / AWAITING_INFO → same level as INVESTIGATION
-   *   CLOSED → after RESOLVED (past the end)
-   */
   private getEffectiveIndex(status: ComplaintStatus): number {
-    const directIdx = this.steps.indexOf(status);
-    if (directIdx !== -1) return directIdx;
-
-    const positionMap: Partial<Record<ComplaintStatus, number>> = {
-      [ComplaintStatus.DRAFT]: -1,
-      [ComplaintStatus.PENDING_VERIFICATION]: -1,
-      [ComplaintStatus.IN_PROGRESS]: this.steps.indexOf(
-        ComplaintStatus.INVESTIGATION,
-      ),
-      [ComplaintStatus.AWAITING_INFO]: this.steps.indexOf(
-        ComplaintStatus.INVESTIGATION,
-      ),
-      [ComplaintStatus.CLOSED]: this.steps.length,
-    };
-    return positionMap[status] ?? -1;
+    return this.steps.indexOf(status);
   }
 
   getStepState(step: ComplaintStatus): "completed" | "active" | "pending" {
@@ -52,9 +35,10 @@ export class StatusStepperComponent {
     const labels: Record<string, string> = {
       [ComplaintStatus.SUBMITTED]: "Submitted",
       [ComplaintStatus.UNDER_REVIEW]: "Under Review",
-      [ComplaintStatus.INVESTIGATION]: "Investigation",
-      [ComplaintStatus.ESCALATED]: "Escalate",
+      [ComplaintStatus.IN_PROGRESS]: "In Progress",
+      [ComplaintStatus.AWAITING_INFO]: "Awaiting Info",
       [ComplaintStatus.RESOLVED]: "Resolved",
+      [ComplaintStatus.CLOSED]: "Closed",
     };
     return labels[step] || step;
   }

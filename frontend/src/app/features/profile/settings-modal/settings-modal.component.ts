@@ -35,7 +35,10 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => {
-        if (user) this.notificationsEnabled = user.notificationsEnabled;
+        if (user) {
+          this.notificationsEnabled = user.notificationsEnabled;
+          this.selectedDateFormat = user.dateFormat || this.selectedDateFormat;
+        }
       });
   }
 
@@ -45,14 +48,25 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
   }
 
   onDateFormatChange(format: string): void {
+    const previousFormat = this.selectedDateFormat;
     this.settingsService.setDateFormat(format);
+    this.authService.updatePreferences({ dateFormat: format }).subscribe({
+      error: () => {
+        this.settingsService.setDateFormat(previousFormat);
+      },
+    });
   }
 
   toggleNotifications(): void {
+    const previousValue = this.notificationsEnabled;
     this.notificationsEnabled = !this.notificationsEnabled;
     this.authService
-      .updateProfile({ notificationsEnabled: this.notificationsEnabled })
-      .subscribe();
+      .updatePreferences({ notificationsEnabled: this.notificationsEnabled })
+      .subscribe({
+        error: () => {
+          this.notificationsEnabled = previousValue;
+        },
+      });
   }
 
   close(): void {

@@ -13,10 +13,7 @@
     "TITLE": "Sign In",
     "EMAIL": "Email Address",
     "PASSWORD": "Password",
-    "REMEMBER_ME": "Remember Me",
-    "FORGOT_PASSWORD": "Forgot Password?",
     "LOGIN_BUTTON": "Login",
-    "SIGNUP_BUTTON": "SignUp",
     "ERROR_INVALID": "Invalid email or password"
   },
   "DASHBOARD": {

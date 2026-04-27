@@ -23,12 +23,18 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.notificationService.notifications$
+    this.notificationService
+      .notifications$
       .pipe(takeUntil(this.destroy$))
       .subscribe((n) => {
         this.notifications = n;
         this.applyFilter();
       });
+
+    this.notificationService
+      .getNotifications()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   ngOnDestroy(): void {
@@ -50,22 +56,35 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   }
 
   markAsRead(notification: AppNotification): void {
-    this.notificationService.markAsRead(notification.id);
-    if (notification.link) {
-      this.router.navigateByUrl(notification.link);
-    }
+    this.notificationService
+      .markAsRead(notification.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (notification.link) {
+          this.router.navigateByUrl(notification.link);
+        }
+      });
   }
 
   markAllAsRead(): void {
-    this.notificationService.markAllAsRead();
+    this.notificationService
+      .markAllAsRead()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.applyFilter());
   }
 
   deleteNotification(id: string): void {
-    this.notificationService.deleteNotification(id);
+    this.notificationService
+      .deleteNotification(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.applyFilter());
   }
 
   clearAll(): void {
-    this.notificationService.clearAll();
+    this.notificationService
+      .clearAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.applyFilter());
   }
 
   getIcon(type: string): string {

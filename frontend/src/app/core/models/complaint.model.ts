@@ -1,21 +1,22 @@
 export enum ComplaintStatus {
-  DRAFT = "Draft",
   SUBMITTED = "Submitted",
-  PENDING_VERIFICATION = "Pending Verification",
   UNDER_REVIEW = "Under Review",
-  INVESTIGATION = "Investigation",
-  ESCALATED = "Escalate",
-  AWAITING_INFO = "Awaiting Info",
   IN_PROGRESS = "In Progress",
+  AWAITING_INFO = "Awaiting Info",
   RESOLVED = "Resolved",
   CLOSED = "Closed",
 }
 
 export type ComplaintType =
-  | "SALARY_ISSUES"
-  | "LEAVE_ISSUES"
-  | "WORK_ENVIRONMENT"
-  | "SUPERVISOR_ISSUES"
+  | "BREACH_OF_CONTRACT"
+  | "LACK_OF_COMMUNICATION"
+  | "SICK"
+  | "BEING_JAILED"
+  | "BEING_REMANDED_BY_POLICE"
+  | "BEING_STRANDED"
+  | "PROBLEMS_AT_HOME"
+  | "DEATH"
+  | "BEING_RETAINED"
   | "OTHER";
 
 export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -92,6 +93,7 @@ export interface ComplaintFilter {
 }
 
 export interface DashboardStats {
+  scope?: "GLOBAL" | "ASSIGNED";
   totalCases: number;
   resolvedCases: number;
   pendingReview: number;
@@ -112,17 +114,23 @@ export interface MonthlyData {
 }
 
 export const COMPLAINT_TYPE_LABELS: Record<ComplaintType, string> = {
-  SALARY_ISSUES: "Salary Issues",
-  LEAVE_ISSUES: "Leave Issues",
-  WORK_ENVIRONMENT: "Work Environment",
-  SUPERVISOR_ISSUES: "Supervisor Issues",
+  BREACH_OF_CONTRACT: "Breach of Employment Contract",
+  LACK_OF_COMMUNICATION: "Lack of Communication",
+  SICK: "Sick",
+  BEING_JAILED: "Being Jailed",
+  BEING_REMANDED_BY_POLICE: "Being Remanded by Police",
+  BEING_STRANDED: "Being Stranded without Employment",
+  PROBLEMS_AT_HOME: "Problems at Employee's Home (Sri Lanka)",
+  DEATH: "Death",
+  BEING_RETAINED: "Being Retained by Unknown Person",
   OTHER: "Other",
 };
 
 export const STATUS_STEPS = [
   ComplaintStatus.SUBMITTED,
   ComplaintStatus.UNDER_REVIEW,
-  ComplaintStatus.INVESTIGATION,
-  ComplaintStatus.ESCALATED,
+  ComplaintStatus.IN_PROGRESS,
+  ComplaintStatus.AWAITING_INFO,
   ComplaintStatus.RESOLVED,
+  ComplaintStatus.CLOSED,
 ];
