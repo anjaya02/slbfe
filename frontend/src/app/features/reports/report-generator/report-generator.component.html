@@ -63,11 +63,19 @@
     </button>
   </div>
 
-  <app-loading
-    *ngIf="loading"
-    mode="inline"
-    message="Generating report..."
-  ></app-loading>
+  <div class="report-skeleton" *ngIf="loading">
+    <div class="sk-summary-row">
+      <div class="sk-summary-card"></div>
+      <div class="sk-summary-card"></div>
+      <div class="sk-summary-card"></div>
+      <div class="sk-summary-card"></div>
+    </div>
+    <div class="sk-chart-row">
+      <div class="sk-chart-card"></div>
+      <div class="sk-chart-card"></div>
+    </div>
+    <div class="sk-perf-card"></div>
+  </div>
 
   <div class="report-content" *ngIf="reportData && !loading" #reportContent>
     <div class="summary-cards">
@@ -150,65 +158,67 @@
       <ng-container
         *ngIf="reportData.officerPerformance.length; else noOfficerPerformance"
       >
-        <table
-          mat-table
-          [dataSource]="reportData.officerPerformance"
-          class="performance-table"
-        >
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Officer</th>
-            <td mat-cell *matCellDef="let row">
-              <div class="officer-cell">
-                <div class="officer-avatar">
-                  {{ row.officerName | slice: 0 : 1 }}
+        <div class="table-scroll">
+          <table
+            mat-table
+            [dataSource]="reportData.officerPerformance"
+            class="performance-table"
+          >
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Officer</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="officer-cell">
+                  <div class="officer-avatar">
+                    {{ row.officerName | slice: 0 : 1 }}
+                  </div>
+                  <span class="officer-name">{{ row.officerName }}</span>
                 </div>
-                <span class="officer-name">{{ row.officerName }}</span>
-              </div>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="totalCases">
-            <th mat-header-cell *matHeaderCellDef>Total Cases</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="cases-badge">{{ row.casesHandled }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="resolved">
-            <th mat-header-cell *matHeaderCellDef>Resolved</th>
-            <td mat-cell *matCellDef="let row">
-              <div class="resolved-cell">
-                <span class="resolved-badge">{{ row.casesResolved }}</span>
-                <div class="resolve-bar-wrap">
-                  <div
-                    class="resolve-bar"
-                    [style.width.%]="
-                      row.casesHandled
-                        ? (row.casesResolved / row.casesHandled) * 100
-                        : 0
-                    "
-                  ></div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="totalCases">
+              <th mat-header-cell *matHeaderCellDef>Total Cases</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="cases-badge">{{ row.casesHandled }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="resolved">
+              <th mat-header-cell *matHeaderCellDef>Resolved</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="resolved-cell">
+                  <span class="resolved-badge">{{ row.casesResolved }}</span>
+                  <div class="resolve-bar-wrap">
+                    <div
+                      class="resolve-bar"
+                      [style.width.%]="
+                        row.casesHandled
+                          ? (row.casesResolved / row.casesHandled) * 100
+                          : 0
+                      "
+                    ></div>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="avgDays">
-            <th mat-header-cell *matHeaderCellDef>Avg Days</th>
-            <td mat-cell *matCellDef="let row">
-              <span
-                class="avg-days-badge"
-                [class.badge-fast]="row.avgResolutionDays <= 3"
-                [class.badge-ok]="
-                  row.avgResolutionDays > 3 && row.avgResolutionDays <= 7
-                "
-                [class.badge-slow]="row.avgResolutionDays > 7"
-              >
-                <mat-icon>schedule</mat-icon>{{ row.avgResolutionDays }}d
-              </span>
-            </td>
-          </ng-container>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="avgDays">
+              <th mat-header-cell *matHeaderCellDef>Avg Days</th>
+              <td mat-cell *matCellDef="let row">
+                <span
+                  class="avg-days-badge"
+                  [class.badge-fast]="row.avgResolutionDays <= 3"
+                  [class.badge-ok]="
+                    row.avgResolutionDays > 3 && row.avgResolutionDays <= 7
+                  "
+                  [class.badge-slow]="row.avgResolutionDays > 7"
+                >
+                  <mat-icon>schedule</mat-icon>{{ row.avgResolutionDays }}d
+                </span>
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
       </ng-container>
 
       <ng-template #noOfficerPerformance>

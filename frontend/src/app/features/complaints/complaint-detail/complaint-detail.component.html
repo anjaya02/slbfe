@@ -274,11 +274,18 @@
   </div>
 </div>
 
-<app-loading
-  *ngIf="loading"
-  mode="inline"
-  message="Loading case documentation..."
-></app-loading>
+<div class="detail-skeleton" *ngIf="loading">
+  <div class="sk-stepper"></div>
+  <div class="sk-banner"></div>
+  <div class="sk-detail-grid">
+    <div class="sk-card sk-card-tall"></div>
+    <div class="sk-card sk-card-tall"></div>
+  </div>
+  <div class="sk-detail-grid">
+    <div class="sk-card sk-card-medium"></div>
+    <div class="sk-card sk-card-medium"></div>
+  </div>
+</div>
 
 <div class="not-found-page" *ngIf="!loading && !complaint">
   <mat-icon class="not-found-icon">search_off</mat-icon>

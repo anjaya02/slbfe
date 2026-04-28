@@ -69,11 +69,15 @@ async function updateUser(userId, updates) {
   return userRepository.mapUserRow(updated);
 }
 
-async function updateUserStatus(userId, isActive) {
+async function updateUserStatus(userId, isActive, actorUserId = null) {
   const existing = await userRepository.findById(userId);
 
   if (!existing) {
     throw new AppError(404, "User not found");
+  }
+
+  if (actorUserId === userId && !isActive) {
+    throw new AppError(400, "You cannot deactivate your own account");
   }
 
   const updated = await userRepository.updateUser(userId, {

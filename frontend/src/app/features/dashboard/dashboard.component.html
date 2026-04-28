@@ -90,11 +90,19 @@
   </div>
 </div>
 
-<app-loading
-  *ngIf="loading"
-  mode="inline"
-  message="Synchronizing dashboard data..."
-></app-loading>
+<!-- Skeleton loader shown while data is being fetched -->
+<div class="dashboard-skeleton" *ngIf="loading">
+  <div class="skeleton-metrics">
+    <div class="skeleton-metric-card"></div>
+    <div class="skeleton-metric-card"></div>
+    <div class="skeleton-metric-card"></div>
+  </div>
+  <div class="skeleton-hero"></div>
+  <div class="skeleton-charts">
+    <div class="skeleton-chart-card"></div>
+    <div class="skeleton-chart-card"></div>
+  </div>
+</div>
 
 <div class="error-page" *ngIf="error">
   <mat-icon class="error-icon">error_outline</mat-icon>

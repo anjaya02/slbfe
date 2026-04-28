@@ -54,6 +54,26 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       });
   }
 
+  isCurrentUser(user: User): boolean {
+    return this.authService.currentUser?.id === user.id;
+  }
+
+  getStatusActionLabel(user: User): string {
+    if (this.isCurrentUser(user)) {
+      return "Current user";
+    }
+
+    return user.isActive ? "Deactivate user" : "Activate user";
+  }
+
+  getStatusActionTooltip(user: User): string {
+    if (this.isCurrentUser(user)) {
+      return "You can't deactivate your own account";
+    }
+
+    return user.isActive ? "Deactivate user" : "Activate user";
+  }
+
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(UserFormDialogComponent, {
       width: "500px",
@@ -107,6 +127,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   toggleUserStatus(user: User): void {
+    if (this.isCurrentUser(user)) {
+      this.toast.info("You can't deactivate your own account");
+      return;
+    }
+
     this.authService
       .toggleUserActive(user)
       .pipe(takeUntil(this.destroy$))
@@ -117,7 +142,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           );
           this.loadUsers();
         },
-          error: () => {},
+        error: () => {},
       });
   }
 

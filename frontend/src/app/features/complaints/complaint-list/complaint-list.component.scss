@@ -149,6 +149,11 @@
   overflow: hidden;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .loading-state {
   display: flex;
   justify-content: center;
@@ -157,6 +162,7 @@
 
 .complaint-table {
   width: 100%;
+  min-width: 960px;
 }
 
 th.mat-mdc-header-cell {
@@ -334,5 +340,48 @@ td .assign-cell {
 
   .search-field {
     width: 100%;
+  }
+}
+
+// ── Skeleton loader ────────────────────────────────────────────
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+%sk-base {
+  background: linear-gradient(
+    90deg,
+    v.$gray-100 25%,
+    v.$gray-50 50%,
+    v.$gray-100 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.table-skeleton {
+  overflow: hidden;
+}
+
+.sk-head {
+  @extend %sk-base;
+  height: 48px;
+  margin-bottom: 2px;
+  border-radius: 0;
+}
+
+.sk-row {
+  @extend %sk-base;
+  height: 54px;
+  margin-bottom: 2px;
+  border-radius: 0;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 }

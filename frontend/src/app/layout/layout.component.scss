@@ -4,6 +4,7 @@
   display: flex;
   padding-top: v.$header-height;
   min-height: 100vh;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -11,9 +12,10 @@
   flex: 1;
   margin-left: v.$sidebar-width;
   padding: v.$space-lg;
-  padding-bottom: 80px; 
+  padding-bottom: 80px;
   background: var(--bg-primary);
   min-height: calc(100vh - #{v.$header-height});
+  min-width: 0;
   transition: margin-left v.$transition-normal;
   box-sizing: border-box;
 }

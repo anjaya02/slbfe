@@ -21,7 +21,9 @@ const originalFunctions = {
   generateReport: complaintService.generateReport,
   complaintFindById: complaintRepository.findComplaintById,
   getUsers: userService.getUsers,
+  updateUserStatus: userService.updateUserStatus,
   userFindById: userRepository.findById,
+  userUpdateUser: userRepository.updateUser,
 };
 
 function createUserRow({ id, role, email, name }) {
@@ -63,7 +65,9 @@ test.afterEach(() => {
   complaintService.generateReport = originalFunctions.generateReport;
   complaintRepository.findComplaintById = originalFunctions.complaintFindById;
   userService.getUsers = originalFunctions.getUsers;
+  userService.updateUserStatus = originalFunctions.updateUserStatus;
   userRepository.findById = originalFunctions.userFindById;
+  userRepository.updateUser = originalFunctions.userUpdateUser;
 });
 
 test("POST /api/auth/login rejects invalid payloads", async () => {
@@ -253,6 +257,58 @@ test("GET /api/users allows supervisors", async () => {
   assert.equal(response.status, 200);
   assert.equal(response.body.length, 1);
   assert.equal(response.body[0].role, "SUPERVISOR");
+});
+
+test("PATCH /api/users/:id/status passes the actor id to prevent self-deactivation", async () => {
+  const supervisor = createUserRow({
+    id: "USR_SUP",
+    role: "SUPERVISOR",
+    email: "admin@slbfe.gov.lk",
+    name: "Supervisor",
+  });
+  let actorId = null;
+
+  mockAuthenticatedUsers([supervisor]);
+  userService.updateUserStatus = async (userId, isActive, receivedActorId) => {
+    actorId = receivedActorId;
+    return {
+      id: userId,
+      name: "Supervisor",
+      email: "admin@slbfe.gov.lk",
+      role: "SUPERVISOR",
+      isActive,
+    };
+  };
+
+  const response = await request(app)
+    .patch("/api/users/USR_SUP/status")
+    .set("Authorization", `Bearer ${signToken(supervisor)}`)
+    .send({ isActive: false });
+
+  assert.equal(response.status, 200);
+  assert.equal(actorId, "USR_SUP");
+});
+
+test("user status service blocks supervisors from deactivating themselves", async () => {
+  const supervisor = createUserRow({
+    id: "USR_SUP",
+    role: "SUPERVISOR",
+    email: "admin@slbfe.gov.lk",
+    name: "Supervisor",
+  });
+
+  userRepository.findById = async () => supervisor;
+  userRepository.updateUser = async () => {
+    throw new Error("updateUser should not be called");
+  };
+
+  await assert.rejects(
+    () => userService.updateUserStatus("USR_SUP", false, "USR_SUP"),
+    {
+      statusCode: 400,
+      message: "You cannot deactivate your own account",
+    },
+  );
 });
 
 test("GET /api/complaints/:id blocks case officers from unassigned complaints", async () => {

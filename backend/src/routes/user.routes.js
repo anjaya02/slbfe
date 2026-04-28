@@ -80,6 +80,7 @@ router.patch(
     const user = await userService.updateUserStatus(
       req.params.id,
       req.body.isActive,
+      req.user.id,
     );
     res.json(user);
   }),

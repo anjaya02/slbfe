@@ -219,6 +219,22 @@ a {
   }
 }
 
+.user-action-tooltip {
+  --mdc-plain-tooltip-container-color: #{v.$dark};
+  --mdc-plain-tooltip-supporting-text-color: #{v.$white};
+
+  .mdc-tooltip__surface {
+    padding: 8px 11px !important;
+    border-radius: v.$radius-md !important;
+    font-size: 12px !important;
+    font-weight: v.$font-weight-semibold !important;
+    letter-spacing: 0 !important;
+    box-shadow:
+      0 10px 22px rgba(15, 23, 42, 0.2),
+      0 2px 6px rgba(15, 23, 42, 0.14) !important;
+  }
+}
+
 .custom-dialog .mat-mdc-dialog-container {
   padding: 0;
   border-radius: v.$radius-xl !important;

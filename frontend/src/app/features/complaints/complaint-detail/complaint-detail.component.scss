@@ -26,6 +26,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   background: var(--bg-card);
   border-radius: v.$radius-lg;
   box-shadow: var(--shadow-card);
@@ -49,6 +51,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   background: linear-gradient(135deg, #eef2ff, #e0e7ff);
   border: 1px solid #c7d2fe;
   border-radius: v.$radius-lg;
@@ -106,10 +110,9 @@
   font-weight: v.$font-weight-medium;
 }
 
-
 .detail-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
 }
 
@@ -310,7 +313,11 @@
 }
 
 .btn-solve {
-  background: linear-gradient(135deg, v.$success-green, v.$success-dark) !important;
+  background: linear-gradient(
+    135deg,
+    v.$success-green,
+    v.$success-dark
+  ) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
@@ -480,7 +487,8 @@
 
 // Update Panel
 .update-card {
-  max-width: 600px;
+  width: min(100%, 880px);
+  max-width: 100%;
 }
 
 .update-title {
@@ -494,14 +502,19 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .action-select {
-  flex: 1;
+  flex: 1 1 240px;
 }
 
 .btn-update {
-  background: linear-gradient(135deg, v.$primary-blue, v.$primary-dark) !important;
+  background: linear-gradient(
+    135deg,
+    v.$primary-blue,
+    v.$primary-dark
+  ) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
@@ -521,11 +534,13 @@
   font-weight: v.$font-weight-medium;
 }
 
-@media (max-width: v.$bp-tablet) {
-  .detail-grid {
-    grid-template-columns: 1fr;
+@media (max-width: v.$bp-laptop) {
+  .btn-update {
+    width: 100%;
   }
+}
 
+@media (max-width: v.$bp-tablet) {
   .card-title-row {
     flex-direction: column;
     align-items: flex-start;
@@ -549,5 +564,60 @@
   .note-input-card,
   .btn-back {
     display: none !important;
+  }
+}
+
+// ── Skeleton loader ────────────────────────────────────────────
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+%sk-base {
+  background: linear-gradient(
+    90deg,
+    v.$gray-100 25%,
+    v.$gray-50 50%,
+    v.$gray-100 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: v.$radius-lg;
+}
+
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0;
+}
+
+.sk-stepper {
+  @extend %sk-base;
+  height: 72px;
+}
+
+.sk-banner {
+  @extend %sk-base;
+  height: 64px;
+}
+
+.sk-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.sk-card {
+  @extend %sk-base;
+  &.sk-card-tall {
+    height: 300px;
+  }
+  &.sk-card-medium {
+    height: 220px;
   }
 }
