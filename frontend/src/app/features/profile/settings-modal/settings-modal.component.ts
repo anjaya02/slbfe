@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { SettingsService } from "../../../core/services/theme.service";
+import { SettingsService } from "../../../core/services/settings.service";
 import { AuthService } from "../../../core/services/auth.service";
 import { ToastService } from "../../../core/services/toast.service";
 

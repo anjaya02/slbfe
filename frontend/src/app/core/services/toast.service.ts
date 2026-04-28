@@ -65,14 +65,6 @@ export class ToastService {
     this.error(message, { persistent: true });
   }
 
-  persistentWarning(message: string): void {
-    this.warning(message, { persistent: true });
-  }
-
-  persistentInfo(message: string): void {
-    this.info(message, { persistent: true });
-  }
-
   dismissAll(): void {
     this.queue = [];
     if (!this.activeToast) {

@@ -36,21 +36,6 @@ async function listNotifications(userId, filter = "all") {
   return rows.map(mapNotificationRow);
 }
 
-async function getUnreadCount(userId) {
-  const rows = await query(
-    `
-      SELECT COUNT(*) AS count
-      FROM notifications
-      WHERE recipient_user_id = :userId
-        AND deleted_at IS NULL
-        AND is_read = 0
-    `,
-    { userId },
-  );
-
-  return Number(rows[0]?.count || 0);
-}
-
 async function createNotification(notification) {
   await query(
     `
@@ -124,7 +109,6 @@ async function clearNotifications(userId) {
 
 module.exports = {
   listNotifications,
-  getUnreadCount,
   createNotification,
   markAsRead,
   markAllAsRead,

@@ -44,14 +44,6 @@ router.get(
   }),
 );
 
-router.get(
-  "/notifications/unread-count",
-  asyncHandler(async (req, res) => {
-    const unread = await notificationService.getUnreadCount(req.user.id);
-    res.json(unread);
-  }),
-);
-
 router.patch(
   "/notifications/:id/read",
   validateRequest({ params: idParamSchema, body: emptyBodySchema }),

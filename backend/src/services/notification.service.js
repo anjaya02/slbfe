@@ -6,11 +6,6 @@ async function getNotifications(userId, filter) {
   return notificationRepository.listNotifications(userId, filter);
 }
 
-async function getUnreadCount(userId) {
-  const count = await notificationRepository.getUnreadCount(userId);
-  return { count };
-}
-
 async function markAsRead(userId, notificationId) {
   const result = await notificationRepository.markAsRead(
     userId,
@@ -84,7 +79,6 @@ async function createStatusNotification({
 
 module.exports = {
   getNotifications,
-  getUnreadCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,

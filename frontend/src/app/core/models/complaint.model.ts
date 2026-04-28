@@ -125,12 +125,3 @@ export const COMPLAINT_TYPE_LABELS: Record<ComplaintType, string> = {
   BEING_RETAINED: "Being Retained by Unknown Person",
   OTHER: "Other",
 };
-
-export const STATUS_STEPS = [
-  ComplaintStatus.SUBMITTED,
-  ComplaintStatus.UNDER_REVIEW,
-  ComplaintStatus.IN_PROGRESS,
-  ComplaintStatus.AWAITING_INFO,
-  ComplaintStatus.RESOLVED,
-  ComplaintStatus.CLOSED,
-];

@@ -16,8 +16,4 @@ export class SettingsService {
   setDateFormat(format: string): void {
     this.dateFormatSubject.next(format);
   }
-
-  get currentDateFormat(): string {
-    return this.dateFormatSubject.value;
-  }
 }
