@@ -78,6 +78,14 @@
   </div>
 
   <div class="report-content" *ngIf="reportData && !loading" #reportContent>
+    <div class="report-header-block">
+      <div class="report-org">Sri Lanka Bureau of Foreign Employment</div>
+      <div class="report-title">{{ reportData.title }}</div>
+      <div class="report-meta">
+        Generated on {{ reportData.generatedAt | date: "MMMM d, y, h:mm a" }}
+      </div>
+    </div>
+
     <div class="summary-cards">
       <div class="summary-card card-blue">
         <div class="card-icon"><mat-icon>assignment</mat-icon></div>

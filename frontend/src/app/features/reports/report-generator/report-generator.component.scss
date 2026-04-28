@@ -72,18 +72,20 @@
 
 .filter-bar {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   background: var(--bg-card);
   border-radius: v.$radius-lg;
   box-shadow: var(--shadow-card);
-  padding: 20px;
+  padding: 12px 16px;
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
 .filter-bar mat-form-field {
-  flex: 1 1 220px;
+  flex: 0 1 240px;
+  max-width: 240px;
+  margin-bottom: -1.25em;
 }
 
 .btn-generate {
@@ -95,9 +97,10 @@
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
-  height: 56px;
+  height: 42px;
   box-shadow: 0 3px 12px rgba(16, 185, 129, 0.3);
   transition: all 0.25s ease;
+  white-space: nowrap;
   &:hover {
     box-shadow: 0 5px 18px rgba(16, 185, 129, 0.4) !important;
     transform: translateY(-1px);
@@ -109,6 +112,33 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
+}
+
+.report-header-block {
+  border-bottom: 2px solid #1e40af;
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+
+  .report-org {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1e40af;
+    margin-bottom: 4px;
+  }
+
+  .report-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+  }
+
+  .report-meta {
+    font-size: 12px;
+    color: #6b7280;
+  }
 }
 
 .summary-cards {
@@ -514,12 +544,21 @@
 
 // ── Skeleton loader ────────────────────────────────────────────
 @keyframes shimmer {
-  0%   { background-position: -600px 0; }
-  100% { background-position:  600px 0; }
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
 }
 
 %sk-base {
-  background: linear-gradient(90deg, v.$gray-100 25%, v.$gray-50 50%, v.$gray-100 75%);
+  background: linear-gradient(
+    90deg,
+    v.$gray-100 25%,
+    v.$gray-50 50%,
+    v.$gray-100 75%
+  );
   background-size: 1200px 100%;
   animation: shimmer 1.6s ease-in-out infinite;
   border-radius: v.$radius-lg;
