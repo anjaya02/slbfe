@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ChartConfiguration } from "chart.js";
 import { BaseChartDirective } from "ng2-charts";
 import { Subject } from "rxjs";
@@ -19,9 +19,11 @@ import {
 })
 export class ReportGeneratorComponent implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+  @ViewChild("reportContent") reportContent?: ElementRef<HTMLDivElement>;
 
   reportData: ReportData | null = null;
   loading = false;
+  exportingPdf = false;
   private destroy$ = new Subject<void>();
   selectedReportType: ReportType = "MONTHLY";
   startDate: Date | null = null;
@@ -134,8 +136,79 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     };
   }
 
-  printReport(): void {
-    window.print();
+  async downloadPDF(): Promise<void> {
+    if (!this.reportContent?.nativeElement || !this.reportData || this.exportingPdf) {
+      return;
+    }
+
+    this.exportingPdf = true;
+
+    try {
+      await this.chart?.chart?.update();
+
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const canvas = await html2canvas(this.reportContent.nativeElement, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+      });
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const imageWidth = pageWidth - margin * 2;
+      const imageHeight = (canvas.height * imageWidth) / canvas.width;
+      const pageContentHeight = pageHeight - margin * 2;
+      const imageData = canvas.toDataURL("image/png");
+
+      let remainingHeight = imageHeight;
+      let offsetY = margin;
+
+      pdf.addImage(
+        imageData,
+        "PNG",
+        margin,
+        offsetY,
+        imageWidth,
+        imageHeight,
+        undefined,
+        "FAST",
+      );
+      remainingHeight -= pageContentHeight;
+
+      while (remainingHeight > 0) {
+        pdf.addPage();
+        offsetY = margin - (imageHeight - remainingHeight);
+        pdf.addImage(
+          imageData,
+          "PNG",
+          margin,
+          offsetY,
+          imageWidth,
+          imageHeight,
+          undefined,
+          "FAST",
+        );
+        remainingHeight -= pageContentHeight;
+      }
+
+      pdf.save(`report-${new Date().toISOString().split("T")[0]}.pdf`);
+      this.toast.success("Report downloaded successfully");
+    } catch {
+      this.toast.error("Failed to download PDF");
+    } finally {
+      this.exportingPdf = false;
+    }
   }
 
   exportCSV(): void {
