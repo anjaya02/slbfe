@@ -2,16 +2,22 @@
   <div class="page-header">
     <h1>Reports</h1>
     <div class="header-actions">
-      <button mat-stroked-button (click)="exportCSV()" [disabled]="!reportData">
-        <mat-icon>download</mat-icon> Export CSV
+      <button
+        mat-raised-button
+        class="btn-csv"
+        (click)="exportCSV()"
+        [disabled]="!reportData"
+      >
+        <mat-icon>table_chart</mat-icon> Export CSV
       </button>
       <button
         mat-raised-button
         class="btn-primary"
-        (click)="printReport()"
-        [disabled]="!reportData"
+        (click)="downloadPDF()"
+        [disabled]="!reportData || exportingPdf"
       >
-        <mat-icon>print</mat-icon> Print / Save PDF
+        <mat-icon>picture_as_pdf</mat-icon>
+        {{ exportingPdf ? "Preparing PDF..." : "Download PDF" }}
       </button>
     </div>
   </div>
@@ -63,7 +69,7 @@
     message="Generating report..."
   ></app-loading>
 
-  <div class="report-content" *ngIf="reportData && !loading">
+  <div class="report-content" *ngIf="reportData && !loading" #reportContent>
     <div class="summary-cards">
       <div class="summary-card card-blue">
         <div class="card-icon"><mat-icon>assignment</mat-icon></div>
@@ -126,7 +132,21 @@
     </div>
 
     <div class="card performance-card">
-      <h3>Officer Performance</h3>
+      <div class="performance-card-header">
+        <div class="performance-card-title">
+          <div class="perf-icon"><mat-icon>leaderboard</mat-icon></div>
+          <div>
+            <h3>Officer Performance</h3>
+            <span class="perf-subtitle"
+              >{{ reportData.officerPerformance.length }} officer{{
+                reportData.officerPerformance.length !== 1 ? "s" : ""
+              }}
+              in period</span
+            >
+          </div>
+        </div>
+      </div>
+
       <ng-container
         *ngIf="reportData.officerPerformance.length; else noOfficerPerformance"
       >
@@ -137,19 +157,53 @@
         >
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Officer</th>
-            <td mat-cell *matCellDef="let row">{{ row.officerName }}</td>
+            <td mat-cell *matCellDef="let row">
+              <div class="officer-cell">
+                <div class="officer-avatar">
+                  {{ row.officerName | slice: 0 : 1 }}
+                </div>
+                <span class="officer-name">{{ row.officerName }}</span>
+              </div>
+            </td>
           </ng-container>
           <ng-container matColumnDef="totalCases">
             <th mat-header-cell *matHeaderCellDef>Total Cases</th>
-            <td mat-cell *matCellDef="let row">{{ row.casesHandled }}</td>
+            <td mat-cell *matCellDef="let row">
+              <span class="cases-badge">{{ row.casesHandled }}</span>
+            </td>
           </ng-container>
           <ng-container matColumnDef="resolved">
             <th mat-header-cell *matHeaderCellDef>Resolved</th>
-            <td mat-cell *matCellDef="let row">{{ row.casesResolved }}</td>
+            <td mat-cell *matCellDef="let row">
+              <div class="resolved-cell">
+                <span class="resolved-badge">{{ row.casesResolved }}</span>
+                <div class="resolve-bar-wrap">
+                  <div
+                    class="resolve-bar"
+                    [style.width.%]="
+                      row.casesHandled
+                        ? (row.casesResolved / row.casesHandled) * 100
+                        : 0
+                    "
+                  ></div>
+                </div>
+              </div>
+            </td>
           </ng-container>
           <ng-container matColumnDef="avgDays">
             <th mat-header-cell *matHeaderCellDef>Avg Days</th>
-            <td mat-cell *matCellDef="let row">{{ row.avgResolutionDays }}</td>
+            <td mat-cell *matCellDef="let row">
+              <span
+                class="avg-days-badge"
+                [class.badge-fast]="row.avgResolutionDays <= 3"
+                [class.badge-ok]="
+                  row.avgResolutionDays > 3 && row.avgResolutionDays <= 7
+                "
+                [class.badge-slow]="row.avgResolutionDays > 7"
+              >
+                <mat-icon>schedule</mat-icon>{{ row.avgResolutionDays }}d
+              </span>
+            </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -158,9 +212,10 @@
       </ng-container>
 
       <ng-template #noOfficerPerformance>
-        <p class="performance-empty">
-          No assigned-officer data is available for the selected filters.
-        </p>
+        <div class="performance-empty">
+          <mat-icon>person_off</mat-icon>
+          <p>No assigned-officer data is available for the selected filters.</p>
+        </div>
       </ng-template>
     </div>
   </div>
