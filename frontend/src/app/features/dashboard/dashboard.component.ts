@@ -37,7 +37,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { callback: (v: string | number) => +v / 1000 + "K" },
+        ticks: {
+          stepSize: 1,
+          callback: (v: string | number) => {
+            const n = +v;
+            return Number.isInteger(n) ? n : null;
+          },
+        },
       },
       y: { grid: { display: false } },
     },
