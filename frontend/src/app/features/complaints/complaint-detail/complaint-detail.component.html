@@ -5,10 +5,13 @@
       <button
         mat-icon-button
         color="primary"
-        matTooltip="Print case details"
-        (click)="printCase()"
+        matTooltip="Download case details as PDF"
+        (click)="downloadPDF()"
+        [disabled]="exportingPdf"
       >
-        <mat-icon>print</mat-icon>
+        <mat-icon>{{
+          exportingPdf ? "hourglass_empty" : "picture_as_pdf"
+        }}</mat-icon>
       </button>
     </div>
   </div>
@@ -268,7 +271,11 @@
       </mat-form-field>
     </div>
 
-    <button mat-button class="btn-back" (click)="toggleUpdatePanel()">
+    <button
+      mat-button
+      class="btn-back"
+      (click)="toggleUpdatePanel()"
+    >
       <mat-icon>arrow_back</mat-icon> Back to Details
     </button>
   </div>
