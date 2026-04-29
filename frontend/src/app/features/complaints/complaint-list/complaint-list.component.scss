@@ -35,6 +35,30 @@
 
 .search-field {
   width: 360px;
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: v.$compact-field-height;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: v.$compact-field-height;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: v.$compact-field-height;
+    padding-top: 10px !important;
+    padding-bottom: 6px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-icon-prefix {
+    padding: 0 12px 0 v.$compact-field-padding-x;
+  }
+
+  ::ng-deep input.mat-mdc-input-element {
+    font-size: v.$font-size-sm;
+  }
+
   ::ng-deep .mat-mdc-form-field-subscript-wrapper {
     display: none;
   }
@@ -196,6 +220,11 @@ th.mat-mdc-header-cell {
   max-width: 180px;
 }
 
+th.mat-column-assignedTo,
+td.mat-column-assignedTo {
+  padding-left: 30px;
+}
+
 td.assign-cell {
   vertical-align: middle;
 }
@@ -320,7 +349,9 @@ td .assign-cell {
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
-  min-width: 72px;
+  height: v.$action-button-height;
+  min-width: v.$action-button-min-width;
+  padding: 0 v.$action-button-padding-x;
   box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
   transition: all 0.25s ease;
   &:hover {

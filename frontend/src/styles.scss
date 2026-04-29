@@ -90,8 +90,65 @@ a {
 .mat-mdc-button,
 .mat-mdc-raised-button,
 .mat-mdc-stroked-button {
+  min-height: v.$action-button-height;
+  height: v.$action-button-height;
+  min-width: v.$action-button-min-width;
+  padding: 0 v.$action-button-padding-x !important;
+  font-size: v.$font-size-xs !important;
+  font-weight: v.$font-weight-semibold;
   text-transform: none;
   letter-spacing: 0;
+
+  .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.mat-mdc-icon-button {
+  --mdc-icon-button-state-layer-size: #{v.$action-button-height};
+  width: v.$action-button-height !important;
+  height: v.$action-button-height !important;
+  padding: 8px !important;
+
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.mat-mdc-form-field-type-mat-select {
+  .mat-mdc-text-field-wrapper:not(.mdc-text-field--textarea) {
+    height: v.$compact-field-height;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: v.$compact-field-height;
+    align-items: center;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: v.$compact-field-height;
+    padding-top: 10px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .mat-mdc-select-value {
+    font-size: v.$font-size-sm;
+  }
+}
+
+.mat-mdc-option {
+  min-height: v.$compact-option-height !important;
+  font-size: v.$font-size-sm !important;
+  line-height: 1.3 !important;
+
+  .mdc-list-item__primary-text {
+    font-size: inherit !important;
+    line-height: inherit !important;
+  }
 }
 
 .mat-mdc-dialog-container {
@@ -156,6 +213,39 @@ a {
   background: transparent !important;
 }
 
+.mat-mdc-paginator {
+  font-size: v.$font-size-xs !important;
+
+  .mat-mdc-paginator-page-size {
+    align-items: center;
+  }
+
+  .mat-mdc-paginator-page-size-select {
+    width: 68px !important;
+    margin: 0 8px !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: v.$compact-paginator-select-height !important;
+    padding: 0 8px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: v.$compact-paginator-select-height !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: v.$compact-paginator-select-height !important;
+    padding-top: 7px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .mat-mdc-select-value,
+  .mat-mdc-select-arrow {
+    font-size: v.$font-size-xs;
+  }
+}
+
 @media print {
   app-header,
   app-sidebar {
@@ -178,6 +268,7 @@ a {
 .assign-officer-panel {
   border-radius: v.$radius-md !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  min-width: 180px !important;
   max-height: 240px !important;
   overflow-y: auto;
 
@@ -191,9 +282,15 @@ a {
 
   .mat-mdc-option {
     font-size: v.$font-size-sm;
-    min-height: 40px;
-    padding: 0 16px;
+    min-height: v.$compact-option-height;
+    padding: 0 12px;
     transition: background v.$transition-fast;
+
+    .mdc-list-item__primary-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     &:hover {
       background: v.$gray-50;
@@ -214,8 +311,8 @@ a {
 
   .mat-mdc-option {
     font-size: v.$font-size-sm;
-    min-height: 36px;
-    padding: 0 14px;
+    min-height: v.$compact-option-height;
+    padding: 0 12px;
   }
 }
 

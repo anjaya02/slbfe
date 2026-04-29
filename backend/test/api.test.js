@@ -203,7 +203,11 @@ test("POST /api/reports/generate allows supervisors", async () => {
   });
 
   mockAuthenticatedUsers([supervisor]);
-  complaintService.generateReport = async () => ({ title: "Monthly Report" });
+  let reportActor = null;
+  complaintService.generateReport = async (_filter, actor) => {
+    reportActor = actor;
+    return { title: "Monthly Report" };
+  };
 
   const response = await request(app)
     .post("/api/reports/generate")
@@ -212,6 +216,7 @@ test("POST /api/reports/generate allows supervisors", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(response.body.title, "Monthly Report");
+  assert.equal(reportActor.id, "USR_SUP");
 });
 
 test("GET /api/users blocks case officers", async () => {

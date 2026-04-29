@@ -79,7 +79,9 @@
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
-  min-width: 100px;
+  min-width: v.$action-button-min-width;
+  height: v.$action-button-height;
+  padding: 0 v.$action-button-padding-x !important;
   &:hover {
     background: v.$primary-dark !important;
   }

@@ -2,6 +2,7 @@ const express = require("express");
 
 const complaintService = require("../services/complaint.service");
 const { requireAuth, requireRole } = require("../middleware/auth.middleware");
+const { auditRequest } = require("../middleware/audit-log.middleware");
 const validateRequest = require("../middleware/validate-request.middleware");
 const asyncHandler = require("../utils/async-handler");
 const {
@@ -14,6 +15,7 @@ const {
 const router = express.Router();
 
 router.use(requireAuth);
+router.use(auditRequest("COMPLAINT_API"));
 
 router.get(
   "/",

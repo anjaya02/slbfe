@@ -68,7 +68,7 @@
         </ng-container>
 
         <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <th mat-header-cell *matHeaderCellDef>Incident Category</th>
           <td mat-cell *matCellDef="let row">{{ $any(typeLabels)[row.type] }}</td>
         </ng-container>
 
@@ -77,11 +77,11 @@
             <div class="incident-header-wrapper">
               <div class="incident-header-row">
                 <ng-container *ngIf="!statusSearchOpen">
-                  <span>Incident Category</span>
+                  <span>Status</span>
                   <mat-icon
                     class="header-search-icon"
                     (click)="openStatusSearch($event)"
-                    matTooltip="Search categories"
+                    matTooltip="Search statuses"
                     >search</mat-icon
                   >
                 </ng-container>
@@ -107,7 +107,7 @@
                     panelClass="status-autocomplete-panel"
                   >
                     <mat-option value="ALL">
-                      <span class="autocomplete-option-all">All Categories</span>
+                      <span class="autocomplete-option-all">All Statuses</span>
                     </mat-option>
                     <mat-option
                       *ngFor="let s of filteredStatusOptions"

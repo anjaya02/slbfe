@@ -243,8 +243,8 @@
 
 .btn-login {
   width: 100%;
-  height: 50px;
-  font-size: v.$font-size-base !important;
+  height: v.$action-button-height;
+  font-size: v.$font-size-sm !important;
   font-weight: v.$font-weight-bold !important;
   border-radius: v.$radius-lg !important;
   background: v.$primary-blue !important;
@@ -365,7 +365,7 @@
   }
 
   .btn-login {
-    height: 46px;
+    height: v.$action-button-height;
   }
 
   .form-help {

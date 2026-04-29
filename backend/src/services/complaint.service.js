@@ -3,6 +3,7 @@ const userRepository = require("../repositories/user.repository");
 const notificationService = require("./notification.service");
 const AppError = require("../utils/app-error");
 const { generateId } = require("../utils/id");
+const { writeComplaintLog } = require("../utils/activity-logger");
 
 const TYPE_LABELS = {
   BREACH_OF_CONTRACT: "Breach of Employment Contract",
@@ -18,6 +19,7 @@ const TYPE_LABELS = {
 };
 
 const RESOLVED_STATUSES = new Set(["Resolved", "Closed"]);
+const NOTE_PREVIEW_LENGTH = 160;
 
 function isResolvedComplaint(complaint) {
   return RESOLVED_STATUSES.has(complaint.status);
@@ -34,25 +36,46 @@ function getResolutionDays(complaint) {
   return Math.max(1, (resolvedAt - submittedAt) / (1000 * 60 * 60 * 24));
 }
 
-async function getComplaints(filters) {
-  if (filters.actor?.role === "CASE_OFFICER") {
-    return complaintRepository.listComplaints({
-      ...filters,
-      assignedTo: filters.actor.id,
-    });
+function getNotePreview(note) {
+  const normalized = note?.trim().replace(/\s+/g, " ");
+
+  if (!normalized) {
+    return undefined;
   }
 
-  return complaintRepository.listComplaints(filters);
+  if (normalized.length <= NOTE_PREVIEW_LENGTH) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, NOTE_PREVIEW_LENGTH)}...`;
 }
 
-async function getComplaintById(complaintId, actor) {
+function getActorFields(actor) {
+  return {
+    actorId: actor?.id,
+    actorName: actor?.name,
+    actorRole: actor?.role,
+  };
+}
+
+async function getAuthorizedComplaint(complaintId, actor, actionPrefix) {
   const complaint = await complaintRepository.findComplaintById(complaintId);
 
   if (!complaint) {
+    writeComplaintLog(`${actionPrefix}_NOT_FOUND`, {
+      ...getActorFields(actor),
+      complaintId,
+    });
     throw new AppError(404, "Complaint not found");
   }
 
   if (actor?.role === "CASE_OFFICER" && complaint.assignedTo !== actor.id) {
+    writeComplaintLog(`${actionPrefix}_DENIED`, {
+      ...getActorFields(actor),
+      complaintId,
+      referenceNo: complaint.referenceNo,
+      assignedTo: complaint.assignedTo,
+    });
     throw new AppError(
       403,
       "You do not have permission to access this complaint",
@@ -62,12 +85,66 @@ async function getComplaintById(complaintId, actor) {
   return complaint;
 }
 
+async function getComplaints(filters) {
+  const effectiveFilters = {
+    ...filters,
+    assignedTo:
+      filters.actor?.role === "CASE_OFFICER"
+        ? filters.actor.id
+        : filters.assignedTo,
+  };
+
+  const response = await complaintRepository.listComplaints(effectiveFilters);
+
+  writeComplaintLog("COMPLAINT_LIST_RETURNED", {
+    ...getActorFields(filters.actor),
+    search: filters.search,
+    statuses: filters.statuses?.join(","),
+    types: filters.types?.join(","),
+    assignedTo: effectiveFilters.assignedTo,
+    page: filters.page,
+    pageSize: filters.pageSize,
+    returnedCount: response.data?.length || 0,
+    totalCount: response.total || 0,
+  });
+
+  return response;
+}
+
+async function getComplaintById(complaintId, actor) {
+  const complaint = await getAuthorizedComplaint(
+    complaintId,
+    actor,
+    "COMPLAINT_VIEW",
+  );
+
+  writeComplaintLog("COMPLAINT_VIEWED", {
+    ...getActorFields(actor),
+    complaintId: complaint.id,
+    referenceNo: complaint.referenceNo,
+    status: complaint.status,
+    assignedTo: complaint.assignedTo,
+  });
+
+  return complaint;
+}
+
 async function updateComplaintStatus({ complaintId, newStatus, note, actor }) {
   if (!complaintRepository.STATUS_VALUES.includes(newStatus)) {
+    writeComplaintLog("COMPLAINT_STATUS_UPDATE_REJECTED", {
+      ...getActorFields(actor),
+      complaintId,
+      attemptedStatus: newStatus,
+      reason: "Invalid complaint status",
+    });
     throw new AppError(400, "Invalid complaint status");
   }
 
-  await getComplaintById(complaintId, actor);
+  const existingComplaint = await getAuthorizedComplaint(
+    complaintId,
+    actor,
+    "COMPLAINT_STATUS_UPDATE",
+  );
 
   const updatedComplaint = await complaintRepository.updateComplaintStatus({
     complaintId,
@@ -80,6 +157,22 @@ async function updateComplaintStatus({ complaintId, newStatus, note, actor }) {
   if (!updatedComplaint) {
     throw new AppError(404, "Complaint not found");
   }
+
+  const eventName =
+    updatedComplaint.status === "Closed"
+      ? "COMPLAINT_CLOSED"
+      : "COMPLAINT_STATUS_UPDATED";
+
+  writeComplaintLog(eventName, {
+    ...getActorFields(actor),
+    complaintId: updatedComplaint.id,
+    referenceNo: updatedComplaint.referenceNo,
+    previousStatus: existingComplaint.status,
+    newStatus: updatedComplaint.status,
+    assignedTo: updatedComplaint.assignedTo,
+    noteAdded: Boolean(note?.trim()),
+    notePreview: getNotePreview(note),
+  });
 
   if (updatedComplaint.assignedTo) {
     await notificationService.createStatusNotification({
@@ -94,7 +187,11 @@ async function updateComplaintStatus({ complaintId, newStatus, note, actor }) {
 }
 
 async function assignComplaint({ complaintId, officerId, note, actor }) {
-  await getComplaintById(complaintId, actor);
+  const existingComplaint = await getAuthorizedComplaint(
+    complaintId,
+    actor,
+    "COMPLAINT_ASSIGNMENT",
+  );
 
   const officerRow = await userRepository.findById(officerId);
 
@@ -103,6 +200,13 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
     officerRow.role !== "CASE_OFFICER" ||
     !officerRow.is_active
   ) {
+    writeComplaintLog("COMPLAINT_ASSIGNMENT_REJECTED", {
+      ...getActorFields(actor),
+      complaintId,
+      referenceNo: existingComplaint.referenceNo,
+      attemptedOfficerId: officerId,
+      reason: "Selected officer is invalid or inactive",
+    });
     throw new AppError(400, "Selected officer is invalid or inactive");
   }
 
@@ -119,6 +223,18 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
     throw new AppError(404, "Complaint not found");
   }
 
+  writeComplaintLog("COMPLAINT_ASSIGNED", {
+    ...getActorFields(actor),
+    complaintId: updatedComplaint.id,
+    referenceNo: updatedComplaint.referenceNo,
+    previousOfficerId: existingComplaint.assignedTo,
+    previousOfficerName: existingComplaint.assignedToName,
+    newOfficerId: officerId,
+    newOfficerName: officerRow.name,
+    noteAdded: Boolean(note?.trim()),
+    notePreview: getNotePreview(note),
+  });
+
   await notificationService.createAssignmentNotification({
     recipientUserId: officerId,
     complaintId: updatedComplaint.id,
@@ -129,15 +245,31 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
 }
 
 async function addNote({ complaintId, content, isInternal, actor }) {
-  await getComplaintById(complaintId, actor);
+  const complaint = await getAuthorizedComplaint(
+    complaintId,
+    actor,
+    "COMPLAINT_NOTE_ADD",
+  );
 
-  return complaintRepository.addNote({
+  const note = await complaintRepository.addNote({
     noteId: generateId("N"),
     complaintId,
     content,
     isInternal,
     actor,
   });
+
+  writeComplaintLog("COMPLAINT_NOTE_ADDED", {
+    ...getActorFields(actor),
+    complaintId,
+    referenceNo: complaint.referenceNo,
+    noteId: note.id,
+    noteType: isInternal ? "INTERNAL_NOTE" : "WORKER_UPDATE",
+    contentLength: content?.length || 0,
+    contentPreview: getNotePreview(content),
+  });
+
+  return note;
 }
 
 async function getDashboardStats(user) {
@@ -201,7 +333,7 @@ async function getDashboardStats(user) {
     };
   });
 
-  return {
+  const dashboardStats = {
     scope: isCaseOfficer ? "ASSIGNED" : "GLOBAL",
     totalCases: Number(summary.total_cases || 0),
     resolvedCases: Number(summary.resolved_cases || 0),
@@ -209,6 +341,16 @@ async function getDashboardStats(user) {
     weeklyData,
     monthlyData,
   };
+
+  writeComplaintLog("COMPLAINT_DASHBOARD_RETURNED", {
+    ...getActorFields(user),
+    scope: dashboardStats.scope,
+    totalCases: dashboardStats.totalCases,
+    resolvedCases: dashboardStats.resolvedCases,
+    pendingReview: dashboardStats.pendingReview,
+  });
+
+  return dashboardStats;
 }
 
 function buildDateRange(reportType, filter) {
@@ -262,7 +404,7 @@ function round(value) {
   return Number(value.toFixed(1));
 }
 
-async function generateReport(filter) {
+async function generateReport(filter, actor) {
   const effectiveFilter = {
     ...filter,
     ...buildDateRange(filter.reportType, filter),
@@ -320,7 +462,7 @@ async function generateReport(filter) {
     monthlyBuckets.set(monthKey, monthBucket);
   });
 
-  return {
+  const report = {
     title: `${filter.reportType.charAt(0)}${filter.reportType.slice(1).toLowerCase()} Report`,
     generatedAt: new Date(),
     filters: effectiveFilter,
@@ -382,6 +524,18 @@ async function generateReport(filter) {
         return left.officerName.localeCompare(right.officerName);
       }),
   };
+
+  writeComplaintLog("COMPLAINT_REPORT_GENERATED", {
+    ...getActorFields(actor),
+    reportType: filter.reportType,
+    dateFrom: effectiveFilter.dateFrom?.toISOString?.() || effectiveFilter.dateFrom,
+    dateTo: effectiveFilter.dateTo?.toISOString?.() || effectiveFilter.dateTo,
+    totalCases,
+    resolvedCases: resolvedCases.length,
+    pendingCases,
+  });
+
+  return report;
 }
 
 module.exports = {

@@ -43,10 +43,18 @@
     v.$success-dark
   ) !important;
   color: v.$white !important;
+  height: v.$action-button-height;
+  padding: 0 v.$action-button-padding-x;
+  font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
   transition: all 0.25s ease;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
   &:hover {
     box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
     transform: translateY(-1px);
@@ -60,10 +68,18 @@
     v.$primary-dark
   ) !important;
   color: v.$white !important;
+  height: v.$action-button-height;
+  padding: 0 v.$action-button-padding-x;
+  font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
   box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
   transition: all 0.25s ease;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
   &:hover {
     box-shadow: 0 4px 14px rgba(30, 64, 175, 0.3) !important;
     transform: translateY(-1px);
@@ -83,9 +99,32 @@
 }
 
 .filter-bar mat-form-field {
-  flex: 0 1 240px;
-  max-width: 240px;
-  margin-bottom: -1.25em;
+  flex: 0 1 220px;
+  max-width: 220px;
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: v.$compact-field-height;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: v.$compact-field-height;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: v.$compact-field-height;
+    padding-top: 10px !important;
+    padding-bottom: 6px !important;
+  }
+
+  ::ng-deep .mat-mdc-select-value,
+  ::ng-deep input.mat-mdc-input-element {
+    font-size: v.$font-size-sm;
+  }
 }
 
 .btn-generate {
@@ -95,12 +134,19 @@
     v.$success-dark
   ) !important;
   color: v.$white !important;
+  font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
-  height: 42px;
+  height: v.$action-button-height;
+  padding: 0 v.$action-button-padding-x;
   box-shadow: 0 3px 12px rgba(16, 185, 129, 0.3);
   transition: all 0.25s ease;
   white-space: nowrap;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
   &:hover {
     box-shadow: 0 5px 18px rgba(16, 185, 129, 0.4) !important;
     transform: translateY(-1px);

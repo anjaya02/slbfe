@@ -33,6 +33,29 @@
         >
       </div>
     </div>
+
+    <div
+      class="case-path-info"
+      [ngClass]="
+        complaint.registrationPath === 'SLBFE'
+          ? 'case-path-info--slbfe'
+          : 'case-path-info--consular'
+      "
+    >
+      <div class="case-path-avatar">
+        <mat-icon>{{
+          complaint.registrationPath === "SLBFE"
+            ? "assured_workload"
+            : "public"
+        }}</mat-icon>
+      </div>
+      <div class="case-path-details">
+        <span class="case-path-label">Registration Path</span>
+        <span class="case-path-name">{{
+          getRegistrationPathLabel(complaint.registrationPath)
+        }}</span>
+      </div>
+    </div>
   </div>
 
   <div class="content-area" *ngIf="!showUpdatePanel">
@@ -40,83 +63,43 @@
       <div class="card worker-card">
         <div class="card-title-row">
           <h3 class="card-title">Worker profile</h3>
-          <span
-            class="path-badge"
-            [ngClass]="
-              complaint.registrationPath === 'SLBFE'
-                ? 'badge-slbfe'
-                : 'badge-consular'
-            "
-          >
-            <mat-icon class="path-icon">{{
-              complaint.registrationPath === "SLBFE"
-                ? "verified"
-                : "account_balance"
-            }}</mat-icon>
-            {{
-              complaint.registrationPath === "SLBFE"
-                ? "SLBFE PATH"
-                : "CONSULAR PATH"
-            }}
-          </span>
         </div>
         <div class="profile-fields">
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">person_outline</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">FIRST NAME</span>
-              <span class="field-value">{{
-                getWorkerFirstName(complaint.workerName)
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">FIRST NAME</span>
+            <span class="field-value">{{
+              getWorkerFirstName(complaint.workerName)
+            }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">person_outline</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">LAST NAME</span>
-              <span class="field-value">{{
-                getWorkerLastName(complaint.workerName)
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">LAST NAME</span>
+            <span class="field-value">{{
+              getWorkerLastName(complaint.workerName)
+            }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">badge</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">NIC</span>
-              <span class="field-value">{{ complaint.workerNIC }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">NIC</span>
+            <span class="field-value">{{ complaint.workerNIC }}</span>
           </div>
-          <div class="profile-input-card" *ngIf="complaint.workerPassport">
-            <mat-icon class="profile-field-icon">credit_card</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">PASSPORT</span>
-              <span class="field-value">{{ complaint.workerPassport }}</span>
-            </div>
+          <div class="field" *ngIf="complaint.workerPassport">
+            <span class="field-label">PASSPORT</span>
+            <span class="field-value">{{ complaint.workerPassport }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">smartphone</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">MOBILE NUMBER</span>
-              <span class="field-value">{{ complaint.workerContact }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">MOBILE NUMBER</span>
+            <span class="field-value">{{ complaint.workerContact }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">mail_outline</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">EMAIL</span>
-              <span class="field-value field-value--placeholder">{{
-                unavailableFieldText
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">EMAIL</span>
+            <span class="field-value field-value--placeholder">{{
+              unavailableFieldText
+            }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">where_to_vote</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">WORK COUNTRY</span>
-              <span class="field-value field-value--placeholder">{{
-                unavailableFieldText
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">WORK COUNTRY</span>
+            <span class="field-value field-value--placeholder">{{
+              unavailableFieldText
+            }}</span>
           </div>
         </div>
       </div>
@@ -271,11 +254,7 @@
       </mat-form-field>
     </div>
 
-    <button
-      mat-button
-      class="btn-back"
-      (click)="toggleUpdatePanel()"
-    >
+    <button mat-button class="btn-back" (click)="toggleUpdatePanel()">
       <mat-icon>arrow_back</mat-icon> Back to Details
     </button>
   </div>

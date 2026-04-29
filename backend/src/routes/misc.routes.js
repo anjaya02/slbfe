@@ -3,6 +3,7 @@ const express = require("express");
 const complaintService = require("../services/complaint.service");
 const notificationService = require("../services/notification.service");
 const { requireAuth, requireRole } = require("../middleware/auth.middleware");
+const { auditRequest } = require("../middleware/audit-log.middleware");
 const validateRequest = require("../middleware/validate-request.middleware");
 const asyncHandler = require("../utils/async-handler");
 const {
@@ -17,6 +18,7 @@ router.use(requireAuth);
 
 router.get(
   "/dashboard/stats",
+  auditRequest("COMPLAINT_DASHBOARD"),
   asyncHandler(async (req, res) => {
     const stats = await complaintService.getDashboardStats(req.user);
     res.json(stats);
@@ -25,10 +27,11 @@ router.get(
 
 router.post(
   "/reports/generate",
+  auditRequest("COMPLAINT_REPORT"),
   requireRole("SUPERVISOR"),
   validateRequest({ body: reportGenerateBodySchema }),
   asyncHandler(async (req, res) => {
-    const report = await complaintService.generateReport(req.body);
+    const report = await complaintService.generateReport(req.body, req.user);
     res.json(report);
   }),
 );

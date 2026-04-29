@@ -252,7 +252,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       ["Passport", complaint.workerPassport || this.unavailableFieldText],
       ["Mobile Number", complaint.workerContact],
       ["Address", complaint.workerAddress || this.unavailableFieldText],
-      ["Registration Path", complaint.registrationPath],
+      ["Registration Path", this.getRegistrationPathLabel(complaint.registrationPath)],
     ]);
 
     this.drawSectionTitle(pdf, layout, "Complaint Details");
@@ -698,6 +698,10 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   getWorkerLastName(fullName: string): string {
     const parts = this.getNameParts(fullName);
     return parts.lastName || this.unavailableFieldText;
+  }
+
+  getRegistrationPathLabel(path: Complaint["registrationPath"]): string {
+    return path === "SLBFE" ? "SLBFE Transfer" : "Consular Path";
   }
 
   private getNameParts(fullName: string): {

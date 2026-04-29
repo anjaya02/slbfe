@@ -1,7 +1,7 @@
 @use "../../../../assets/styles/variables" as v;
 
 .stepper-container {
-  padding: 24px 16px;
+  padding: 8px 12px;
   display: flex;
   justify-content: center;
 }
@@ -16,15 +16,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  min-width: 100px;
+  gap: 4px;
+  min-width: 92px;
   position: relative;
   z-index: 1;
 }
 
 .step-circle {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,9 +32,9 @@
   transition: all v.$transition-normal;
 
   mat-icon {
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
   }
 }
 
@@ -71,7 +71,7 @@
   flex: 1;
   height: 3px;
   min-width: 40px;
-  margin-top: 19px;
+  margin-top: 15px;
   background: v.$gray-300;
   transition: background v.$transition-normal;
 
