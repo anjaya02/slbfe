@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, Inject, Output } from "@angular/core";
+import { Component, EventEmitter, inject, Output } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import {
   MAT_SNACK_BAR_DATA,
@@ -178,7 +178,8 @@ export class ToastComponent {
   progress: number;
   persistent: boolean;
 
-  constructor(@Inject(MAT_SNACK_BAR_DATA) data: ToastComponentData) {
+  constructor() {
+    const data = inject<ToastComponentData>(MAT_SNACK_BAR_DATA);
     this.message = data.message;
     this.count = data.count;
     this.kind = data.kind;
