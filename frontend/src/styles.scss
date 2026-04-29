@@ -131,8 +131,9 @@ a {
 
   .mat-mdc-form-field-infix {
     min-height: v.$compact-field-height;
-    padding-top: 10px !important;
-    padding-bottom: 6px !important;
+    padding: 0 12px !important;
+    display: flex;
+    align-items: center;
   }
 
   .mat-mdc-select-value {

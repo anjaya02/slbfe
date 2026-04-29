@@ -66,7 +66,7 @@ export interface ToastComponentData {
         overflow: hidden;
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto auto;
-        align-items: start;
+        align-items: center;
         gap: 12px;
         padding: 14px 16px;
         min-width: 0;
@@ -78,7 +78,6 @@ export interface ToastComponentData {
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-top: 2px;
 
         mat-icon {
           width: 20px;
@@ -112,14 +111,12 @@ export interface ToastComponentData {
         font-size: 12px;
         font-weight: 700;
         line-height: 1;
-        margin-top: 1px;
       }
 
       .toast__close {
         width: 28px;
         height: 28px;
         padding: 0;
-        margin-top: -2px;
         color: inherit;
         opacity: 0.86;
 
