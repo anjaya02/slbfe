@@ -126,6 +126,38 @@ async function ensureRuntimeTables() {
       )
     `,
   );
+
+  await query(
+    `
+      CREATE TABLE IF NOT EXISTS complaint_audit_events (
+        id VARCHAR(30) NOT NULL,
+        complaint_id VARCHAR(30) NOT NULL,
+        event_type VARCHAR(40) NOT NULL,
+        actor_user_id VARCHAR(20) NULL,
+        actor_name VARCHAR(150) NULL,
+        actor_role VARCHAR(30) NULL,
+        previous_status VARCHAR(30) NULL,
+        new_status VARCHAR(30) NULL,
+        previous_assignee_user_id VARCHAR(20) NULL,
+        previous_assignee_name VARCHAR(150) NULL,
+        new_assignee_user_id VARCHAR(20) NULL,
+        new_assignee_name VARCHAR(150) NULL,
+        note_id VARCHAR(30) NULL,
+        note_type VARCHAR(30) NULL,
+        metadata_json JSON NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_complaint_audit_complaint_created (complaint_id, created_at),
+        KEY idx_complaint_audit_actor_created (actor_user_id, created_at),
+        KEY idx_complaint_audit_event_type (event_type),
+        CONSTRAINT fk_complaint_audit_actor_runtime FOREIGN KEY (actor_user_id) REFERENCES users(id)
+      )
+    `,
+  );
+}
+
+async function closePool() {
+  await pool.end();
 }
 
 module.exports = {
@@ -134,4 +166,5 @@ module.exports = {
   withTransaction,
   testConnection,
   ensureRuntimeTables,
+  closePool,
 };

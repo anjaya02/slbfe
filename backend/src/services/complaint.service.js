@@ -58,6 +58,14 @@ function getActorFields(actor) {
   };
 }
 
+function getActorAuditFields(actor) {
+  return {
+    actorUserId: actor?.id,
+    actorName: actor?.name || actor?.id || "System",
+    actorRole: actor?.role,
+  };
+}
+
 async function getAuthorizedComplaint(complaintId, actor, actionPrefix) {
   const complaint = await complaintRepository.findComplaintById(complaintId);
 
@@ -151,7 +159,17 @@ async function updateComplaintStatus({ complaintId, newStatus, note, actor }) {
     newStatus,
     note,
     actor,
-    historyId: generateId("H"),
+    auditEvent: {
+      id: generateId("AUD"),
+      complaintId,
+      eventType: "STATUS_CHANGED",
+      ...getActorAuditFields(actor),
+      previousStatus: existingComplaint.status,
+      newStatus,
+      metadata: {
+        noteAdded: Boolean(note?.trim()),
+      },
+    },
   });
 
   if (!updatedComplaint) {
@@ -216,7 +234,21 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
     officerName: officerRow.name,
     note,
     actor,
-    historyId: generateId("H"),
+    auditEvent: {
+      id: generateId("AUD"),
+      complaintId,
+      eventType: "ASSIGNED",
+      ...getActorAuditFields(actor),
+      previousStatus: existingComplaint.status,
+      newStatus: "Under Review",
+      previousAssigneeUserId: existingComplaint.assignedTo,
+      previousAssigneeName: existingComplaint.assignedToName,
+      newAssigneeUserId: officerId,
+      newAssigneeName: officerRow.name,
+      metadata: {
+        noteAdded: Boolean(note?.trim()),
+      },
+    },
   });
 
   if (!updatedComplaint) {
@@ -250,13 +282,25 @@ async function addNote({ complaintId, content, isInternal, actor }) {
     actor,
     "COMPLAINT_NOTE_ADD",
   );
+  const noteId = generateId("N");
 
   const note = await complaintRepository.addNote({
-    noteId: generateId("N"),
+    noteId,
     complaintId,
     content,
     isInternal,
     actor,
+    auditEvent: {
+      id: generateId("AUD"),
+      complaintId,
+      eventType: "NOTE_ADDED",
+      ...getActorAuditFields(actor),
+      noteId,
+      noteType: isInternal ? "INTERNAL_NOTE" : "WORKER_UPDATE",
+      metadata: {
+        contentLength: content?.length || 0,
+      },
+    },
   });
 
   writeComplaintLog("COMPLAINT_NOTE_ADDED", {

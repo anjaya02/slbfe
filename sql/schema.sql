@@ -86,6 +86,30 @@ CREATE TABLE `complain_logs` (
   `updated_time` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `complaint_audit_events` (
+  `id` varchar(30) NOT NULL,
+  `complaint_id` varchar(30) NOT NULL,
+  `event_type` varchar(40) NOT NULL,
+  `actor_user_id` varchar(20) DEFAULT NULL,
+  `actor_name` varchar(150) DEFAULT NULL,
+  `actor_role` varchar(30) DEFAULT NULL,
+  `previous_status` varchar(30) DEFAULT NULL,
+  `new_status` varchar(30) DEFAULT NULL,
+  `previous_assignee_user_id` varchar(20) DEFAULT NULL,
+  `previous_assignee_name` varchar(150) DEFAULT NULL,
+  `new_assignee_user_id` varchar(20) DEFAULT NULL,
+  `new_assignee_name` varchar(150) DEFAULT NULL,
+  `note_id` varchar(30) DEFAULT NULL,
+  `note_type` varchar(30) DEFAULT NULL,
+  `metadata_json` json DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_complaint_audit_complaint_created` (`complaint_id`,`created_at`),
+  KEY `idx_complaint_audit_actor_created` (`actor_user_id`,`created_at`),
+  KEY `idx_complaint_audit_event_type` (`event_type`),
+  CONSTRAINT `fk_complaint_audit_actor` FOREIGN KEY (`actor_user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE `migrant_employees` (
   `id` int NOT NULL AUTO_INCREMENT,
   `fname` varchar(50) DEFAULT NULL,

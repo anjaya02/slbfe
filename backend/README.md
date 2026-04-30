@@ -256,6 +256,7 @@ The Angular app expects these response shapes:
 - complaint detail returns the full complaint object with attachments, history, and notes
 - dashboard stats return complaint summary/chart data
 - notifications return a list of notification objects
+- notification unread count returns `{ unreadCount }`
 - reports return a fully computed report object
 
 ## Development Notes
@@ -280,4 +281,5 @@ The Angular app expects these response shapes:
 ## Suggested Next Steps
 
 1. Add real file upload and object-storage integration for complaint attachments.
-2. Introduce refresh-token persistence and token revocation for production auth hardening.
+2. Add formal database migration tooling before changing shared tables used by the mobile app.
+3. Confirm the final mobile API contract before adding new mobile-specific fields to shared complaint tables.

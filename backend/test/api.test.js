@@ -7,9 +7,11 @@ const jwt = require("jsonwebtoken");
 const request = require("supertest");
 
 const app = require("../src/index");
+const { closePool } = require("../src/config/db");
 const authService = require("../src/services/auth.service");
 const complaintService = require("../src/services/complaint.service");
 const complaintRepository = require("../src/repositories/complaint.repository");
+const notificationService = require("../src/services/notification.service");
 const userService = require("../src/services/user.service");
 const userRepository = require("../src/repositories/user.repository");
 
@@ -20,6 +22,12 @@ const originalFunctions = {
   dashboardStats: complaintService.getDashboardStats,
   generateReport: complaintService.generateReport,
   complaintFindById: complaintRepository.findComplaintById,
+  complaintUpdateStatus: complaintRepository.updateComplaintStatus,
+  complaintAssign: complaintRepository.assignComplaint,
+  complaintAddNote: complaintRepository.addNote,
+  createStatusNotification: notificationService.createStatusNotification,
+  createAssignmentNotification: notificationService.createAssignmentNotification,
+  getUnreadNotificationCount: notificationService.getUnreadCount,
   getUsers: userService.getUsers,
   updateUserStatus: userService.updateUserStatus,
   userFindById: userRepository.findById,
@@ -64,10 +72,24 @@ test.afterEach(() => {
   complaintService.getDashboardStats = originalFunctions.dashboardStats;
   complaintService.generateReport = originalFunctions.generateReport;
   complaintRepository.findComplaintById = originalFunctions.complaintFindById;
+  complaintRepository.updateComplaintStatus =
+    originalFunctions.complaintUpdateStatus;
+  complaintRepository.assignComplaint = originalFunctions.complaintAssign;
+  complaintRepository.addNote = originalFunctions.complaintAddNote;
+  notificationService.createStatusNotification =
+    originalFunctions.createStatusNotification;
+  notificationService.createAssignmentNotification =
+    originalFunctions.createAssignmentNotification;
+  notificationService.getUnreadCount =
+    originalFunctions.getUnreadNotificationCount;
   userService.getUsers = originalFunctions.getUsers;
   userService.updateUserStatus = originalFunctions.updateUserStatus;
   userRepository.findById = originalFunctions.userFindById;
   userRepository.updateUser = originalFunctions.userUpdateUser;
+});
+
+test.after(async () => {
+  await closePool();
 });
 
 test("POST /api/auth/login rejects invalid payloads", async () => {
@@ -217,6 +239,30 @@ test("POST /api/reports/generate allows supervisors", async () => {
   assert.equal(response.status, 200);
   assert.equal(response.body.title, "Monthly Report");
   assert.equal(reportActor.id, "USR_SUP");
+});
+
+test("GET /api/notifications/unread-count returns the current user's count", async () => {
+  const officer = createUserRow({
+    id: "USR_OFF",
+    role: "CASE_OFFICER",
+    email: "officer@slbfe.gov.lk",
+    name: "Case Officer",
+  });
+  let countedUserId = null;
+
+  mockAuthenticatedUsers([officer]);
+  notificationService.getUnreadCount = async (userId) => {
+    countedUserId = userId;
+    return { unreadCount: 3 };
+  };
+
+  const response = await request(app)
+    .get("/api/notifications/unread-count")
+    .set("Authorization", `Bearer ${signToken(officer)}`);
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.unreadCount, 3);
+  assert.equal(countedUserId, "USR_OFF");
 });
 
 test("GET /api/users blocks case officers", async () => {
@@ -378,4 +424,137 @@ test("PATCH /api/complaints/:id/assignment remains supervisor-only", async () =>
 
   assert.equal(response.status, 403);
   assert.match(response.body.message, /permission/i);
+});
+
+test("complaint status updates carry a structured audit event", async () => {
+  const actor = {
+    id: "USR_OFF",
+    name: "Case Officer",
+    role: "CASE_OFFICER",
+  };
+  const existingComplaint = {
+    id: "C001",
+    referenceNo: "C001",
+    status: "Under Review",
+    assignedTo: "USR_OFF",
+  };
+  let capturedAuditEvent = null;
+
+  complaintRepository.findComplaintById = async () => existingComplaint;
+  complaintRepository.updateComplaintStatus = async (payload) => {
+    capturedAuditEvent = payload.auditEvent;
+    return {
+      ...existingComplaint,
+      status: payload.newStatus,
+    };
+  };
+  notificationService.createStatusNotification = async () => ({});
+
+  await complaintService.updateComplaintStatus({
+    complaintId: "C001",
+    newStatus: "In Progress",
+    note: "Followed up with mission.",
+    actor,
+  });
+
+  assert.match(capturedAuditEvent.id, /^AUD/);
+  assert.equal(capturedAuditEvent.complaintId, "C001");
+  assert.equal(capturedAuditEvent.eventType, "STATUS_CHANGED");
+  assert.equal(capturedAuditEvent.actorUserId, "USR_OFF");
+  assert.equal(capturedAuditEvent.actorName, "Case Officer");
+  assert.equal(capturedAuditEvent.actorRole, "CASE_OFFICER");
+  assert.equal(capturedAuditEvent.previousStatus, "Under Review");
+  assert.equal(capturedAuditEvent.newStatus, "In Progress");
+  assert.equal(capturedAuditEvent.metadata.noteAdded, true);
+});
+
+test("complaint assignments carry assignee before and after fields", async () => {
+  const actor = {
+    id: "USR_SUP",
+    name: "Supervisor",
+    role: "SUPERVISOR",
+  };
+  const existingComplaint = {
+    id: "C001",
+    referenceNo: "C001",
+    status: "Submitted",
+    assignedTo: "USR_OLD",
+    assignedToName: "Old Officer",
+  };
+  let capturedAuditEvent = null;
+
+  complaintRepository.findComplaintById = async () => existingComplaint;
+  userRepository.findById = async () => ({
+    id: "USR_NEW",
+    name: "New Officer",
+    role: "CASE_OFFICER",
+    is_active: 1,
+  });
+  complaintRepository.assignComplaint = async (payload) => {
+    capturedAuditEvent = payload.auditEvent;
+    return {
+      ...existingComplaint,
+      status: "Under Review",
+      assignedTo: payload.officerId,
+      assignedToName: payload.officerName,
+    };
+  };
+  notificationService.createAssignmentNotification = async () => ({});
+
+  await complaintService.assignComplaint({
+    complaintId: "C001",
+    officerId: "USR_NEW",
+    note: "",
+    actor,
+  });
+
+  assert.match(capturedAuditEvent.id, /^AUD/);
+  assert.equal(capturedAuditEvent.eventType, "ASSIGNED");
+  assert.equal(capturedAuditEvent.previousStatus, "Submitted");
+  assert.equal(capturedAuditEvent.newStatus, "Under Review");
+  assert.equal(capturedAuditEvent.previousAssigneeUserId, "USR_OLD");
+  assert.equal(capturedAuditEvent.previousAssigneeName, "Old Officer");
+  assert.equal(capturedAuditEvent.newAssigneeUserId, "USR_NEW");
+  assert.equal(capturedAuditEvent.newAssigneeName, "New Officer");
+});
+
+test("complaint notes carry a structured audit event with the note id", async () => {
+  const actor = {
+    id: "USR_OFF",
+    name: "Case Officer",
+    role: "CASE_OFFICER",
+  };
+  let capturedAuditEvent = null;
+
+  complaintRepository.findComplaintById = async () => ({
+    id: "C001",
+    referenceNo: "C001",
+    status: "In Progress",
+    assignedTo: "USR_OFF",
+  });
+  complaintRepository.addNote = async (payload) => {
+    capturedAuditEvent = payload.auditEvent;
+    return {
+      id: payload.noteId,
+      complaintId: payload.complaintId,
+      type: "INTERNAL_NOTE",
+      content: payload.content,
+      author: actor.name,
+      timestamp: new Date(),
+      isInternal: true,
+    };
+  };
+
+  const note = await complaintService.addNote({
+    complaintId: "C001",
+    content: "Escalated to embassy contact.",
+    isInternal: true,
+    actor,
+  });
+
+  assert.match(capturedAuditEvent.id, /^AUD/);
+  assert.equal(capturedAuditEvent.eventType, "NOTE_ADDED");
+  assert.equal(capturedAuditEvent.noteId, note.id);
+  assert.equal(capturedAuditEvent.noteType, "INTERNAL_NOTE");
+  assert.equal(capturedAuditEvent.metadata.contentLength, note.content.length);
 });

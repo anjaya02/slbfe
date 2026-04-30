@@ -373,9 +373,144 @@ function syntheticId(prefix, complaintId, timestamp, index) {
   return `${prefix}${index + 1}-${complaintId}-${time}`;
 }
 
+function getAuditAction(row) {
+  if (row.event_type === "STATUS_CHANGED") {
+    return row.new_status === "Closed" ? "Complaint closed" : "Status changed";
+  }
+
+  if (row.event_type === "ASSIGNED") {
+    return "Complaint assigned";
+  }
+
+  if (row.event_type === "NOTE_ADDED") {
+    return row.note_type === "WORKER_UPDATE"
+      ? "Worker update added"
+      : "Internal note added";
+  }
+
+  return fallbackText(row.event_type, "Complaint updated")
+    .toLowerCase()
+    .replace(/(^|_)([a-z])/g, (_match, separator, character) => {
+      return `${separator ? " " : ""}${character.toUpperCase()}`;
+    });
+}
+
+function getAuditDescription(row) {
+  if (row.event_type === "STATUS_CHANGED") {
+    if (row.previous_status && row.new_status) {
+      return `Status changed from ${row.previous_status} to ${row.new_status}.`;
+    }
+
+    return row.new_status
+      ? `Status changed to ${row.new_status}.`
+      : "Complaint status changed.";
+  }
+
+  if (row.event_type === "ASSIGNED") {
+    const previousAssignee =
+      row.previous_assignee_name ||
+      row.previous_assignee_user_id ||
+      "Unassigned";
+    const newAssignee =
+      row.new_assignee_name || row.new_assignee_user_id || "Unassigned";
+
+    return `Assigned from ${previousAssignee} to ${newAssignee}.`;
+  }
+
+  if (row.event_type === "NOTE_ADDED") {
+    return row.note_type === "WORKER_UPDATE"
+      ? "Worker update recorded on the complaint."
+      : "Internal note recorded on the complaint.";
+  }
+
+  return "Complaint updated.";
+}
+
+function mapAuditHistoryRow(row) {
+  return {
+    id: row.id,
+    complaintId: row.complaint_id,
+    eventType: row.event_type,
+    action: getAuditAction(row),
+    description: getAuditDescription(row),
+    performedBy: row.actor_name || row.updated_user_name || row.actor_user_id || "System",
+    timestamp: row.created_at,
+    previousStatus: row.previous_status
+      ? normalizeStatus(row.previous_status)
+      : undefined,
+    newStatus: row.new_status ? normalizeStatus(row.new_status) : undefined,
+    previousAssignee: row.previous_assignee_user_id || undefined,
+    previousAssigneeName: row.previous_assignee_name || undefined,
+    newAssignee: row.new_assignee_user_id || undefined,
+    newAssigneeName: row.new_assignee_name || undefined,
+    noteId: row.note_id || undefined,
+    noteType: row.note_type || undefined,
+  };
+}
+
 function parseLogStatus(message) {
   const match = String(message || "").match(/Status Changed:\s*(.+)$/i);
   return match ? normalizeStatus(match[1]) : undefined;
+}
+
+function mapLegacyHistoryRow(row, complaint, index) {
+  return {
+    id: syntheticId("L", complaint.id, row.updated_time, index),
+    complaintId: row.complain_id,
+    action: row.complain_msg || "Complaint updated",
+    description: row.complain_msg || "Complaint updated",
+    performedBy: row.updated_user_name || row.updated_user || "System",
+    timestamp: row.updated_time || complaint.dateUpdated,
+    previousStatus: undefined,
+    newStatus: parseLogStatus(row.complain_msg),
+    legacy: true,
+  };
+}
+
+async function insertComplaintAuditEvent(connection, event) {
+  if (!event) {
+    return;
+  }
+
+  await connection.execute(
+    `
+      INSERT INTO complaint_audit_events (
+        id,
+        complaint_id,
+        event_type,
+        actor_user_id,
+        actor_name,
+        actor_role,
+        previous_status,
+        new_status,
+        previous_assignee_user_id,
+        previous_assignee_name,
+        new_assignee_user_id,
+        new_assignee_name,
+        note_id,
+        note_type,
+        metadata_json,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `,
+    [
+      event.id,
+      event.complaintId,
+      event.eventType,
+      event.actorUserId || null,
+      event.actorName || null,
+      event.actorRole || null,
+      event.previousStatus || null,
+      event.newStatus || null,
+      event.previousAssigneeUserId || null,
+      event.previousAssigneeName || null,
+      event.newAssigneeUserId || null,
+      event.newAssigneeName || null,
+      event.noteId || null,
+      event.noteType || null,
+      event.metadata ? JSON.stringify(event.metadata) : null,
+    ],
+  );
 }
 
 async function findComplaintById(id) {
@@ -394,7 +529,7 @@ async function findComplaintById(id) {
     return null;
   }
 
-  const [attachments, history, notes] = await Promise.all([
+  const [attachments, auditHistory, legacyHistory, notes] = await Promise.all([
     query(
       `
         SELECT
@@ -409,6 +544,33 @@ async function findComplaintById(id) {
         FROM complaint_attachments
         WHERE complaint_id = :id
         ORDER BY uploaded_at DESC
+      `,
+      { id },
+    ),
+    query(
+      `
+        SELECT
+          ae.id,
+          ae.complaint_id,
+          ae.event_type,
+          ae.actor_user_id,
+          ae.actor_name,
+          ae.actor_role,
+          ae.previous_status,
+          ae.new_status,
+          ae.previous_assignee_user_id,
+          ae.previous_assignee_name,
+          ae.new_assignee_user_id,
+          ae.new_assignee_name,
+          ae.note_id,
+          ae.note_type,
+          ae.metadata_json,
+          ae.created_at,
+          u.name AS updated_user_name
+        FROM complaint_audit_events ae
+        LEFT JOIN users u ON u.id = ae.actor_user_id
+        WHERE ae.complaint_id = :id
+        ORDER BY ae.created_at DESC
       `,
       { id },
     ),
@@ -455,16 +617,14 @@ async function findComplaintById(id) {
     uploadedAt: row.uploaded_at,
   }));
 
-  complaint.history = history.map((row, index) => ({
-    id: syntheticId("L", id, row.updated_time, index),
-    complaintId: row.complain_id,
-    action: row.complain_msg || "Complaint updated",
-    description: row.complain_msg || "Complaint updated",
-    performedBy: row.updated_user_name || row.updated_user || "System",
-    timestamp: row.updated_time || complaint.dateUpdated,
-    previousStatus: undefined,
-    newStatus: parseLogStatus(row.complain_msg),
-  }));
+  complaint.history = [
+    ...auditHistory.map(mapAuditHistoryRow),
+    ...legacyHistory.map((row, index) =>
+      mapLegacyHistoryRow(row, complaint, index),
+    ),
+  ].sort((left, right) => {
+    return new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime();
+  });
 
   complaint.notes = notes.map((row, index) => ({
     id: syntheticId("CM", id, row.updated_time, index),
@@ -484,7 +644,7 @@ async function updateComplaintStatus({
   newStatus,
   note,
   actor,
-  historyId,
+  auditEvent,
 }) {
   await withTransaction(async (connection) => {
     const [complaintRows] = await connection.execute(
@@ -549,6 +709,8 @@ async function updateComplaintStatus({
         [complaintId, truncate(note.trim(), 1000), actor?.id || null],
       );
     }
+
+    await insertComplaintAuditEvent(connection, auditEvent);
   });
 
   return findComplaintById(complaintId);
@@ -560,7 +722,7 @@ async function assignComplaint({
   officerName,
   note,
   actor,
-  historyId,
+  auditEvent,
 }) {
   await withTransaction(async (connection) => {
     const [complaintRows] = await connection.execute(
@@ -637,32 +799,36 @@ async function assignComplaint({
         [complaintId, truncate(note.trim(), 1000), actor?.id || null],
       );
     }
+
+    await insertComplaintAuditEvent(connection, auditEvent);
   });
 
   return findComplaintById(complaintId);
 }
 
-async function addNote({ noteId, complaintId, content, isInternal, actor }) {
-  await query(
-    `
-      INSERT INTO complain_comments (
-        complain_id,
-        complain_msg,
-        updated_user,
-        updated_time
-      ) VALUES (
-        :complaintId,
-        :content,
-        :updatedUser,
-        CURRENT_TIMESTAMP
-      )
-    `,
-    {
-      complaintId,
-      content: truncate(content, 1000),
-      updatedUser: isInternal ? actor?.id || null : null,
-    },
-  );
+async function addNote({
+  noteId,
+  complaintId,
+  content,
+  isInternal,
+  actor,
+  auditEvent,
+}) {
+  await withTransaction(async (connection) => {
+    await connection.execute(
+      `
+        INSERT INTO complain_comments (
+          complain_id,
+          complain_msg,
+          updated_user,
+          updated_time
+        ) VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      `,
+      [complaintId, truncate(content, 1000), isInternal ? actor?.id || null : null],
+    );
+
+    await insertComplaintAuditEvent(connection, auditEvent);
+  });
 
   return {
     id: noteId,
