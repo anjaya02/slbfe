@@ -5,6 +5,7 @@ import {
   QueryList,
   ViewChildren,
 } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import { ChartConfiguration } from "chart.js";
 import { BaseChartDirective } from "ng2-charts";
 import { Subject } from "rxjs";
@@ -72,17 +73,37 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     plugins: { legend: { display: true, position: "top" } },
   };
   displayedColumns = ["name", "totalCases", "resolved", "avgDays"];
+  private syncingRouteState = false;
 
   constructor(
     private reportService: ReportService,
+    private route: ActivatedRoute,
+    private router: Router,
     private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
-    this.generateReport();
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (this.syncingRouteState) {
+        this.syncingRouteState = false;
+        return;
+      }
+
+      this.restoreReportState(params);
+      this.generateReport(false);
+    });
   }
 
-  generateReport(): void {
+  generateReport(syncUrl = true): void {
+    if (syncUrl) {
+      this.syncingRouteState = true;
+      this.persistReportState().finally(() => {
+        setTimeout(() => {
+          this.syncingRouteState = false;
+        });
+      });
+    }
+
     this.loading = true;
     const filter: ReportFilter = {
       reportType: this.selectedReportType,
@@ -692,6 +713,63 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
       month: "short",
       year: "numeric",
     }).format(date);
+  }
+
+  private persistReportState(): Promise<boolean> {
+    return this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        type:
+          this.selectedReportType === "MONTHLY"
+            ? null
+            : this.selectedReportType,
+        from:
+          this.selectedReportType === "CUSTOM" && this.startDate
+            ? this.toDateInputValue(this.startDate)
+            : null,
+        to:
+          this.selectedReportType === "CUSTOM" && this.endDate
+            ? this.toDateInputValue(this.endDate)
+            : null,
+      },
+      queryParamsHandling: "merge",
+      replaceUrl: true,
+    });
+  }
+
+  private restoreReportState(params: {
+    get(name: string): string | null;
+  }): void {
+    const type = params.get("type") as ReportType | null;
+    this.selectedReportType = this.isReportType(type) ? type : "MONTHLY";
+    this.startDate =
+      this.selectedReportType === "CUSTOM"
+        ? this.parseDateParam(params.get("from"))
+        : null;
+    this.endDate =
+      this.selectedReportType === "CUSTOM"
+        ? this.parseDateParam(params.get("to"))
+        : null;
+  }
+
+  private isReportType(value: ReportType | null): value is ReportType {
+    return this.reportTypes.some((type) => type.value === value);
+  }
+
+  private parseDateParam(value: string | null): Date | null {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return null;
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private toDateInputValue(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
   exportCSV(): void {

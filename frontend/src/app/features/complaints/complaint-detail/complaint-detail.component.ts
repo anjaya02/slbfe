@@ -70,6 +70,16 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
           { value: "close", label: "Close Case" },
         ];
 
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        const shouldShowUpdatePanel = params.get("panel") === "update";
+        if (this.showUpdatePanel && !shouldShowUpdatePanel) {
+          this.resetUpdateForm();
+        }
+        this.showUpdatePanel = shouldShowUpdatePanel;
+      });
+
     const id = this.route.snapshot.paramMap.get("id");
     if (id) {
       this.complaintService
@@ -103,7 +113,23 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   }
 
   toggleUpdatePanel(): void {
-    this.showUpdatePanel = !this.showUpdatePanel;
+    this.setUpdatePanel(!this.showUpdatePanel);
+  }
+
+  private setUpdatePanel(show: boolean, replaceUrl = false): void {
+    if (!show) {
+      this.resetUpdateForm();
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { panel: show ? "update" : null },
+      queryParamsHandling: "merge",
+      replaceUrl,
+    });
+  }
+
+  private resetUpdateForm(): void {
     this.selectedAction = "";
     this.selectedOfficerId = "";
   }
@@ -128,7 +154,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
           next: (updated) => {
             this.complaint = this.normalizeComplaintTimeline(updated);
             this.updating = false;
-            this.showUpdatePanel = false;
+            this.setUpdatePanel(false, true);
             this.selectedAction = "";
             this.selectedOfficerId = "";
             this.actionNote = "";
@@ -155,7 +181,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
         next: (updated) => {
           this.complaint = this.normalizeComplaintTimeline(updated);
           this.updating = false;
-          this.showUpdatePanel = false;
+          this.setUpdatePanel(false, true);
           this.selectedAction = "";
           this.selectedOfficerId = "";
           this.actionNote = "";

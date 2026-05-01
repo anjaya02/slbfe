@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { NotificationService } from "../../../core/services/notification.service";
@@ -20,11 +20,18 @@ export class NotificationListComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
+    private route: ActivatedRoute,
     private router: Router,
     private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const filter = params.get("filter");
+      this.activeFilter = filter === "unread" ? "unread" : "all";
+      this.applyFilter();
+    });
+
     this.notificationService
       .notifications$
       .pipe(takeUntil(this.destroy$))
@@ -55,6 +62,12 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   setFilter(filter: "all" | "unread"): void {
     this.activeFilter = filter;
     this.applyFilter();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { filter: filter === "all" ? null : filter },
+      queryParamsHandling: "merge",
+      replaceUrl: true,
+    });
   }
 
   markAsRead(notification: AppNotification): void {

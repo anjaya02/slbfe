@@ -44,6 +44,9 @@
         mat-table
         [dataSource]="dataSource"
         matSort
+        [matSortActive]="sortActive"
+        [matSortDirection]="sortDirection"
+        (matSortChange)="onSortChange($event)"
         class="complaint-table"
       >
         <ng-container matColumnDef="workerName">
@@ -195,6 +198,9 @@
 
     <mat-paginator
       [pageSizeOptions]="[10, 25, 50]"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      (page)="onPageChange($event)"
       showFirstLastButtons
       *ngIf="!loading && !error"
     ></mat-paginator>

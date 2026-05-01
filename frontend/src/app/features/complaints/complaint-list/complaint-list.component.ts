@@ -1,14 +1,15 @@
 import {
+  AfterViewInit,
   Component,
   OnInit,
   ViewChild,
   OnDestroy,
   ElementRef,
 } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { MatTableDataSource } from "@angular/material/table";
-import { MatPaginator } from "@angular/material/paginator";
-import { MatSort } from "@angular/material/sort";
+import { MatPaginator, PageEvent } from "@angular/material/paginator";
+import { MatSort, Sort, SortDirection } from "@angular/material/sort";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../../core/services/complaint.service";
@@ -27,7 +28,7 @@ import { User } from "../../../core/models/user.model";
   templateUrl: "./complaint-list.component.html",
   styleUrls: ["./complaint-list.component.scss"],
 })
-export class ComplaintListComponent implements OnInit, OnDestroy {
+export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy {
   displayedColumns = [
     "workerName",
     "referenceNo",
@@ -50,7 +51,12 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   caseOfficers: User[] = [];
   assigningId: string | null = null;
   isSupervisor = false;
+  pageIndex = 0;
+  pageSize = 10;
+  sortActive = "";
+  sortDirection: SortDirection = "";
   private destroy$ = new Subject<void>();
+  private viewReady = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -60,6 +66,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   constructor(
     private complaintService: ComplaintService,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private toast: ToastService,
   ) {}
@@ -81,7 +88,18 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
       const matchesStatus =
         filter.status === "ALL" ? true : complaint.status === filter.status;
       return matchesSearch && matchesStatus;
-    };
+      };
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.searchValue = params.get("q") || "";
+      const status = params.get("status") || "ALL";
+      this.selectedStatus = this.isValidStatus(status) ? status : "ALL";
+      this.pageIndex = this.parsePositiveNumber(params.get("page"), 0);
+      this.pageSize = this.parsePositiveNumber(params.get("pageSize"), 10);
+      this.sortActive = params.get("sort") || "";
+      this.sortDirection = this.parseSortDirection(params.get("dir"));
+      this.applyTableFilter(false);
+      this.syncTableControls();
+    });
     this.loadComplaints();
     if (this.isSupervisor) {
       this.authService
@@ -89,6 +107,11 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe((officers) => (this.caseOfficers = officers));
     }
+  }
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.syncTableControls();
   }
 
   loadComplaints(): void {
@@ -101,10 +124,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.dataSource.data = res.data;
           this.loading = false;
-          setTimeout(() => {
-            if (this.paginator) this.dataSource.paginator = this.paginator;
-            if (this.sort) this.dataSource.sort = this.sort;
-          });
+          setTimeout(() => this.syncTableControls());
         },
         error: () => {
           this.loading = false;
@@ -119,12 +139,18 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   }
 
   applyFilter(): void {
+    this.pageIndex = 0;
+    this.applyTableFilter(true);
+    this.persistListState();
+  }
+
+  private applyTableFilter(resetPage: boolean): void {
     this.dataSource.filter = JSON.stringify({
       search: this.searchValue.trim().toLowerCase(),
       status: this.selectedStatus,
     });
 
-    if (this.dataSource.paginator) {
+    if (resetPage && this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
   }
@@ -164,6 +190,20 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
     this.applyFilter();
   }
 
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.persistListState();
+  }
+
+  onSortChange(sort: Sort): void {
+    this.sortActive = sort.active;
+    this.sortDirection = sort.direction;
+    this.pageIndex = 0;
+    this.dataSource.paginator?.firstPage();
+    this.persistListState();
+  }
+
   viewComplaint(complaint: Complaint): void {
     this.router.navigate(["/complaints", complaint.id]);
   }
@@ -201,5 +241,50 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   get pageTitle(): string {
     return this.isSupervisor ? "Problem List" : "My Assigned Cases";
+  }
+
+  private syncTableControls(): void {
+    if (!this.viewReady || this.loading) return;
+
+    if (this.paginator) {
+      this.paginator.pageIndex = this.pageIndex;
+      this.paginator.pageSize = this.pageSize;
+      this.dataSource.paginator = this.paginator;
+    }
+
+    if (this.sort) {
+      this.sort.active = this.sortActive;
+      this.sort.direction = this.sortDirection;
+      this.dataSource.sort = this.sort;
+    }
+  }
+
+  private persistListState(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        q: this.searchValue.trim() || null,
+        status: this.selectedStatus === "ALL" ? null : this.selectedStatus,
+        page: this.pageIndex || null,
+        pageSize: this.pageSize === 10 ? null : this.pageSize,
+        sort: this.sortActive || null,
+        dir: this.sortDirection || null,
+      },
+      queryParamsHandling: "merge",
+      replaceUrl: true,
+    });
+  }
+
+  private isValidStatus(status: string): boolean {
+    return status === "ALL" || this.statusOptions.includes(status as ComplaintStatus);
+  }
+
+  private parsePositiveNumber(value: string | null, fallback: number): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+  }
+
+  private parseSortDirection(value: string | null): SortDirection {
+    return value === "asc" || value === "desc" ? value : "";
   }
 }

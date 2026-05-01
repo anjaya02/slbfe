@@ -532,7 +532,35 @@
   flex: 0 1 v.$action-control-width;
   width: v.$action-control-width;
   max-width: 100%;
-  
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: v.$compact-field-height;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: v.$compact-field-height;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: v.$compact-field-height;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-select-value {
+    font-size: v.$font-size-sm;
+    line-height: v.$compact-field-height;
+  }
+
+  ::ng-deep .mat-mdc-select-placeholder {
+    color: v.$gray-400;
+    font-style: normal;
+    line-height: v.$compact-field-height;
+  }
+
   ::ng-deep .mat-mdc-form-field-subscript-wrapper {
     display: none;
   }
