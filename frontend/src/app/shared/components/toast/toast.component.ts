@@ -25,6 +25,7 @@ export interface ToastComponentData {
     <div
       class="toast"
       [class.toast-warning]="kind === 'warning'"
+      [class.toast--timed]="!persistent"
       (mouseenter)="paused.emit()"
       (mouseleave)="resumed.emit()"
     >
@@ -70,6 +71,10 @@ export interface ToastComponentData {
         gap: 12px;
         padding: 14px 16px;
         min-width: 0;
+      }
+
+      .toast--timed {
+        padding-bottom: 22px;
       }
 
       .toast__icon {
@@ -152,15 +157,19 @@ export interface ToastComponentData {
 
       .toast__progress-track {
         position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        left: 16px;
+        right: 16px;
+        bottom: 10px;
         height: 4px;
+        border-radius: 999px;
+        overflow: hidden;
         background: rgba(255, 255, 255, 0.14);
+        pointer-events: none;
       }
 
       .toast__progress-bar {
         height: 100%;
+        border-radius: inherit;
         background: rgba(255, 255, 255, 0.58);
         transition: width 120ms linear;
       }
