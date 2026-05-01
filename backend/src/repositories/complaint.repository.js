@@ -453,9 +453,9 @@ function parseLogStatus(message) {
   return match ? normalizeStatus(match[1]) : undefined;
 }
 
-function mapLegacyHistoryRow(row, complaint, index) {
+function mapComplaintLogHistoryRow(row, complaint, index) {
   return {
-    id: syntheticId("L", complaint.id, row.updated_time, index),
+    id: syntheticId("CL", complaint.id, row.updated_time, index),
     complaintId: row.complain_id,
     action: row.complain_msg || "Complaint updated",
     description: row.complain_msg || "Complaint updated",
@@ -463,7 +463,6 @@ function mapLegacyHistoryRow(row, complaint, index) {
     timestamp: row.updated_time || complaint.dateUpdated,
     previousStatus: undefined,
     newStatus: parseLogStatus(row.complain_msg),
-    legacy: true,
   };
 }
 
@@ -529,7 +528,7 @@ async function findComplaintById(id) {
     return null;
   }
 
-  const [attachments, auditHistory, legacyHistory, notes] = await Promise.all([
+  const [attachments, auditHistory, complaintLogHistory, notes] = await Promise.all([
     query(
       `
         SELECT
@@ -619,8 +618,8 @@ async function findComplaintById(id) {
 
   complaint.history = [
     ...auditHistory.map(mapAuditHistoryRow),
-    ...legacyHistory.map((row, index) =>
-      mapLegacyHistoryRow(row, complaint, index),
+    ...complaintLogHistory.map((row, index) =>
+      mapComplaintLogHistoryRow(row, complaint, index),
     ),
   ].sort((left, right) => {
     return new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime();

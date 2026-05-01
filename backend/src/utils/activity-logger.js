@@ -4,6 +4,22 @@ const path = require("path");
 const logDirectory = path.resolve(__dirname, "..", "..", "logs");
 const complaintLogPath = path.join(logDirectory, "complaints.log");
 const MAX_FIELD_LENGTH = 500;
+const IST_TIME_ZONE = "Asia/Kolkata";
+
+const istTimestampFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: IST_TIME_ZONE,
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+function formatIstTimestamp(date = new Date()) {
+  return `${istTimestampFormatter.format(date)} IST`;
+}
 
 function normalizeValue(value) {
   if (value === undefined || value === null || value === "") {
@@ -32,7 +48,7 @@ async function appendLogLine(filePath, line) {
 }
 
 function writeComplaintLog(event, fields = {}) {
-  const timestamp = new Date().toISOString();
+  const timestamp = formatIstTimestamp();
   const line = `[${timestamp}] ${event} ${formatFields(fields)}`.trim();
 
   appendLogLine(complaintLogPath, line).catch((error) => {
@@ -42,5 +58,6 @@ function writeComplaintLog(event, fields = {}) {
 
 module.exports = {
   complaintLogPath,
+  formatIstTimestamp,
   writeComplaintLog,
 };
