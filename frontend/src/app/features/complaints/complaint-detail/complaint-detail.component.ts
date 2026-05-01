@@ -46,6 +46,8 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   addingNote = false;
   updating = false;
   exportingPdf = false;
+  canUpdateComplaint = false;
+  actionOptions: ActionOption[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -76,10 +78,12 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (c) => {
             this.complaint = c ? this.normalizeComplaintTimeline(c) : null;
+            this.refreshActionOptions();
             this.loading = false;
           },
           error: () => {
             this.complaint = null;
+            this.refreshActionOptions();
             this.loading = false;
           },
         });
@@ -122,83 +126,28 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     this.selectedOfficerId = "";
   }
 
-  updateStatus(): void {
-    if (!this.complaint || !this.selectedAction) return;
+  private setComplaint(complaint: Complaint): void {
+    this.complaint = this.normalizeComplaintTimeline(complaint);
+    this.refreshActionOptions();
+  }
 
-    if (this.selectedAction === "assign") {
-      if (!this.selectedOfficerId) return;
-      const officer = this.caseOfficers.find(
-        (o) => o.id === this.selectedOfficerId,
-      );
-      if (!officer) return;
-      this.updating = true;
-      this.complaintService
-        .assignComplaint(
-          this.complaint.id,
-          officer.id,
-          this.actionNote,
-        )
-        .subscribe({
-          next: (updated) => {
-            this.complaint = this.normalizeComplaintTimeline(updated);
-            this.updating = false;
-            this.setUpdatePanel(false, true);
-            this.selectedAction = "";
-            this.selectedOfficerId = "";
-            this.actionNote = "";
-            this.internalNoteText = "";
-            this.toast.success(`Assigned to ${officer.name}`);
-          },
-          error: () => {
-            this.updating = false;
-          },
-        });
-      return;
+  private refreshActionOptions(): void {
+    this.actionOptions = this.buildActionOptions();
+    this.canUpdateComplaint = this.actionOptions.length > 0;
+
+    if (
+      this.selectedAction &&
+      !this.actionOptions.some((option) => option.value === this.selectedAction)
+    ) {
+      this.resetUpdateForm();
     }
 
-    this.updating = true;
-    const statusMap: Record<string, ComplaintStatus> = {
-      start_progress: ComplaintStatus.IN_PROGRESS,
-      resolve: ComplaintStatus.RESOLVED,
-      close: ComplaintStatus.CLOSED,
-      request_info: ComplaintStatus.AWAITING_INFO,
-    };
-    const newStatus = statusMap[this.selectedAction] || this.complaint.status;
-    this.complaintService
-      .updateComplaintStatus(this.complaint.id, newStatus, this.actionNote)
-      .subscribe({
-        next: (updated) => {
-          this.complaint = this.normalizeComplaintTimeline(updated);
-          this.updating = false;
-          this.setUpdatePanel(false, true);
-          this.selectedAction = "";
-          this.selectedOfficerId = "";
-          this.actionNote = "";
-          this.internalNoteText = "";
-          this.toast.success("Status updated successfully");
-        },
-        error: () => {
-          this.updating = false;
-        },
-      });
-  }
-
-  get isAssignDisabled(): boolean {
-    if (this.selectedAction === "assign") {
-      return this.updating || !this.selectedOfficerId;
+    if (!this.canUpdateComplaint && this.showUpdatePanel) {
+      this.setUpdatePanel(false, true);
     }
-    return this.updating || !this.selectedAction;
   }
 
-  get canAssignComplaint(): boolean {
-    return this.isSupervisor;
-  }
-
-  get canUpdateComplaint(): boolean {
-    return this.actionOptions.length > 0;
-  }
-
-  get actionOptions(): ActionOption[] {
+  private buildActionOptions(): ActionOption[] {
     if (!this.complaint) {
       return [];
     }
@@ -241,6 +190,82 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     }
 
     return options;
+  }
+
+  updateStatus(): void {
+    if (!this.complaint || !this.selectedAction) return;
+
+    if (this.selectedAction === "assign") {
+      if (!this.selectedOfficerId) return;
+      const officer = this.caseOfficers.find(
+        (o) => o.id === this.selectedOfficerId,
+      );
+      if (!officer) return;
+      this.updating = true;
+      this.complaintService
+        .assignComplaint(
+          this.complaint.id,
+          officer.id,
+          this.actionNote,
+        )
+        .subscribe({
+          next: (updated) => {
+            this.setComplaint(updated);
+            this.updating = false;
+            this.setUpdatePanel(false, true);
+            this.selectedAction = "";
+            this.selectedOfficerId = "";
+            this.actionNote = "";
+            this.internalNoteText = "";
+            this.toast.success(`Assigned to ${officer.name}`);
+          },
+          error: () => {
+            this.updating = false;
+          },
+        });
+      return;
+    }
+
+    this.updating = true;
+    const statusMap: Record<string, ComplaintStatus> = {
+      start_progress: ComplaintStatus.IN_PROGRESS,
+      resolve: ComplaintStatus.RESOLVED,
+      close: ComplaintStatus.CLOSED,
+      request_info: ComplaintStatus.AWAITING_INFO,
+    };
+    const newStatus = statusMap[this.selectedAction] || this.complaint.status;
+    this.complaintService
+      .updateComplaintStatus(this.complaint.id, newStatus, this.actionNote)
+      .subscribe({
+        next: (updated) => {
+          this.setComplaint(updated);
+          this.updating = false;
+          this.setUpdatePanel(false, true);
+          this.selectedAction = "";
+          this.selectedOfficerId = "";
+          this.actionNote = "";
+          this.internalNoteText = "";
+          this.toast.success("Status updated successfully");
+        },
+        error: () => {
+          this.updating = false;
+        },
+      });
+  }
+
+  get isAssignDisabled(): boolean {
+    if (this.selectedAction === "assign") {
+      return this.updating || !this.selectedOfficerId;
+    }
+    return this.updating || !this.selectedAction;
+  }
+
+  get canAssignComplaint(): boolean {
+    return this.isSupervisor;
+  }
+
+  trackActionOption(_index: number, option: ActionOption): string {
+    return option.value;
   }
 
   addNote(): void {

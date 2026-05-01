@@ -214,9 +214,11 @@
         <mat-form-field appearance="outline" class="action-select">
           <mat-label>Select action</mat-label>
           <mat-select [(ngModel)]="selectedAction">
-            <mat-option *ngFor="let opt of actionOptions" [value]="opt.value">{{
-              opt.label
-            }}</mat-option>
+            <mat-option
+              *ngFor="let opt of actionOptions; trackBy: trackActionOption"
+              [value]="opt.value"
+              >{{ opt.label }}</mat-option
+            >
           </mat-select>
         </mat-form-field>
 

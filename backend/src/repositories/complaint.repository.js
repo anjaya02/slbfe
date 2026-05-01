@@ -699,9 +699,6 @@ async function updateComplaintStatus({
       throw new Error("Complaint not found");
     }
 
-    const effectiveNextStatus =
-      nextStatus || normalizeStatus(complaint.complain_status);
-
     await connection.execute(
       `
         UPDATE complain_details
@@ -780,6 +777,9 @@ async function assignComplaint({
     if (!complaint) {
       throw new Error("Complaint not found");
     }
+
+    const effectiveNextStatus =
+      nextStatus || normalizeStatus(complaint.complain_status);
 
     await connection.execute(
       `
