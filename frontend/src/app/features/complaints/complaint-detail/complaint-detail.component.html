@@ -125,6 +125,7 @@
           mat-raised-button
           class="btn-solve"
           (click)="toggleUpdatePanel()"
+          *ngIf="canUpdateComplaint"
         >
           {{ canAssignComplaint ? "Solve" : "Update Case" }}
         </button>

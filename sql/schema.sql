@@ -393,6 +393,51 @@ INSERT INTO `complain_details` (
   'Resolved',
   '2026-04-15 17:20:00',
   'USR002'
+), (
+  'C005',
+  'OTHER',
+  'Malith Priyankara',
+  NULL,
+  '+968 91234567',
+  'M8765432',
+  '199112345678',
+  'Muscat',
+  '2026-04-22 09:05:00',
+  'OTHER',
+  NULL,
+  'Submitted',
+  '2026-04-22 09:05:00',
+  NULL
+), (
+  'C006',
+  'SICK',
+  'Dilini Apsara',
+  NULL,
+  '+973 33124567',
+  'D6543218',
+  '199556789012',
+  'Manama',
+  '2026-04-22 10:30:00',
+  'SICK',
+  NULL,
+  'Under Review',
+  '2026-04-22 11:00:00',
+  'USR001'
+), (
+  'C007',
+  'BEING_STRANDED',
+  'Ruwan Lakmal',
+  NULL,
+  '+974 55112233',
+  'R3344556',
+  '198812349876',
+  'Doha',
+  '2026-04-08 13:45:00',
+  'BEING_STRANDED',
+  'CLOSED',
+  'Closed',
+  '2026-04-18 15:30:00',
+  'USR001'
 );
 
 INSERT INTO `complaint_assignments` (
@@ -414,11 +459,29 @@ INSERT INTO `complaint_assignments` (
   '2026-04-18 10:20:00',
   '2026-04-18 10:20:00'
 ), (
+  'C003',
+  'USR002',
+  'USR001',
+  '2026-04-19 09:30:00',
+  '2026-04-19 09:30:00'
+), (
   'C004',
   'USR002',
   'USR001',
   '2026-04-11 09:00:00',
   '2026-04-11 09:00:00'
+), (
+  'C006',
+  'USR002',
+  'USR001',
+  '2026-04-22 11:00:00',
+  '2026-04-22 11:00:00'
+), (
+  'C007',
+  'USR002',
+  'USR001',
+  '2026-04-08 14:10:00',
+  '2026-04-08 14:10:00'
 );
 
 INSERT INTO `complain_comments` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
@@ -469,15 +532,82 @@ INSERT INTO `complain_comments` (`complain_id`, `complain_msg`, `updated_user`, 
     'Worker confirmed improved site conditions and no further threats from the supervisor. Case can be closed if there are no further complaints within a week.',
     'USR002',
     '2026-04-15 16:10:00'
+  ),
+  (
+    'C005',
+    'I submitted this through the mobile app today. My employer has delayed my final salary and I need guidance before I sign any settlement paper.',
+    NULL,
+    '2026-04-22 09:05:00'
+  ),
+  (
+    'C006',
+    'I am unwell and need help contacting the sponsor because I have not been taken to a doctor despite repeated requests.',
+    NULL,
+    '2026-04-22 10:30:00'
+  ),
+  (
+    'C006',
+    'Assigned case is being reviewed. Medical details and employer contact information will be verified before active intervention starts.',
+    'USR002',
+    '2026-04-22 11:05:00'
+  ),
+  (
+    'C007',
+    'I was stranded after the agency stopped answering calls. I had no clear accommodation or return plan and asked for urgent assistance.',
+    NULL,
+    '2026-04-08 13:45:00'
+  ),
+  (
+    'C007',
+    'Return travel support was completed, worker confirmed safe arrival, and the case was closed by the supervisor.',
+    'USR001',
+    '2026-04-18 15:30:00'
   );
 
 INSERT INTO `complain_logs` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
-  ('C001', 'Status Changed: Under Review', 'USR001', '2026-04-18 10:10:00'),
+  ('C001', 'Assigned to Iman Fernando', 'USR001', '2026-04-18 10:15:00'),
   ('C001', 'Status Changed: In Progress', 'USR002', '2026-04-21 11:10:00'),
+  ('C002', 'Assigned to Iman Fernando', 'USR001', '2026-04-18 10:20:00'),
   ('C002', 'Status Changed: Awaiting Info', 'USR002', '2026-04-20 14:05:00'),
+  ('C003', 'Assigned to Iman Fernando', 'USR001', '2026-04-19 09:30:00'),
   ('C003', 'Status Changed: In Progress', 'USR001', '2026-04-19 09:40:00'),
   ('C004', 'Assigned to Iman Fernando', 'USR001', '2026-04-11 09:00:00'),
-  ('C004', 'Status Changed: Resolved', 'USR002', '2026-04-15 17:20:00');
+  ('C004', 'Status Changed: Resolved', 'USR002', '2026-04-15 17:20:00'),
+  ('C006', 'Assigned to Iman Fernando', 'USR001', '2026-04-22 11:00:00'),
+  ('C007', 'Assigned to Iman Fernando', 'USR001', '2026-04-08 14:10:00'),
+  ('C007', 'Status Changed: In Progress', 'USR002', '2026-04-09 08:45:00'),
+  ('C007', 'Status Changed: Resolved', 'USR002', '2026-04-17 16:20:00'),
+  ('C007', 'Status Changed: Closed', 'USR001', '2026-04-18 15:30:00');
+
+INSERT INTO `complaint_audit_events` (
+  `id`,
+  `complaint_id`,
+  `event_type`,
+  `actor_user_id`,
+  `actor_name`,
+  `actor_role`,
+  `previous_status`,
+  `new_status`,
+  `previous_assignee_user_id`,
+  `previous_assignee_name`,
+  `new_assignee_user_id`,
+  `new_assignee_name`,
+  `metadata_json`,
+  `created_at`
+) VALUES
+  ('AUD001', 'C001', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-18 10:15:00'),
+  ('AUD002', 'C001', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-21 11:10:00'),
+  ('AUD003', 'C002', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-18 10:20:00'),
+  ('AUD004', 'C002', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'Awaiting Info', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE, 'noteAdded', TRUE), '2026-04-20 14:05:00'),
+  ('AUD005', 'C003', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-19 09:30:00'),
+  ('AUD006', 'C003', 'STATUS_CHANGED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE, 'urgent', TRUE), '2026-04-19 09:40:00'),
+  ('AUD007', 'C004', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-11 09:00:00'),
+  ('AUD008', 'C004', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'In Progress', 'Resolved', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-15 17:20:00'),
+  ('AUD009', 'C006', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-22 11:00:00'),
+  ('AUD010', 'C007', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-08 14:10:00'),
+  ('AUD011', 'C007', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-09 08:45:00'),
+  ('AUD012', 'C007', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'In Progress', 'Resolved', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-17 16:20:00'),
+  ('AUD013', 'C007', 'STATUS_CHANGED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Resolved', 'Closed', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-18 15:30:00');
 
 INSERT INTO `notifications` (
   `id`,
@@ -533,5 +663,27 @@ INSERT INTO `notifications` (
   '/complaints/C003',
   'C003',
   '2026-04-19 09:45:00',
+  NULL
+), (
+  'NTF005',
+  'USR002',
+  'ASSIGNMENT',
+  'New Case Under Review',
+  'Case C006 has been assigned to you and is now under review.',
+  0,
+  '/complaints/C006',
+  'C006',
+  '2026-04-22 11:00:00',
+  NULL
+), (
+  'NTF006',
+  'USR002',
+  'CASE_UPDATE',
+  'Case C007 Closed',
+  'Complaint C007 was closed after resolution confirmation.',
+  1,
+  '/complaints/C007',
+  'C007',
+  '2026-04-18 15:35:00',
   NULL
 );

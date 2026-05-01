@@ -13,7 +13,7 @@ async function main() {
     database: process.env.DB_NAME,
   });
 
-  const complaintId = "C005";
+  const complaintId = "C008";
 
   try {
     await connection.beginTransaction();
@@ -24,6 +24,10 @@ async function main() {
     await connection.execute("DELETE FROM complain_logs WHERE complain_id = ?", [
       complaintId,
     ]);
+    await connection.execute(
+      "DELETE FROM complaint_audit_events WHERE complaint_id = ?",
+      [complaintId],
+    );
     await connection.execute(
       "DELETE FROM complaint_assignments WHERE complaint_id = ?",
       [complaintId],

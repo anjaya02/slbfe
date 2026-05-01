@@ -468,6 +468,38 @@ test("complaint status updates carry a structured audit event", async () => {
   assert.equal(capturedAuditEvent.metadata.noteAdded, true);
 });
 
+test("complaint status service rejects invalid lifecycle jumps", async () => {
+  const actor = {
+    id: "USR_OFF",
+    name: "Case Officer",
+    role: "CASE_OFFICER",
+  };
+
+  complaintRepository.findComplaintById = async () => ({
+    id: "C001",
+    referenceNo: "C001",
+    status: "Submitted",
+    assignedTo: "USR_OFF",
+  });
+  complaintRepository.updateComplaintStatus = async () => {
+    throw new Error("updateComplaintStatus should not be called");
+  };
+
+  await assert.rejects(
+    () =>
+      complaintService.updateComplaintStatus({
+        complaintId: "C001",
+        newStatus: "In Progress",
+        note: "",
+        actor,
+      }),
+    {
+      statusCode: 400,
+      message: "Cannot move complaint from Submitted to In Progress",
+    },
+  );
+});
+
 test("complaint assignments carry assignee before and after fields", async () => {
   const actor = {
     id: "USR_SUP",
@@ -516,6 +548,87 @@ test("complaint assignments carry assignee before and after fields", async () =>
   assert.equal(capturedAuditEvent.previousAssigneeName, "Old Officer");
   assert.equal(capturedAuditEvent.newAssigneeUserId, "USR_NEW");
   assert.equal(capturedAuditEvent.newAssigneeName, "New Officer");
+});
+
+test("complaint assignment does not downgrade cases already in progress", async () => {
+  const actor = {
+    id: "USR_SUP",
+    name: "Supervisor",
+    role: "SUPERVISOR",
+  };
+  const existingComplaint = {
+    id: "C001",
+    referenceNo: "C001",
+    status: "In Progress",
+    assignedTo: "USR_OLD",
+    assignedToName: "Old Officer",
+  };
+  let capturedAssignmentPayload = null;
+
+  complaintRepository.findComplaintById = async () => existingComplaint;
+  userRepository.findById = async () => ({
+    id: "USR_NEW",
+    name: "New Officer",
+    role: "CASE_OFFICER",
+    is_active: 1,
+  });
+  complaintRepository.assignComplaint = async (payload) => {
+    capturedAssignmentPayload = payload;
+    return {
+      ...existingComplaint,
+      status: payload.nextStatus,
+      assignedTo: payload.officerId,
+      assignedToName: payload.officerName,
+    };
+  };
+  notificationService.createAssignmentNotification = async () => ({});
+
+  const updatedComplaint = await complaintService.assignComplaint({
+    complaintId: "C001",
+    officerId: "USR_NEW",
+    note: "",
+    actor,
+  });
+
+  assert.equal(capturedAssignmentPayload.nextStatus, "In Progress");
+  assert.equal(capturedAssignmentPayload.auditEvent.previousStatus, "In Progress");
+  assert.equal(capturedAssignmentPayload.auditEvent.newStatus, "In Progress");
+  assert.equal(updatedComplaint.status, "In Progress");
+});
+
+test("opening an assigned submitted complaint acknowledges it under review", async () => {
+  const actor = {
+    id: "USR_OFF",
+    name: "Case Officer",
+    role: "CASE_OFFICER",
+  };
+  const existingComplaint = {
+    id: "C001",
+    referenceNo: "C001",
+    status: "Submitted",
+    assignedTo: "USR_OFF",
+  };
+  let capturedStatusPayload = null;
+
+  complaintRepository.findComplaintById = async () => existingComplaint;
+  complaintRepository.updateComplaintStatus = async (payload) => {
+    capturedStatusPayload = payload;
+    return {
+      ...existingComplaint,
+      status: payload.newStatus,
+    };
+  };
+
+  const complaint = await complaintService.getComplaintById("C001", actor);
+
+  assert.equal(capturedStatusPayload.newStatus, "Under Review");
+  assert.equal(capturedStatusPayload.auditEvent.eventType, "STATUS_CHANGED");
+  assert.equal(capturedStatusPayload.auditEvent.metadata.automatic, true);
+  assert.equal(
+    capturedStatusPayload.auditEvent.metadata.trigger,
+    "OPEN_ASSIGNED_COMPLAINT",
+  );
+  assert.equal(complaint.status, "Under Review");
 });
 
 test("complaint notes carry a structured audit event with the note id", async () => {

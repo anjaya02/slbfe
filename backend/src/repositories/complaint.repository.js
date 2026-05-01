@@ -466,6 +466,43 @@ function mapComplaintLogHistoryRow(row, complaint, index) {
   };
 }
 
+function isSameEventSecond(left, right) {
+  const leftTime = new Date(left).getTime();
+  const rightTime = new Date(right).getTime();
+
+  if (Number.isNaN(leftTime) || Number.isNaN(rightTime)) {
+    return false;
+  }
+
+  return Math.abs(leftTime - rightTime) <= 1000;
+}
+
+function isStructuredDuplicateLog(logRow, auditRows) {
+  const logStatus = parseLogStatus(logRow.complain_msg);
+
+  if (logStatus) {
+    return auditRows.some((auditRow) => {
+      return (
+        auditRow.event_type === "STATUS_CHANGED" &&
+        auditRow.new_status &&
+        normalizeStatus(auditRow.new_status) === logStatus &&
+        isSameEventSecond(logRow.updated_time, auditRow.created_at)
+      );
+    });
+  }
+
+  if (/^Assigned to /i.test(String(logRow.complain_msg || ""))) {
+    return auditRows.some((auditRow) => {
+      return (
+        auditRow.event_type === "ASSIGNED" &&
+        isSameEventSecond(logRow.updated_time, auditRow.created_at)
+      );
+    });
+  }
+
+  return false;
+}
+
 async function insertComplaintAuditEvent(connection, event) {
   if (!event) {
     return;
@@ -618,9 +655,9 @@ async function findComplaintById(id) {
 
   complaint.history = [
     ...auditHistory.map(mapAuditHistoryRow),
-    ...complaintLogHistory.map((row, index) =>
-      mapComplaintLogHistoryRow(row, complaint, index),
-    ),
+    ...complaintLogHistory
+      .filter((row) => !isStructuredDuplicateLog(row, auditHistory))
+      .map((row, index) => mapComplaintLogHistoryRow(row, complaint, index)),
   ].sort((left, right) => {
     return new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime();
   });
@@ -661,6 +698,9 @@ async function updateComplaintStatus({
     if (!complaint) {
       throw new Error("Complaint not found");
     }
+
+    const effectiveNextStatus =
+      nextStatus || normalizeStatus(complaint.complain_status);
 
     await connection.execute(
       `
@@ -719,6 +759,7 @@ async function assignComplaint({
   complaintId,
   officerId,
   officerName,
+  nextStatus,
   note,
   actor,
   auditEvent,
@@ -760,13 +801,18 @@ async function assignComplaint({
     await connection.execute(
       `
         UPDATE complain_details
-        SET complain_status = 'Under Review',
-            resolution_catagory = NULL,
+        SET complain_status = ?,
+            resolution_catagory = ?,
             updated_time = CURRENT_TIMESTAMP,
             updated_user = ?
         WHERE complain_id = ?
       `,
-      [actor?.id || null, complaintId],
+      [
+        effectiveNextStatus,
+        getResolutionCategory(effectiveNextStatus),
+        actor?.id || null,
+        complaintId,
+      ],
     );
 
     await connection.execute(

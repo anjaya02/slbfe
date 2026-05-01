@@ -20,6 +20,29 @@ const TYPE_LABELS = {
 
 const RESOLVED_STATUSES = new Set(["Resolved", "Closed"]);
 const NOTE_PREVIEW_LENGTH = 160;
+const SUBMITTED_STATUS = "Submitted";
+const UNDER_REVIEW_STATUS = "Under Review";
+const IN_PROGRESS_STATUS = "In Progress";
+const AWAITING_INFO_STATUS = "Awaiting Info";
+const RESOLVED_STATUS = "Resolved";
+const CLOSED_STATUS = "Closed";
+const ALLOWED_STATUS_TRANSITIONS = {
+  [SUBMITTED_STATUS]: new Set([UNDER_REVIEW_STATUS]),
+  [UNDER_REVIEW_STATUS]: new Set([
+    IN_PROGRESS_STATUS,
+    AWAITING_INFO_STATUS,
+    RESOLVED_STATUS,
+    CLOSED_STATUS,
+  ]),
+  [IN_PROGRESS_STATUS]: new Set([
+    AWAITING_INFO_STATUS,
+    RESOLVED_STATUS,
+    CLOSED_STATUS,
+  ]),
+  [AWAITING_INFO_STATUS]: new Set([IN_PROGRESS_STATUS, RESOLVED_STATUS, CLOSED_STATUS]),
+  [RESOLVED_STATUS]: new Set([CLOSED_STATUS]),
+  [CLOSED_STATUS]: new Set(),
+};
 
 function isResolvedComplaint(complaint) {
   return RESOLVED_STATUSES.has(complaint.status);
@@ -120,11 +143,15 @@ async function getComplaints(filters) {
 }
 
 async function getComplaintById(complaintId, actor) {
-  const complaint = await getAuthorizedComplaint(
+  let complaint = await getAuthorizedComplaint(
     complaintId,
     actor,
     "COMPLAINT_VIEW",
   );
+
+  if (shouldAcknowledgeReviewOnOpen(complaint, actor)) {
+    complaint = await acknowledgeComplaintReview({ complaint, actor });
+  }
 
   writeComplaintLog("COMPLAINT_VIEWED", {
     ...getActorFields(actor),
@@ -135,6 +162,45 @@ async function getComplaintById(complaintId, actor) {
   });
 
   return complaint;
+}
+
+function shouldAcknowledgeReviewOnOpen(complaint, actor) {
+  return (
+    complaint.status === SUBMITTED_STATUS &&
+    complaint.assignedTo &&
+    (actor?.role === "SUPERVISOR" || complaint.assignedTo === actor?.id)
+  );
+}
+
+async function acknowledgeComplaintReview({ complaint, actor }) {
+  const updatedComplaint = await complaintRepository.updateComplaintStatus({
+    complaintId: complaint.id,
+    newStatus: UNDER_REVIEW_STATUS,
+    actor,
+    auditEvent: {
+      id: generateId("AUD"),
+      complaintId: complaint.id,
+      eventType: "STATUS_CHANGED",
+      ...getActorAuditFields(actor),
+      previousStatus: complaint.status,
+      newStatus: UNDER_REVIEW_STATUS,
+      metadata: {
+        automatic: true,
+        trigger: "OPEN_ASSIGNED_COMPLAINT",
+      },
+    },
+  });
+
+  writeComplaintLog("COMPLAINT_REVIEW_ACKNOWLEDGED", {
+    ...getActorFields(actor),
+    complaintId: complaint.id,
+    referenceNo: complaint.referenceNo,
+    previousStatus: complaint.status,
+    newStatus: UNDER_REVIEW_STATUS,
+    assignedTo: complaint.assignedTo,
+  });
+
+  return updatedComplaint || complaint;
 }
 
 async function updateComplaintStatus({ complaintId, newStatus, note, actor }) {
@@ -153,6 +219,12 @@ async function updateComplaintStatus({ complaintId, newStatus, note, actor }) {
     actor,
     "COMPLAINT_STATUS_UPDATE",
   );
+
+  validateStatusTransition(existingComplaint, newStatus, actor);
+
+  if (existingComplaint.status === newStatus) {
+    return existingComplaint;
+  }
 
   const updatedComplaint = await complaintRepository.updateComplaintStatus({
     complaintId,
@@ -228,10 +300,16 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
     throw new AppError(400, "Selected officer is invalid or inactive");
   }
 
+  const nextStatus =
+    existingComplaint.status === SUBMITTED_STATUS
+      ? UNDER_REVIEW_STATUS
+      : existingComplaint.status;
+
   const updatedComplaint = await complaintRepository.assignComplaint({
     complaintId,
     officerId,
     officerName: officerRow.name,
+    nextStatus,
     note,
     actor,
     auditEvent: {
@@ -240,7 +318,7 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
       eventType: "ASSIGNED",
       ...getActorAuditFields(actor),
       previousStatus: existingComplaint.status,
-      newStatus: "Under Review",
+      newStatus: nextStatus,
       previousAssigneeUserId: existingComplaint.assignedTo,
       previousAssigneeName: existingComplaint.assignedToName,
       newAssigneeUserId: officerId,
@@ -263,6 +341,8 @@ async function assignComplaint({ complaintId, officerId, note, actor }) {
     previousOfficerName: existingComplaint.assignedToName,
     newOfficerId: officerId,
     newOfficerName: officerRow.name,
+    previousStatus: existingComplaint.status,
+    newStatus: updatedComplaint.status,
     noteAdded: Boolean(note?.trim()),
     notePreview: getNotePreview(note),
   });
@@ -314,6 +394,28 @@ async function addNote({ complaintId, content, isInternal, actor }) {
   });
 
   return note;
+}
+
+function validateStatusTransition(complaint, newStatus, actor) {
+  const allowedStatuses = ALLOWED_STATUS_TRANSITIONS[complaint.status] || new Set();
+
+  if (allowedStatuses.has(newStatus)) {
+    return;
+  }
+
+  writeComplaintLog("COMPLAINT_STATUS_UPDATE_REJECTED", {
+    ...getActorFields(actor),
+    complaintId: complaint.id,
+    referenceNo: complaint.referenceNo,
+    currentStatus: complaint.status,
+    attemptedStatus: newStatus,
+    reason: "Invalid status transition",
+  });
+
+  throw new AppError(
+    400,
+    `Cannot move complaint from ${complaint.status} to ${newStatus}`,
+  );
 }
 
 async function getDashboardStats(user) {

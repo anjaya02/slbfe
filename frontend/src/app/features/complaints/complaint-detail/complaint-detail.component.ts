@@ -23,6 +23,8 @@ interface PdfLayout {
   y: number;
 }
 
+type ActionOption = { value: string; label: string };
+
 @Component({
   standalone: false,
   selector: "app-complaint-detail",
@@ -45,8 +47,6 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   updating = false;
   exportingPdf = false;
 
-  actionOptions: { value: string; label: string }[] = [];
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -57,18 +57,6 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isSupervisor = this.authService.currentUser?.role === "SUPERVISOR";
-    this.actionOptions = this.isSupervisor
-      ? [
-          { value: "request_info", label: "Request Info" },
-          { value: "assign", label: "Assign to Officer" },
-          { value: "resolve", label: "Mark Resolved" },
-          { value: "close", label: "Close Case" },
-        ]
-      : [
-          { value: "request_info", label: "Request Info" },
-          { value: "resolve", label: "Mark Resolved" },
-          { value: "close", label: "Close Case" },
-        ];
 
     this.route.queryParamMap
       .pipe(takeUntil(this.destroy$))
@@ -170,6 +158,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
     this.updating = true;
     const statusMap: Record<string, ComplaintStatus> = {
+      start_progress: ComplaintStatus.IN_PROGRESS,
       resolve: ComplaintStatus.RESOLVED,
       close: ComplaintStatus.CLOSED,
       request_info: ComplaintStatus.AWAITING_INFO,
@@ -203,6 +192,55 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
   get canAssignComplaint(): boolean {
     return this.isSupervisor;
+  }
+
+  get canUpdateComplaint(): boolean {
+    return this.actionOptions.length > 0;
+  }
+
+  get actionOptions(): ActionOption[] {
+    if (!this.complaint) {
+      return [];
+    }
+
+    const options: ActionOption[] = [];
+    const status = this.complaint.status;
+
+    if (
+      this.isSupervisor &&
+      status !== ComplaintStatus.RESOLVED &&
+      status !== ComplaintStatus.CLOSED
+    ) {
+      options.push({ value: "assign", label: "Assign to Officer" });
+    }
+
+    if (
+      status === ComplaintStatus.UNDER_REVIEW ||
+      status === ComplaintStatus.AWAITING_INFO
+    ) {
+      options.push({ value: "start_progress", label: "Start Progress" });
+    }
+
+    if (
+      status === ComplaintStatus.UNDER_REVIEW ||
+      status === ComplaintStatus.IN_PROGRESS
+    ) {
+      options.push({ value: "request_info", label: "Request Info" });
+    }
+
+    if (
+      status === ComplaintStatus.UNDER_REVIEW ||
+      status === ComplaintStatus.IN_PROGRESS ||
+      status === ComplaintStatus.AWAITING_INFO
+    ) {
+      options.push({ value: "resolve", label: "Mark Resolved" });
+    }
+
+    if (status === ComplaintStatus.RESOLVED) {
+      options.push({ value: "close", label: "Close Case" });
+    }
+
+    return options;
   }
 
   addNote(): void {
