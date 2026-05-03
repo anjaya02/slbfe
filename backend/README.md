@@ -1,10 +1,10 @@
 # SLBFE Backend
 
-<!-- Repository refreshed: 2026-05-03 -->
-
 Express.js + MySQL backend for the SLBFE complaint management system.
 
 This backend is the API layer used by the Angular frontend in the `frontend/` folder. It provides authentication, user management, complaints, dashboard stats, reports, and notifications.
+
+The local reset workflow uses the shared schema in `../sql/schema.sql`, so database structure and demo seed data stay in one place.
 
 ## Stack
 
