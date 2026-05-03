@@ -1,137 +1,246 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, of, timer } from "rxjs";
-import { delay, map, switchMap, tap } from "rxjs/operators";
+import { HttpBackend, HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
+import { BehaviorSubject, Observable, of, throwError } from "rxjs";
+import {
+  catchError,
+  finalize,
+  map,
+  shareReplay,
+  switchMap,
+  tap,
+} from "rxjs/operators";
 import {
   User,
   UserRole,
   LoginRequest,
   LoginResponse,
+  CreateUserRequest,
+  UserSettings,
 } from "../models/user.model";
-
-const MOCK_USERS: { email: string; password: string; user: User }[] = [
-  {
-    email: "admin@slbfe.gov.lk",
-    password: "admin123",
-    user: {
-      id: "USR001",
-      name: "Main Admin",
-      email: "admin@slbfe.gov.lk",
-      role: "SUPERVISOR",
-      avatar: "",
-      phone: "+94 77 123 4567",
-      location: "Colombo",
-      notificationsEnabled: true,
-      isActive: true,
-      dateCreated: new Date("2024-01-15"),
-    },
-  },
-  {
-    email: "officer@slbfe.gov.lk",
-    password: "officer123",
-    user: {
-      id: "USR002",
-      name: "Iman Fernando",
-      email: "officer@slbfe.gov.lk",
-      role: "CASE_OFFICER",
-      avatar: "",
-      phone: "+94 77 234 5678",
-      location: "Colombo",
-      notificationsEnabled: true,
-      isActive: true,
-      dateCreated: new Date("2024-02-01"),
-    },
-  },
-  {
-    email: "officer2@slbfe.gov.lk",
-    password: "officer123",
-    user: {
-      id: "USR003",
-      name: "Kamal Perera",
-      email: "officer2@slbfe.gov.lk",
-      role: "CASE_OFFICER",
-      avatar: "",
-      phone: "+94 77 345 6789",
-      location: "Kandy",
-      notificationsEnabled: true,
-      isActive: true,
-      dateCreated: new Date("2024-03-10"),
-    },
-  },
-  {
-    email: "officer3@slbfe.gov.lk",
-    password: "officer123",
-    user: {
-      id: "USR004",
-      name: "Nimal Silva",
-      email: "officer3@slbfe.gov.lk",
-      role: "CASE_OFFICER",
-      avatar: "",
-      phone: "+94 77 456 7890",
-      location: "Galle",
-      notificationsEnabled: true,
-      isActive: false,
-      dateCreated: new Date("2024-04-20"),
-    },
-  },
-];
+import { environment } from "../../../environments/environment";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+  private readonly authHttp: HttpClient;
+  private refreshRequest$: Observable<LoginResponse> | null = null;
 
-  private tokenKey = "slbfe_auth_token";
+  private readonly tokenKey = environment.tokenKey;
+  private readonly refreshTokenKey = environment.refreshTokenKey;
+  private readonly userKey = "slbfe_auth_user";
+  private readonly apiBaseUrl = environment.apiBaseUrl;
 
-  constructor(private router: Router) {
+  constructor(
+    private http: HttpClient,
+    private httpBackend: HttpBackend,
+    private router: Router,
+  ) {
+    this.authHttp = new HttpClient(httpBackend);
     this.loadUserFromStorage();
   }
 
-  private loadUserFromStorage(): void {
-    const stored = localStorage.getItem(this.tokenKey);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        this.currentUserSubject.next(data.user);
-      } catch {
-        localStorage.removeItem(this.tokenKey);
+  private clearStorage(storage: Storage): void {
+    storage.removeItem(this.tokenKey);
+    storage.removeItem(this.refreshTokenKey);
+    storage.removeItem(this.userKey);
+  }
+
+  private getStoredSession(): {
+    storage: Storage;
+    token: string;
+    refreshToken: string;
+    storedUser: string;
+  } | null {
+    for (const storage of [localStorage, sessionStorage]) {
+      const token = storage.getItem(this.tokenKey);
+      const refreshToken = storage.getItem(this.refreshTokenKey);
+      const storedUser = storage.getItem(this.userKey);
+
+      if (token && refreshToken && storedUser) {
+        return { storage, token, refreshToken, storedUser };
       }
+
+      if (token || refreshToken || storedUser) {
+        this.clearStorage(storage);
+      }
+    }
+
+    return null;
+  }
+
+  private loadUserFromStorage(): void {
+    const session = this.getStoredSession();
+
+    if (!session) {
+      this.clearSession();
+      return;
+    }
+
+    try {
+      this.currentUserSubject.next(
+        this.mapUser(JSON.parse(session.storedUser)),
+      );
+    } catch {
+      this.clearSession();
     }
   }
 
-  login(req: LoginRequest): Observable<LoginResponse> {
-    const found = MOCK_USERS.find(
-      (u) => u.email === req.email && u.password === req.password,
+  private storeSession(response: LoginResponse, rememberMe: boolean): void {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    const otherStorage = rememberMe ? sessionStorage : localStorage;
+
+    this.clearStorage(otherStorage);
+    storage.setItem(this.tokenKey, response.token);
+    storage.setItem(this.refreshTokenKey, response.refreshToken);
+    storage.setItem(this.userKey, JSON.stringify(response.user));
+    this.currentUserSubject.next(response.user);
+  }
+
+  private clearSession(): void {
+    this.clearStorage(localStorage);
+    this.clearStorage(sessionStorage);
+    this.currentUserSubject.next(null);
+  }
+
+  private mapUser(user: Partial<User> | null | undefined): User {
+    return {
+      id: user?.id || "",
+      name: user?.name || "",
+      email: user?.email || "",
+      role: (user?.role as UserRole) || "CASE_OFFICER",
+      avatar: user?.avatar || "",
+      phone: user?.phone || "",
+      location: user?.location || "",
+      notificationsEnabled: Boolean(user?.notificationsEnabled),
+      dateFormat: user?.dateFormat || "DD/MM/YYYY",
+      isActive: Boolean(user?.isActive),
+      dateCreated: user?.dateCreated ? new Date(user.dateCreated) : undefined,
+    };
+  }
+
+  private persistCurrentUser(user: User): void {
+    const session = this.getStoredSession();
+
+    if (!session) {
+      return;
+    }
+
+    this.storeSession(
+      { token: session.token, refreshToken: session.refreshToken, user },
+      session.storage === localStorage,
     );
-    if (!found) {
-      return timer(800).pipe(
-        switchMap(() => {
-          throw new Error("Invalid email or password");
+  }
+
+  login(req: LoginRequest, rememberMe = false): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.apiBaseUrl}/auth/login`, req)
+      .pipe(
+        map((response) => ({
+          ...response,
+          user: this.mapUser(response.user),
+        })),
+        tap((response) => this.storeSession(response, rememberMe)),
+        catchError((error) => {
+          const message =
+            error?.status === 0
+              ? "Unable to reach the server. Please try again."
+              : error?.error?.message || "Invalid email or password";
+          return throwError(() => new Error(message));
+        }),
+      );
+  }
+
+  refreshSession(): Observable<LoginResponse> {
+    const session = this.getStoredSession();
+
+    if (!session?.refreshToken) {
+      return throwError(() => new Error("No refresh token available"));
+    }
+
+    if (this.refreshRequest$) {
+      return this.refreshRequest$;
+    }
+
+    this.refreshRequest$ = this.authHttp
+      .post<LoginResponse>(`${this.apiBaseUrl}/auth/refresh`, {
+        refreshToken: session.refreshToken,
+      })
+      .pipe(
+        map((response) => ({
+          ...response,
+          user: this.mapUser(response.user),
+        })),
+        tap((response) =>
+          this.storeSession(response, session.storage === localStorage),
+        ),
+        finalize(() => {
+          this.refreshRequest$ = null;
+        }),
+        shareReplay(1),
+      );
+
+    return this.refreshRequest$;
+  }
+
+  initializeSession(): Observable<User | null> {
+    const session = this.getStoredSession();
+
+    if (!session) {
+      return of(null);
+    }
+
+    if (!this.token) {
+      return this.refreshSession().pipe(
+        map((response) => response.user),
+        catchError(() => {
+          this.clearSession();
+          return of(null);
         }),
       );
     }
-    const response: LoginResponse = {
-      token: "mock-jwt-token-" + Date.now(),
-      refreshToken: "mock-refresh-" + Date.now(),
-      user: found.user,
-    };
-    return of(response).pipe(
-      delay(1000),
-      tap((res) => {
-        localStorage.setItem(this.tokenKey, JSON.stringify(res));
-        this.currentUserSubject.next(res.user);
-      }),
+
+    return this.getCurrentUserProfile().pipe(
+      catchError(() =>
+        this.refreshSession().pipe(
+          map((response) => response.user),
+          catchError(() => {
+            this.clearSession();
+            return of(null);
+          }),
+        ),
+      ),
+    );
+  }
+
+  getCurrentUserProfile(): Observable<User> {
+    return this.http.get<User>(`${this.apiBaseUrl}/auth/me`).pipe(
+      map((user) => this.mapUser(user)),
+      tap((user) => this.persistCurrentUser(user)),
     );
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    this.currentUserSubject.next(null);
+    const refreshToken = this.getStoredSession()?.refreshToken;
+
+    if (refreshToken) {
+      this.authHttp
+        .post(`${this.apiBaseUrl}/auth/logout`, { refreshToken })
+        .subscribe({ error: () => undefined });
+    }
+
+    this.clearSession();
+    this.router.navigate(["/login"]);
+  }
+
+  handleExpiredSession(): void {
+    this.clearSession();
     this.router.navigate(["/login"]);
   }
 
   get isLoggedIn(): boolean {
-    return !!this.currentUserSubject.value;
+    return !!this.currentUserSubject.value && !!this.token;
   }
 
   get currentUser(): User | null {
@@ -139,89 +248,67 @@ export class AuthService {
   }
 
   get token(): string | null {
-    const stored = localStorage.getItem(this.tokenKey);
-    if (stored) {
-      try {
-        return JSON.parse(stored).token;
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }
-
-  hasRole(role: string): boolean {
-    return this.currentUser?.role === role;
+    return this.getStoredSession()?.token || null;
   }
 
   updateProfile(updates: Partial<User>): Observable<User> {
-    const user = { ...this.currentUser!, ...updates };
-    this.currentUserSubject.next(user);
-    const stored = localStorage.getItem(this.tokenKey);
-    if (stored) {
-      const data = JSON.parse(stored);
-      data.user = user;
-      localStorage.setItem(this.tokenKey, JSON.stringify(data));
-    }
-    return of(user).pipe(delay(500));
+    return this.http
+      .patch<User>(`${this.apiBaseUrl}/auth/me/profile`, updates)
+      .pipe(
+        map((user) => this.mapUser(user)),
+        tap((user) => this.persistCurrentUser(user)),
+      );
   }
 
-  // ===== User Management (Supervisor) =====
+  updatePreferences(updates: Partial<UserSettings>): Observable<UserSettings> {
+    return this.http
+      .patch<UserSettings>(`${this.apiBaseUrl}/auth/me/preferences`, updates)
+      .pipe(
+        tap((preferences) => {
+          if (!this.currentUser) {
+            return;
+          }
+
+          this.persistCurrentUser({
+            ...this.currentUser,
+            notificationsEnabled:
+              preferences.notificationsEnabled ??
+              this.currentUser.notificationsEnabled,
+            dateFormat: preferences.dateFormat ?? this.currentUser.dateFormat,
+          });
+        }),
+      );
+  }
 
   getUsers(): Observable<User[]> {
-    return of(MOCK_USERS.map((u) => u.user)).pipe(delay(600));
+    return this.http
+      .get<User[]>(`${this.apiBaseUrl}/users`)
+      .pipe(map((users) => users.map((user) => this.mapUser(user))));
   }
 
   getCaseOfficers(): Observable<User[]> {
-    return of(
-      MOCK_USERS.filter(
-        (u) => u.user.role === "CASE_OFFICER" && u.user.isActive,
-      ).map((u) => u.user),
-    ).pipe(delay(300));
+    return this.http
+      .get<User[]>(`${this.apiBaseUrl}/users/case-officers`)
+      .pipe(map((users) => users.map((user) => this.mapUser(user))));
   }
 
-  createUser(userData: {
-    name: string;
-    email: string;
-    role: UserRole;
-    phone?: string;
-    location?: string;
-  }): Observable<User> {
-    const newUser: User = {
-      id: "USR" + String(MOCK_USERS.length + 1).padStart(3, "0"),
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      avatar: "",
-      phone: userData.phone || "",
-      location: userData.location || "",
-      notificationsEnabled: true,
-      isActive: true,
-      dateCreated: new Date(),
-    };
-    MOCK_USERS.push({
-      email: newUser.email,
-      password: "default123",
-      user: newUser,
-    });
-    return of(newUser).pipe(delay(500));
+  createUser(userData: CreateUserRequest): Observable<User> {
+    return this.http
+      .post<User>(`${this.apiBaseUrl}/users`, userData)
+      .pipe(map((user) => this.mapUser(user)));
   }
 
   updateUser(userId: string, updates: Partial<User>): Observable<User> {
-    const idx = MOCK_USERS.findIndex((u) => u.user.id === userId);
-    if (idx === -1) throw new Error("User not found");
-    MOCK_USERS[idx].user = { ...MOCK_USERS[idx].user, ...updates };
-    if (updates.email) MOCK_USERS[idx].email = updates.email;
-    return of(MOCK_USERS[idx].user).pipe(delay(500));
+    return this.http
+      .patch<User>(`${this.apiBaseUrl}/users/${userId}`, updates)
+      .pipe(map((user) => this.mapUser(user)));
   }
 
-  toggleUserActive(userId: string): Observable<User> {
-    const idx = MOCK_USERS.findIndex((u) => u.user.id === userId);
-    if (idx === -1) throw new Error("User not found");
-    MOCK_USERS[idx].user = {
-      ...MOCK_USERS[idx].user,
-      isActive: !MOCK_USERS[idx].user.isActive,
-    };
-    return of(MOCK_USERS[idx].user).pipe(delay(400));
+  toggleUserActive(user: User): Observable<User> {
+    return this.http
+      .patch<User>(`${this.apiBaseUrl}/users/${user.id}/status`, {
+        isActive: !user.isActive,
+      })
+      .pipe(map((updatedUser) => this.mapUser(updatedUser)));
   }
 }

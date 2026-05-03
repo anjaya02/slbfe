@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { NotificationService } from "../../../core/services/notification.service";
+import { ToastService } from "../../../core/services/toast.service";
 import { AppNotification } from "../../../core/models/notification.model";
 
 @Component({
@@ -19,16 +20,30 @@ export class NotificationListComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
+    private route: ActivatedRoute,
     private router: Router,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
-    this.notificationService.notifications$
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const filter = params.get("filter");
+      this.activeFilter = filter === "unread" ? "unread" : "all";
+      this.applyFilter();
+    });
+
+    this.notificationService
+      .notifications$
       .pipe(takeUntil(this.destroy$))
       .subscribe((n) => {
         this.notifications = n;
         this.applyFilter();
       });
+
+    this.notificationService
+      .getNotifications()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   ngOnDestroy(): void {
@@ -47,25 +62,57 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   setFilter(filter: "all" | "unread"): void {
     this.activeFilter = filter;
     this.applyFilter();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { filter: filter === "all" ? null : filter },
+      queryParamsHandling: "merge",
+      replaceUrl: true,
+    });
   }
 
   markAsRead(notification: AppNotification): void {
-    this.notificationService.markAsRead(notification.id);
-    if (notification.link) {
-      this.router.navigateByUrl(notification.link);
-    }
+    const wasUnread = !notification.read;
+    this.notificationService
+      .markAsRead(notification.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (wasUnread) {
+          this.toast.success("Notification marked as read");
+        }
+        if (notification.link) {
+          this.router.navigateByUrl(notification.link);
+        }
+      });
   }
 
   markAllAsRead(): void {
-    this.notificationService.markAllAsRead();
+    this.notificationService
+      .markAllAsRead()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.applyFilter();
+        this.toast.success("All notifications marked as read");
+      });
   }
 
   deleteNotification(id: string): void {
-    this.notificationService.deleteNotification(id);
+    this.notificationService
+      .deleteNotification(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.applyFilter();
+        this.toast.success("Notification deleted");
+      });
   }
 
   clearAll(): void {
-    this.notificationService.clearAll();
+    this.notificationService
+      .clearAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.applyFilter();
+        this.toast.success("All notifications cleared");
+      });
   }
 
   getIcon(type: string): string {

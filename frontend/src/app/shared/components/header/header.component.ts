@@ -8,6 +8,7 @@ import {
 import { trigger, transition, style, animate } from "@angular/animations";
 import { AuthService } from "../../../core/services/auth.service";
 import { NotificationService } from "../../../core/services/notification.service";
+import { ToastService } from "../../../core/services/toast.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.component";
 
@@ -46,6 +47,7 @@ export class HeaderComponent {
     public notificationService: NotificationService,
     private elementRef: ElementRef,
     private dialog: MatDialog,
+    private toast: ToastService,
   ) {}
 
   onLogout(): void {
@@ -91,7 +93,15 @@ export class HeaderComponent {
   toggleNotifications(): void {
     if (this.auth.currentUser) {
       const newState = !this.auth.currentUser.notificationsEnabled;
-      this.auth.updateProfile({ notificationsEnabled: newState }).subscribe();
+      this.auth
+        .updatePreferences({ notificationsEnabled: newState })
+        .subscribe({
+          next: () => {
+            this.toast.success(
+              newState ? "Notifications enabled" : "Notifications disabled",
+            );
+          },
+        });
     }
   }
 

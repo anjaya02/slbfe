@@ -38,6 +38,26 @@
       </mat-select>
     </mat-form-field>
 
+    <mat-form-field
+      *ngIf="mode === 'create'"
+      appearance="outline"
+      class="full-width"
+    >
+      <mat-label>Temporary Password</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        placeholder="Minimum 8 characters"
+        type="password"
+      />
+      <mat-error *ngIf="form.get('password')?.hasError('required')"
+        >Password is required</mat-error
+      >
+      <mat-error *ngIf="form.get('password')?.hasError('minlength')"
+        >Minimum 8 characters</mat-error
+      >
+    </mat-form-field>
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Phone</mat-label>
       <input matInput formControlName="phone" placeholder="+94 77 XXX XXXX" />

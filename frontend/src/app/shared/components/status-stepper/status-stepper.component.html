@@ -1,7 +1,11 @@
 <div class="stepper-container">
   <div class="stepper">
     <ng-container *ngFor="let step of steps; let i = index; let last = last">
-      <div class="step" [ngClass]="getStepState(step)">
+      <div
+        class="step"
+        [ngClass]="getStepState(step)"
+        [attr.aria-current]="getStepState(step) === 'active' ? 'step' : null"
+      >
         <div class="step-circle">
           <mat-icon *ngIf="getStepState(step) === 'completed'"
             >check_circle</mat-icon

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { ToastService } from "../../core/services/toast.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -24,7 +24,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -54,6 +54,26 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       });
   }
 
+  isCurrentUser(user: User): boolean {
+    return this.authService.currentUser?.id === user.id;
+  }
+
+  getStatusActionLabel(user: User): string {
+    if (this.isCurrentUser(user)) {
+      return "Current user";
+    }
+
+    return user.isActive ? "Deactivate user" : "Activate user";
+  }
+
+  getStatusActionTooltip(user: User): string {
+    if (this.isCurrentUser(user)) {
+      return "You can't deactivate your own account";
+    }
+
+    return user.isActive ? "Deactivate user" : "Activate user";
+  }
+
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(UserFormDialogComponent, {
       width: "500px",
@@ -71,18 +91,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: () => {
-                this.snackBar.open("User created successfully", "Close", {
-                  duration: 3000,
-                  panelClass: ["success-snackbar"],
-                });
+                this.toast.success("User created successfully");
                 this.loadUsers();
               },
-              error: () => {
-                this.snackBar.open("Failed to create user", "Close", {
-                  duration: 3000,
-                  panelClass: ["error-snackbar"],
-                });
-              },
+              error: () => {},
             });
         }
       });
@@ -105,42 +117,32 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: () => {
-                this.snackBar.open("User updated successfully", "Close", {
-                  duration: 3000,
-                  panelClass: ["success-snackbar"],
-                });
+                this.toast.success("User updated successfully");
                 this.loadUsers();
               },
-              error: () => {
-                this.snackBar.open("Failed to update user", "Close", {
-                  duration: 3000,
-                  panelClass: ["error-snackbar"],
-                });
-              },
+              error: () => {},
             });
         }
       });
   }
 
   toggleUserStatus(user: User): void {
+    if (this.isCurrentUser(user)) {
+      this.toast.info("You can't deactivate your own account");
+      return;
+    }
+
     this.authService
-      .toggleUserActive(user.id)
+      .toggleUserActive(user)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updated) => {
-          this.snackBar.open(
+          this.toast.success(
             `${updated.name} is now ${updated.isActive ? "active" : "deactivated"}`,
-            "Close",
-            { duration: 3000, panelClass: ["success-snackbar"] },
           );
           this.loadUsers();
         },
-        error: () => {
-          this.snackBar.open("Failed to update user status", "Close", {
-            duration: 3000,
-            panelClass: ["error-snackbar"],
-          });
-        },
+        error: () => {},
       });
   }
 

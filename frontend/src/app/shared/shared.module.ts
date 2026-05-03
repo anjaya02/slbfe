@@ -2,8 +2,6 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-
-// Angular Material
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
@@ -26,18 +24,11 @@ import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
-
-// Shared Components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { StatusStepperComponent } from "./components/status-stepper/status-stepper.component";
 import { LoadingComponent } from "./components/loading/loading.component";
 import { ConfirmDialogComponent } from "./components/confirm-dialog/confirm-dialog.component";
-
-// Pipes & Directives
-import { TimeAgoPipe } from "./pipes/time-ago.pipe";
-import { StatusColorPipe } from "./pipes/status-color.pipe";
-import { HasRoleDirective } from "./directives/has-role.directive";
 
 const MATERIAL_MODULES = [
   MatIconModule,
@@ -71,9 +62,6 @@ const MATERIAL_MODULES = [
     StatusStepperComponent,
     LoadingComponent,
     ConfirmDialogComponent,
-    TimeAgoPipe,
-    StatusColorPipe,
-    HasRoleDirective,
   ],
   imports: [
     CommonModule,
@@ -92,9 +80,6 @@ const MATERIAL_MODULES = [
     HeaderComponent,
     StatusStepperComponent,
     LoadingComponent,
-    TimeAgoPipe,
-    StatusColorPipe,
-    HasRoleDirective,
   ],
 })
 export class SharedModule {}

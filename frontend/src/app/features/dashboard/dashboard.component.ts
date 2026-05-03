@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../core/services/complaint.service";
+import { AuthService } from "../../core/services/auth.service";
 import {
   DashboardStats,
   WeeklyData,
@@ -19,9 +20,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   stats: DashboardStats | null = null;
   loading = true;
   error = false;
+  dashboardHeading = "Manage Cases.";
+  dashboardSubheading = "Track Progress.";
+  dashboardTagline = "Ensure Resolution.";
   private destroy$ = new Subject<void>();
-
-  // Weekly Chart
   weeklyChartData: ChartConfiguration<"bar">["data"] = {
     labels: [],
     datasets: [],
@@ -35,13 +37,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { callback: (v: string | number) => +v / 1000 + "K" },
+        ticks: {
+          stepSize: 1,
+          callback: (v: string | number) => {
+            const n = +v;
+            return Number.isInteger(n) ? n : null;
+          },
+        },
       },
       y: { grid: { display: false } },
     },
   };
-
-  // Yearly Chart
   yearlyChartData: ChartConfiguration<"line">["data"] = {
     labels: [],
     datasets: [],
@@ -58,7 +64,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     elements: { line: { tension: 0.4 }, point: { radius: 3, hoverRadius: 6 } },
   };
 
-  constructor(private complaintService: ComplaintService) {}
+  constructor(
+    private complaintService: ComplaintService,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.complaintService
@@ -67,6 +76,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data: DashboardStats) => {
           this.stats = data;
+          this.applyRoleCopy(data);
           this.loading = false;
           this.buildWeeklyChart(data);
           this.buildYearlyChart(data);
@@ -81,6 +91,61 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get totalCasesLabel(): string {
+    return this.isCaseOfficer ? "Assigned Cases" : "Total Cases";
+  }
+
+  get resolvedCasesLabel(): string {
+    return this.isCaseOfficer ? "Resolved By You" : "Resolved Cases";
+  }
+
+  get pendingReviewLabel(): string {
+    return this.isCaseOfficer ? "Open Assigned" : "Open Cases";
+  }
+
+  get weeklyChartTitle(): string {
+    return this.isCaseOfficer
+      ? "Your Weekly Case Load"
+      : "Weekly Case Overview";
+  }
+
+  get yearlyChartTitle(): string {
+    return this.isCaseOfficer
+      ? "Your Yearly Case Trend"
+      : "Yearly Case Overview";
+  }
+
+  get weeklyChartSummary(): number {
+    return (this.stats?.weeklyData || []).reduce(
+      (total, day) => total + day.submitted,
+      0,
+    );
+  }
+
+  get yearlyChartSummary(): number {
+    return (this.stats?.monthlyData || []).reduce(
+      (total, month) => total + month.count,
+      0,
+    );
+  }
+
+  get isCaseOfficer(): boolean {
+    return this.authService.currentUser?.role === "CASE_OFFICER";
+  }
+
+  private applyRoleCopy(data: DashboardStats): void {
+    if (data.scope === "ASSIGNED") {
+      this.dashboardHeading = "Focus Assigned Cases.";
+      this.dashboardSubheading = "Move Cases Forward.";
+      this.dashboardTagline = "Close What You Own.";
+      return;
+    }
+
+    this.dashboardHeading = "Manage Cases.";
+    this.dashboardSubheading = "Track Progress.";
+    this.dashboardTagline = "Ensure Resolution.";
   }
 
   private buildWeeklyChart(data: DashboardStats): void {

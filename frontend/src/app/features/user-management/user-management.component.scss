@@ -19,6 +19,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 24px;
 }
 
@@ -30,7 +32,11 @@
 }
 
 .btn-add-user {
-  background: linear-gradient(135deg, v.$primary-blue, v.$primary-dark) !important;
+  background: linear-gradient(
+    135deg,
+    v.$primary-blue,
+    v.$primary-dark
+  ) !important;
   color: v.$white !important;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
@@ -83,8 +89,20 @@
   overflow: hidden;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .user-table {
   width: 100%;
+  min-width: 760px;
+}
+
+@media (max-width: v.$bp-laptop) {
+  .btn-add-user {
+    width: 100%;
+  }
 }
 
 .user-name-cell {
@@ -144,6 +162,42 @@
   }
 }
 
+.mat-column-actions {
+  width: 112px;
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.status-action-tooltip-host {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mat-mdc-icon-button {
+  color: var(--text-secondary);
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover:not(:disabled) {
+    color: v.$primary-blue;
+    background: rgba(30, 64, 175, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    color: v.$gray-300;
+    cursor: not-allowed;
+  }
+}
+
 .table-row {
   transition: background 0.15s ease;
 
@@ -164,5 +218,51 @@
     width: 48px;
     height: 48px;
     margin-bottom: 12px;
+  }
+}
+
+// ── Skeleton loader ────────────────────────────────────────────
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+%sk-base {
+  background: linear-gradient(
+    90deg,
+    v.$gray-100 25%,
+    v.$gray-50 50%,
+    v.$gray-100 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.table-skeleton {
+  background: var(--card-bg, #fff);
+  border-radius: v.$radius-lg;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.sk-head {
+  @extend %sk-base;
+  height: 48px;
+  margin-bottom: 2px;
+  border-radius: 0;
+}
+
+.sk-row {
+  @extend %sk-base;
+  height: 54px;
+  margin-bottom: 2px;
+  border-radius: 0;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 }

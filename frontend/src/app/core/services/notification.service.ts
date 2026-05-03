@@ -1,75 +1,55 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, of } from "rxjs";
-import { delay, map } from "rxjs/operators";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { BehaviorSubject, Observable } from "rxjs";
+import { map, tap } from "rxjs/operators";
 import { AppNotification } from "../models/notification.model";
-
-const MOCK_NOTIFICATIONS: AppNotification[] = [
-  {
-    id: "NTF1",
-    type: "CASE_UPDATE",
-    title: "Case R10001 Updated",
-    message: "Status changed to Investigation for complaint R10001.",
-    read: false,
-    timestamp: new Date(Date.now() - 1800000),
-    link: "/complaints/C001",
-  },
-  {
-    id: "NTF2",
-    type: "ASSIGNMENT",
-    title: "New Case Assigned",
-    message: "Case R0023 has been assigned to you by Supervisor.",
-    read: false,
-    timestamp: new Date(Date.now() - 3600000),
-    link: "/complaints/C002",
-  },
-  {
-    id: "NTF3",
-    type: "SYSTEM_ALERT",
-    title: "System Maintenance",
-    message: "Scheduled maintenance on Feb 10, 2026 from 2:00 AM to 4:00 AM.",
-    read: true,
-    timestamp: new Date(Date.now() - 86400000),
-  },
-  {
-    id: "NTF4",
-    type: "MENTION",
-    title: "You were mentioned",
-    message: "Main Admin mentioned you in a note on case R1000.",
-    read: true,
-    timestamp: new Date(Date.now() - 172800000),
-    link: "/complaints/C003",
-  },
-  {
-    id: "NTF5",
-    type: "CASE_UPDATE",
-    title: "Case R5200 Resolved",
-    message: "Case R5200 has been marked as resolved.",
-    read: true,
-    timestamp: new Date(Date.now() - 259200000),
-    link: "/complaints/C004",
-  },
-  {
-    id: "NTF6",
-    type: "ASSIGNMENT",
-    title: "Case Reassigned",
-    message: "Case R1200 has been reassigned from Officer Fernando to you.",
-    read: false,
-    timestamp: new Date(Date.now() - 7200000),
-    link: "/complaints/C006",
-  },
-];
+import { environment } from "../../../environments/environment";
+import { AuthService } from "./auth.service";
 
 @Injectable({ providedIn: "root" })
 export class NotificationService {
-  private notificationsSubject = new BehaviorSubject<AppNotification[]>(
-    MOCK_NOTIFICATIONS,
-  );
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+  private notificationsSubject = new BehaviorSubject<AppNotification[]>([]);
   public notifications$ = this.notificationsSubject.asObservable();
 
-  get unreadCount$(): Observable<number> {
-    return this.notificationsSubject.pipe(
-      map((notifications) => notifications.filter((n) => !n.read).length),
-    );
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.loadNotifications().subscribe();
+        return;
+      }
+
+      this.notificationsSubject.next([]);
+    });
+  }
+
+  private mapNotification(notification: any): AppNotification {
+    return {
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      read: Boolean(notification.read),
+      timestamp: new Date(notification.timestamp),
+      link: notification.link || undefined,
+      icon: notification.icon,
+    };
+  }
+
+  private loadNotifications(filter: "all" | "unread" = "all"): Observable<AppNotification[]> {
+    const params = new HttpParams().set("filter", filter);
+
+    return this.http
+      .get<any[]>(`${this.apiBaseUrl}/notifications`, { params })
+      .pipe(
+        map((notifications) =>
+          notifications.map((notification) => this.mapNotification(notification)),
+        ),
+        tap((notifications) => this.notificationsSubject.next(notifications)),
+      );
   }
 
   getUnreadCount(): number {
@@ -77,34 +57,55 @@ export class NotificationService {
   }
 
   getNotifications(): Observable<AppNotification[]> {
-    return this.notifications$;
+    return this.loadNotifications();
   }
 
   markAsRead(id: string): Observable<void> {
-    const list = this.notificationsSubject.value.map((n) =>
-      n.id === id ? { ...n, read: true } : n,
+    return this.http.patch(`${this.apiBaseUrl}/notifications/${id}/read`, {}).pipe(
+      tap(() => {
+        this.notificationsSubject.next(
+          this.notificationsSubject.value.map((notification) =>
+            notification.id === id
+              ? { ...notification, read: true }
+              : notification,
+          ),
+        );
+      }),
+      map(() => void 0),
     );
-    this.notificationsSubject.next(list);
-    return of(void 0).pipe(delay(200));
   }
 
   markAllAsRead(): Observable<void> {
-    const list = this.notificationsSubject.value.map((n) => ({
-      ...n,
-      read: true,
-    }));
-    this.notificationsSubject.next(list);
-    return of(void 0).pipe(delay(200));
+    return this.http.patch(`${this.apiBaseUrl}/notifications/read-all`, {}).pipe(
+      tap(() => {
+        this.notificationsSubject.next(
+          this.notificationsSubject.value.map((notification) => ({
+            ...notification,
+            read: true,
+          })),
+        );
+      }),
+      map(() => void 0),
+    );
   }
 
   deleteNotification(id: string): Observable<void> {
-    const list = this.notificationsSubject.value.filter((n) => n.id !== id);
-    this.notificationsSubject.next(list);
-    return of(void 0).pipe(delay(200));
+    return this.http.delete(`${this.apiBaseUrl}/notifications/${id}`).pipe(
+      tap(() => {
+        this.notificationsSubject.next(
+          this.notificationsSubject.value.filter(
+            (notification) => notification.id !== id,
+          ),
+        );
+      }),
+      map(() => void 0),
+    );
   }
 
   clearAll(): Observable<void> {
-    this.notificationsSubject.next([]);
-    return of(void 0).pipe(delay(200));
+    return this.http.delete(`${this.apiBaseUrl}/notifications`).pipe(
+      tap(() => this.notificationsSubject.next([])),
+      map(() => void 0),
+    );
   }
 }

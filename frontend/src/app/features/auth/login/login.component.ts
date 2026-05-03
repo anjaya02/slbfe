@@ -14,7 +14,6 @@ export class LoginComponent implements OnInit {
   loading = false;
   error = "";
   hidePassword = true;
-  currentYear = new Date().getFullYear();
 
   constructor(
     private fb: FormBuilder,
@@ -28,8 +27,8 @@ export class LoginComponent implements OnInit {
       return;
     }
     this.loginForm = this.fb.group({
-      email: ["admin@slbfe.gov.lk", [Validators.required, Validators.email]],
-      password: ["admin123", [Validators.required, Validators.minLength(8)]],
+      email: ["", [Validators.required, Validators.email]],
+      password: ["", [Validators.required, Validators.minLength(8)]],
       rememberMe: [false],
     });
   }
@@ -38,7 +37,8 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) return;
     this.loading = true;
     this.error = "";
-    this.auth.login(this.loginForm.value).subscribe({
+    const { email, password, rememberMe } = this.loginForm.getRawValue();
+    this.auth.login({ email, password }, rememberMe).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(["/dashboard"]);

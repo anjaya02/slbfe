@@ -28,7 +28,6 @@ export interface ReportSummary {
   resolvedCases: number;
   resolvedPercentage: number;
   averageResolutionDays: number;
-  escalatedCases: number;
   pendingCases: number;
 }
 
@@ -48,7 +47,6 @@ export interface MonthlyTrendItem {
   month: string;
   submitted: number;
   resolved: number;
-  escalated: number;
 }
 
 export interface OfficerPerformanceItem {
@@ -56,5 +54,4 @@ export interface OfficerPerformanceItem {
   casesHandled: number;
   casesResolved: number;
   avgResolutionDays: number;
-  satisfactionRating: number;
 }

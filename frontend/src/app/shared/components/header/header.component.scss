@@ -36,6 +36,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .menu-toggle {
@@ -50,23 +51,25 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .brand-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   .header-logo-img {
     height: 48px; // Slightly larger for visibility
     width: auto;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
 }
 
 .brand-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .brand-subtitle {
@@ -82,7 +85,7 @@
   font-weight: v.$font-weight-semibold;
   color: v.$primary-blue;
   letter-spacing: 0.3px;
-  
+
   // Truncation logic
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -95,9 +98,9 @@
     font-size: 11px;
     max-width: 250px;
   }
-  
+
   @media (max-width: v.$bp-mobile) {
-    max-width: 180px; 
+    max-width: 180px;
     -webkit-line-clamp: 1; // Single line on very small screens
   }
 }
@@ -106,6 +109,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .notification-btn {
@@ -139,7 +143,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   mat-icon {
     font-size: 22px;
     width: 22px;

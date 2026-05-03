@@ -35,12 +35,35 @@
 
 .search-field {
   width: 360px;
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: v.$compact-field-height;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: v.$compact-field-height;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: v.$compact-field-height;
+    padding-top: 10px !important;
+    padding-bottom: 6px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-icon-prefix {
+    padding: 10px 12px 0 v.$compact-field-padding-x;
+  }
+
+  ::ng-deep input.mat-mdc-input-element {
+    font-size: v.$font-size-sm;
+  }
+
   ::ng-deep .mat-mdc-form-field-subscript-wrapper {
     display: none;
   }
 }
 
-// ===== Incident Category Inline Search =====
 .incident-header {
   position: relative;
   overflow: visible !important;
@@ -150,6 +173,11 @@
   overflow: hidden;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .loading-state {
   display: flex;
   justify-content: center;
@@ -158,6 +186,7 @@
 
 .complaint-table {
   width: 100%;
+  min-width: 960px;
 }
 
 th.mat-mdc-header-cell {
@@ -189,6 +218,11 @@ th.mat-mdc-header-cell {
 .assign-cell {
   min-width: 140px;
   max-width: 180px;
+}
+
+th.mat-column-assignedTo,
+td.mat-column-assignedTo {
+  padding-left: 30px;
 }
 
 td.assign-cell {
@@ -279,6 +313,10 @@ td .assign-cell {
     background: #dbeafe;
     color: #1e40af;
   }
+  &.badge-teal {
+    background: #ccfbf1;
+    color: #0f766e;
+  }
   &.badge-purple {
     background: #ede9fe;
     color: #5b21b6;
@@ -311,7 +349,9 @@ td .assign-cell {
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   border-radius: v.$radius-md !important;
-  min-width: 72px;
+  height: v.$action-button-height;
+  min-width: v.$action-button-min-width;
+  padding: 0 v.$action-button-padding-x;
   box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
   transition: all 0.25s ease;
   &:hover {
@@ -331,5 +371,48 @@ td .assign-cell {
 
   .search-field {
     width: 100%;
+  }
+}
+
+// ── Skeleton loader ────────────────────────────────────────────
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+%sk-base {
+  background: linear-gradient(
+    90deg,
+    v.$gray-100 25%,
+    v.$gray-50 50%,
+    v.$gray-100 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.table-skeleton {
+  overflow: hidden;
+}
+
+.sk-head {
+  @extend %sk-base;
+  height: 48px;
+  margin-bottom: 2px;
+  border-radius: 0;
+}
+
+.sk-row {
+  @extend %sk-base;
+  height: 54px;
+  margin-bottom: 2px;
+  border-radius: 0;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 }

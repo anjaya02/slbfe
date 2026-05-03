@@ -1,20 +1,21 @@
 <div class="detail-page" *ngIf="!loading && complaint">
-  <!-- Status Stepper -->
   <div class="stepper-section">
     <app-status-stepper [currentStatus]="complaint.status"></app-status-stepper>
     <div class="stepper-actions">
       <button
         mat-icon-button
         color="primary"
-        matTooltip="Print case details"
-        (click)="printCase()"
+        matTooltip="Download case details as PDF"
+        (click)="downloadPDF()"
+        [disabled]="exportingPdf"
       >
-        <mat-icon>print</mat-icon>
+        <mat-icon>{{
+          exportingPdf ? "hourglass_empty" : "picture_as_pdf"
+        }}</mat-icon>
       </button>
     </div>
   </div>
 
-  <!-- Assignment Banner -->
   <div class="assignment-banner">
     <div class="assignment-info">
       <div class="assignment-avatar">
@@ -22,102 +23,87 @@
       </div>
       <div class="assignment-details">
         <span class="assignment-label">Assigned Officer</span>
-        <span class="assignment-name" *ngIf="complaint.assignedToName">{{ complaint.assignedToName }}</span>
-        <span class="assignment-name assignment-unassigned" *ngIf="!complaint.assignedToName">Unassigned</span>
+        <span class="assignment-name" *ngIf="complaint.assignedToName">{{
+          complaint.assignedToName
+        }}</span>
+        <span
+          class="assignment-name assignment-unassigned"
+          *ngIf="!complaint.assignedToName"
+          >Unassigned</span
+        >
+      </div>
+    </div>
+
+    <div
+      class="case-path-info"
+      [ngClass]="
+        complaint.registrationPath === 'SLBFE'
+          ? 'case-path-info--slbfe'
+          : 'case-path-info--consular'
+      "
+    >
+      <div class="case-path-avatar">
+        <mat-icon>{{
+          complaint.registrationPath === "SLBFE"
+            ? "assured_workload"
+            : "public"
+        }}</mat-icon>
+      </div>
+      <div class="case-path-details">
+        <span class="case-path-label">Registration Path</span>
+        <span class="case-path-name">{{
+          getRegistrationPathLabel(complaint.registrationPath)
+        }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Detail / Update Toggle -->
   <div class="content-area" *ngIf="!showUpdatePanel">
-    <!-- Top Row: Worker Profile + Incident -->
     <div class="detail-grid">
-      <!-- Worker Profile Card -->
       <div class="card worker-card">
         <div class="card-title-row">
           <h3 class="card-title">Worker profile</h3>
-          <span
-            class="path-badge"
-            [ngClass]="
-              complaint.registrationPath === 'SLBFE'
-                ? 'badge-slbfe'
-                : 'badge-consular'
-            "
-          >
-            <mat-icon class="path-icon">{{
-              complaint.registrationPath === "SLBFE"
-                ? "verified"
-                : "account_balance"
-            }}</mat-icon>
-            {{
-              complaint.registrationPath === "SLBFE"
-                ? "SLBFE PATH"
-                : "CONSULAR PATH"
-            }}
-          </span>
         </div>
         <div class="profile-fields">
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">person_outline</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">FIRST NAME</span>
-              <span class="field-value">{{
-                getWorkerFirstName(complaint.workerName)
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">FIRST NAME</span>
+            <span class="field-value">{{
+              getWorkerFirstName(complaint.workerName)
+            }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">person_outline</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">LAST NAME</span>
-              <span class="field-value">{{
-                getWorkerLastName(complaint.workerName)
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">LAST NAME</span>
+            <span class="field-value">{{
+              getWorkerLastName(complaint.workerName)
+            }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">badge</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">NIC</span>
-              <span class="field-value">{{ complaint.workerNIC }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">NIC</span>
+            <span class="field-value">{{ complaint.workerNIC }}</span>
           </div>
-          <div class="profile-input-card" *ngIf="complaint.workerPassport">
-            <mat-icon class="profile-field-icon">credit_card</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">PASSPORT</span>
-              <span class="field-value">{{ complaint.workerPassport }}</span>
-            </div>
+          <div class="field" *ngIf="complaint.workerPassport">
+            <span class="field-label">PASSPORT</span>
+            <span class="field-value">{{ complaint.workerPassport }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">smartphone</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">MOBILE NUMBER</span>
-              <span class="field-value">{{ complaint.workerContact }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">MOBILE NUMBER</span>
+            <span class="field-value">{{ complaint.workerContact }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">mail_outline</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">EMAIL</span>
-              <span class="field-value field-value--placeholder">{{
-                unavailableFieldText
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">EMAIL</span>
+            <span class="field-value field-value--placeholder">{{
+              unavailableFieldText
+            }}</span>
           </div>
-          <div class="profile-input-card">
-            <mat-icon class="profile-field-icon">where_to_vote</mat-icon>
-            <div class="profile-field-copy">
-              <span class="field-label">WORK COUNTRY</span>
-              <span class="field-value field-value--placeholder">{{
-                unavailableFieldText
-              }}</span>
-            </div>
+          <div class="field">
+            <span class="field-label">WORK COUNTRY</span>
+            <span class="field-value field-value--placeholder">{{
+              unavailableFieldText
+            }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Incident Card -->
       <div class="card incident-card">
         <h3 class="card-title">Incident</h3>
         <p class="incident-description">{{ complaint.description }}</p>
@@ -139,15 +125,14 @@
           mat-raised-button
           class="btn-solve"
           (click)="toggleUpdatePanel()"
+          *ngIf="canUpdateComplaint"
         >
-          Solve
+          {{ canAssignComplaint ? "Solve" : "Update Case" }}
         </button>
       </div>
     </div>
 
-    <!-- Bottom Row: History + Notes -->
     <div class="detail-grid">
-      <!-- Case History -->
       <div class="card history-card">
         <h3 class="card-title">
           <mat-icon>history</mat-icon> Case management history
@@ -170,7 +155,6 @@
         </div>
       </div>
 
-      <!-- Worker / Complaint Notes -->
       <div class="card notes-card">
         <h3 class="card-title">
           <mat-icon>description</mat-icon> Worker / Complaint note
@@ -205,17 +189,16 @@
       </div>
     </div>
 
-    <!-- Add Note Section -->
     <div class="card note-input-card">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Add internal note</mat-label>
-        <textarea matInput [(ngModel)]="noteText" rows="3"></textarea>
+        <textarea matInput [(ngModel)]="internalNoteText" rows="3"></textarea>
       </mat-form-field>
       <button
         mat-raised-button
         class="btn-add-note"
         (click)="addNote()"
-        [disabled]="addingNote || !noteText.trim()"
+        [disabled]="addingNote || !internalNoteText.trim()"
       >
         <mat-spinner *ngIf="addingNote" diameter="18"></mat-spinner>
         <span *ngIf="!addingNote">ADD NOTE</span>
@@ -223,7 +206,6 @@
     </div>
   </div>
 
-  <!-- Update Panel (Screen 5) -->
   <div class="content-area" *ngIf="showUpdatePanel">
     <div class="card update-card">
       <h3 class="update-title">How to solve this?</h3>
@@ -232,17 +214,18 @@
         <mat-form-field appearance="outline" class="action-select">
           <mat-label>Select action</mat-label>
           <mat-select [(ngModel)]="selectedAction">
-            <mat-option *ngFor="let opt of actionOptions" [value]="opt.value">{{
-              opt.label
-            }}</mat-option>
+            <mat-option
+              *ngFor="let opt of actionOptions; trackBy: trackActionOption"
+              [value]="opt.value"
+              >{{ opt.label }}</mat-option
+            >
           </mat-select>
         </mat-form-field>
 
-        <!-- Officer selection (shown when Assign is selected) -->
         <mat-form-field
           appearance="outline"
           class="action-select"
-          *ngIf="selectedAction === 'assign'"
+          *ngIf="canAssignComplaint && selectedAction === 'assign'"
         >
           <mat-label>Select Case Officer</mat-label>
           <mat-select [(ngModel)]="selectedOfficerId">
@@ -269,18 +252,9 @@
 
     <div class="card note-input-card">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Add internal note</mat-label>
-        <textarea matInput [(ngModel)]="noteText" rows="3"></textarea>
+        <mat-label>Add a note about this action (optional)</mat-label>
+        <textarea matInput [(ngModel)]="actionNote" rows="3"></textarea>
       </mat-form-field>
-      <button
-        mat-raised-button
-        class="btn-add-note"
-        (click)="addNote()"
-        [disabled]="addingNote || !noteText.trim()"
-      >
-        <mat-spinner *ngIf="addingNote" diameter="18"></mat-spinner>
-        <span *ngIf="!addingNote">ADD NOTE</span>
-      </button>
     </div>
 
     <button mat-button class="btn-back" (click)="toggleUpdatePanel()">
@@ -289,14 +263,19 @@
   </div>
 </div>
 
-<!-- Loading -->
-<app-loading
-  *ngIf="loading"
-  mode="full-page"
-  message="Loading case documentation..."
-></app-loading>
+<div class="detail-skeleton" *ngIf="loading">
+  <div class="sk-stepper"></div>
+  <div class="sk-banner"></div>
+  <div class="sk-detail-grid">
+    <div class="sk-card sk-card-tall"></div>
+    <div class="sk-card sk-card-tall"></div>
+  </div>
+  <div class="sk-detail-grid">
+    <div class="sk-card sk-card-medium"></div>
+    <div class="sk-card sk-card-medium"></div>
+  </div>
+</div>
 
-<!-- Not Found -->
 <div class="not-found-page" *ngIf="!loading && !complaint">
   <mat-icon class="not-found-icon">search_off</mat-icon>
   <h2>Complaint Not Found</h2>

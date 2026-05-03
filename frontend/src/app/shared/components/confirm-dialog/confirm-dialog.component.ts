@@ -90,13 +90,14 @@ export interface ConfirmDialogData {
         gap: 16px;
         
         button {
-          min-width: 120px;
-          height: 48px;
+          min-width: 72px;
+          height: 40px;
+          padding: 0 16px;
           font-weight: 600;
           font-family: 'Inter', sans-serif;
-          font-size: 15px;
-          border-radius: 12px;
-          letter-spacing: 0.01em;
+          font-size: 12px;
+          border-radius: 8px;
+          letter-spacing: 0;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
       }

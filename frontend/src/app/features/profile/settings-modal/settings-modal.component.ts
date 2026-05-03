@@ -2,8 +2,9 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { SettingsService } from "../../../core/services/theme.service";
+import { SettingsService } from "../../../core/services/settings.service";
 import { AuthService } from "../../../core/services/auth.service";
+import { ToastService } from "../../../core/services/toast.service";
 
 @Component({
   standalone: false,
@@ -26,6 +27,7 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
     private dialogRef: MatDialogRef<SettingsModalComponent>,
     private settingsService: SettingsService,
     private authService: AuthService,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +37,10 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => {
-        if (user) this.notificationsEnabled = user.notificationsEnabled;
+        if (user) {
+          this.notificationsEnabled = user.notificationsEnabled;
+          this.selectedDateFormat = user.dateFormat || this.selectedDateFormat;
+        }
       });
   }
 
@@ -45,14 +50,35 @@ export class SettingsModalComponent implements OnInit, OnDestroy {
   }
 
   onDateFormatChange(format: string): void {
+    const previousFormat = this.selectedDateFormat;
     this.settingsService.setDateFormat(format);
+    this.authService.updatePreferences({ dateFormat: format }).subscribe({
+      next: () => {
+        this.toast.success("Date format updated");
+      },
+      error: () => {
+        this.settingsService.setDateFormat(previousFormat);
+      },
+    });
   }
 
   toggleNotifications(): void {
+    const previousValue = this.notificationsEnabled;
     this.notificationsEnabled = !this.notificationsEnabled;
     this.authService
-      .updateProfile({ notificationsEnabled: this.notificationsEnabled })
-      .subscribe();
+      .updatePreferences({ notificationsEnabled: this.notificationsEnabled })
+      .subscribe({
+        next: () => {
+          this.toast.success(
+            this.notificationsEnabled
+              ? "Notifications enabled"
+              : "Notifications disabled",
+          );
+        },
+        error: () => {
+          this.notificationsEnabled = previousValue;
+        },
+      });
   }
 
   close(): void {
