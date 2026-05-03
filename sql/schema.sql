@@ -1,5 +1,6 @@
 -- ============================================================
 -- SLBFE Complaint Management System - MySQL reset and seed
+-- Repository refreshed: 2026-05-03
 -- ============================================================
 
 DROP DATABASE IF EXISTS slbfe;

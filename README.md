@@ -1,5 +1,7 @@
 # SLBFE Complaint Management Portal
 
+<!-- Repository refreshed: 2026-05-03 -->
+
 Web portal and backend API for SLBFE complaint management. The backend uses MySQL and includes a reset script that creates the schema and seed data needed for local development and handover testing.
 
 ## Repository Layout

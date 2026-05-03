@@ -17,6 +17,7 @@ import { AuthService } from "./core/services/auth.service";
 })
 export class AppComponent implements OnInit, OnDestroy {
   navState: "idle" | "active" | "done" = "idle";
+  // Root shell owns authentication bootstrap and route transition state.
   private doneTimer: ReturnType<typeof setTimeout> | null = null;
   private routerSub?: Subscription;
 
