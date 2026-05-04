@@ -317,6 +317,60 @@ a {
   }
 }
 
+// ── Incident-category autocomplete dropdown ─────────────────────
+.type-autocomplete-panel {
+  border-radius: v.$radius-md !important;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  min-width: 280px !important;
+  max-height: 340px !important;
+  overflow-y: auto;
+  padding: 4px 0 !important;
+  border: 1px solid v.$gray-200;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: v.$gray-300;
+    border-radius: 2px;
+  }
+
+  .mat-mdc-option {
+    font-size: v.$font-size-sm !important;
+    min-height: 40px !important;
+    padding: 0 16px !important;
+    color: v.$dark-700;
+    transition: background v.$transition-fast;
+
+    .mdc-list-item__primary-text {
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &:hover {
+      background: v.$gray-50;
+    }
+
+    &.mdc-list-item--selected,
+    &.mat-mdc-option-active {
+      background: #dbeafe !important;
+      color: v.$primary-blue;
+      font-weight: v.$font-weight-medium;
+    }
+
+    // "All Categories" separator
+    &:first-child {
+      font-weight: v.$font-weight-semibold;
+      color: v.$primary-blue;
+      border-bottom: 1px solid v.$gray-200;
+      margin-bottom: 2px;
+    }
+  }
+}
+
 .user-action-tooltip {
   --mdc-plain-tooltip-container-color: #{v.$dark};
   --mdc-plain-tooltip-supporting-text-color: #{v.$white};

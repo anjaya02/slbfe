@@ -102,10 +102,9 @@
                     #typeAuto="matAutocomplete"
                     (optionSelected)="selectTypeFilter($event.option.value)"
                     panelClass="type-autocomplete-panel"
+                    panelWidth="auto"
                   >
-                    <mat-option value="ALL">
-                      <span class="autocomplete-option-all">All Categories</span>
-                    </mat-option>
+                    <mat-option value="ALL">All Categories</mat-option>
                     <mat-option
                       *ngFor="let type of filteredTypeOptions"
                       [value]="type"
