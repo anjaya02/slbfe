@@ -15,7 +15,7 @@ import { takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../../core/services/complaint.service";
 import {
   Complaint,
-  ComplaintStatus,
+  ComplaintType,
   COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
 import { AuthService } from "../../../core/services/auth.service";
@@ -43,11 +43,13 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
   error = false;
   typeLabels = COMPLAINT_TYPE_LABELS;
   searchValue = "";
-  selectedStatus = "ALL";
-  statusOptions: string[] = Object.values(ComplaintStatus);
-  filteredStatusOptions: string[] = [];
-  statusSearchOpen = false;
-  statusSearchTerm = "";
+  selectedType: ComplaintType | "ALL" = "ALL";
+  typeOptions: ComplaintType[] = Object.keys(
+    COMPLAINT_TYPE_LABELS,
+  ) as ComplaintType[];
+  filteredTypeOptions: ComplaintType[] = [];
+  typeSearchOpen = false;
+  typeSearchTerm = "";
   caseOfficers: User[] = [];
   assigningId: string | null = null;
   isSupervisor = false;
@@ -60,8 +62,8 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild("statusSearchInput")
-  statusSearchInput!: ElementRef<HTMLInputElement>;
+  @ViewChild("typeSearchInput")
+  typeSearchInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private complaintService: ComplaintService,
@@ -73,11 +75,11 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit(): void {
     this.isSupervisor = this.authService.currentUser?.role === "SUPERVISOR";
-    this.filteredStatusOptions = [...this.statusOptions];
+    this.filteredTypeOptions = [...this.typeOptions];
     this.dataSource.filterPredicate = (complaint, rawFilter) => {
       const filter = JSON.parse(rawFilter) as {
         search: string;
-        status: string;
+        type: ComplaintType | "ALL";
       };
       const matchesSearch = !filter.search
         ? true
@@ -85,14 +87,13 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
             .join(" ")
             .toLowerCase()
             .includes(filter.search);
-      const matchesStatus =
-        filter.status === "ALL" ? true : complaint.status === filter.status;
-      return matchesSearch && matchesStatus;
-      };
+      const matchesType = filter.type === "ALL" ? true : complaint.type === filter.type;
+      return matchesSearch && matchesType;
+    };
     this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.searchValue = params.get("q") || "";
-      const status = params.get("status") || "ALL";
-      this.selectedStatus = this.isValidStatus(status) ? status : "ALL";
+      const type = params.get("type") || "ALL";
+      this.selectedType = this.isValidType(type) ? type : "ALL";
       this.pageIndex = this.parsePositiveNumber(params.get("page"), 0);
       this.pageSize = this.parsePositiveNumber(params.get("pageSize"), 10);
       this.sortActive = params.get("sort") || "";
@@ -147,7 +148,7 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
   private applyTableFilter(resetPage: boolean): void {
     this.dataSource.filter = JSON.stringify({
       search: this.searchValue.trim().toLowerCase(),
-      status: this.selectedStatus,
+      type: this.selectedType,
     });
 
     if (resetPage && this.dataSource.paginator) {
@@ -155,39 +156,43 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  openStatusSearch(event: Event): void {
+  openTypeSearch(event: Event): void {
     event.stopPropagation();
-    this.statusSearchOpen = true;
-    this.statusSearchTerm = "";
-    this.filteredStatusOptions = [...this.statusOptions];
+    this.typeSearchOpen = true;
+    this.typeSearchTerm = "";
+    this.filteredTypeOptions = [...this.typeOptions];
 
     setTimeout(() => {
-      this.statusSearchInput?.nativeElement?.focus();
+      this.typeSearchInput?.nativeElement?.focus();
     }, 50);
   }
 
-  closeStatusSearch(): void {
-    this.statusSearchOpen = false;
-    this.statusSearchTerm = "";
+  closeTypeSearch(): void {
+    this.typeSearchOpen = false;
+    this.typeSearchTerm = "";
   }
 
-  filterStatusOptions(): void {
-    const term = this.statusSearchTerm.toLowerCase();
-    this.filteredStatusOptions = this.statusOptions.filter((s) =>
-      s.toLowerCase().includes(term),
+  filterTypeOptions(): void {
+    const term = this.typeSearchTerm.toLowerCase();
+    this.filteredTypeOptions = this.typeOptions.filter((type) =>
+      this.getTypeLabel(type).toLowerCase().includes(term),
     );
   }
 
-  selectStatusFilter(value: string): void {
-    this.selectedStatus = value;
-    this.statusSearchOpen = false;
-    this.statusSearchTerm = "";
+  selectTypeFilter(value: ComplaintType | "ALL"): void {
+    this.selectedType = value;
+    this.typeSearchOpen = false;
+    this.typeSearchTerm = "";
     this.applyFilter();
   }
 
-  clearStatusFilter(): void {
-    this.selectedStatus = "ALL";
+  clearTypeFilter(): void {
+    this.selectedType = "ALL";
     this.applyFilter();
+  }
+
+  getTypeLabel(type: ComplaintType | "ALL"): string {
+    return type === "ALL" ? "All Categories" : this.typeLabels[type];
   }
 
   onPageChange(event: PageEvent): void {
@@ -264,7 +269,7 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
       relativeTo: this.route,
       queryParams: {
         q: this.searchValue.trim() || null,
-        status: this.selectedStatus === "ALL" ? null : this.selectedStatus,
+        type: this.selectedType === "ALL" ? null : this.selectedType,
         page: this.pageIndex || null,
         pageSize: this.pageSize === 10 ? null : this.pageSize,
         sort: this.sortActive || null,
@@ -275,8 +280,8 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  private isValidStatus(status: string): boolean {
-    return status === "ALL" || this.statusOptions.includes(status as ComplaintStatus);
+  private isValidType(type: string): type is ComplaintType | "ALL" {
+    return type === "ALL" || this.typeOptions.includes(type as ComplaintType);
   }
 
   private parsePositiveNumber(value: string | null, fallback: number): number {
