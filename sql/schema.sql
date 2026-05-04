@@ -485,6 +485,38 @@ INSERT INTO `complaint_assignments` (
   '2026-04-08 14:10:00'
 );
 
+INSERT INTO `complaint_attachments` (
+  `id`,
+  `complaint_id`,
+  `file_name`,
+  `file_type`,
+  `file_size`,
+  `storage_url`,
+  `uploaded_by_user_id`,
+  `uploaded_by_name`,
+  `uploaded_at`
+) VALUES (
+  'ATT-C006-IMG',
+  'C006',
+  'C006-medical-photo.png',
+  'image/png',
+  694428,
+  'assets/Emblem_of_Sri_Lanka.png',
+  NULL,
+  'Flutter Mobile App',
+  '2026-04-22 10:35:00'
+), (
+  'ATT-C006-PDF',
+  'C006',
+  'C006-medical-request.pdf',
+  'application/pdf',
+  952,
+  'assets/demo-attachments/C006-medical-request.pdf',
+  NULL,
+  'Flutter Mobile App',
+  '2026-04-22 10:36:00'
+);
+
 INSERT INTO `complain_comments` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
   (
     'C001',

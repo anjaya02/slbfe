@@ -7,6 +7,7 @@ import { ComplaintService } from "../../../core/services/complaint.service";
 import { AuthService } from "../../../core/services/auth.service";
 import { User } from "../../../core/models/user.model";
 import {
+  Attachment,
   Complaint,
   ComplaintStatus,
   COMPLAINT_TYPE_LABELS,
@@ -24,6 +25,7 @@ interface PdfLayout {
 }
 
 type ActionOption = { value: string; label: string };
+type AttachmentKind = "image" | "pdf" | "audio" | "file";
 
 @Component({
   standalone: false,
@@ -33,6 +35,7 @@ type ActionOption = { value: string; label: string };
 })
 export class ComplaintDetailComponent implements OnInit, OnDestroy {
   complaint: Complaint | null = null;
+  displayAttachments: Attachment[] = [];
   loading = true;
   readonly unavailableFieldText = "Not provided";
   isSupervisor = false;
@@ -77,12 +80,18 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (c) => {
-            this.complaint = c ? this.normalizeComplaintTimeline(c) : null;
-            this.refreshActionOptions();
+            if (c) {
+              this.setComplaint(c);
+            } else {
+              this.complaint = null;
+              this.displayAttachments = [];
+              this.refreshActionOptions();
+            }
             this.loading = false;
           },
           error: () => {
             this.complaint = null;
+            this.displayAttachments = [];
             this.refreshActionOptions();
             this.loading = false;
           },
@@ -128,6 +137,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
   private setComplaint(complaint: Complaint): void {
     this.complaint = this.normalizeComplaintTimeline(complaint);
+    this.displayAttachments = this.complaint.attachments;
     this.refreshActionOptions();
   }
 
@@ -268,6 +278,78 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     return option.value;
   }
 
+  trackAttachment(_index: number, attachment: Attachment): string {
+    return attachment.id;
+  }
+
+  openAttachment(attachment: Attachment): void {
+    if (!attachment.url) {
+      return;
+    }
+
+    window.open(attachment.url, "_blank", "noopener,noreferrer");
+  }
+
+  getAttachmentIcon(attachment: Attachment): string {
+    const kind = this.getAttachmentKind(attachment);
+
+    if (kind === "image") {
+      return "image";
+    }
+
+    if (kind === "pdf") {
+      return "picture_as_pdf";
+    }
+
+    if (kind === "audio") {
+      return "mic";
+    }
+
+    return "attach_file";
+  }
+
+  getAttachmentLabel(attachment: Attachment): string {
+    const kind = this.getAttachmentKind(attachment);
+
+    if (kind === "image") {
+      return "Image";
+    }
+
+    if (kind === "pdf") {
+      return "PDF";
+    }
+
+    if (kind === "audio") {
+      return "Voice message";
+    }
+
+    return "File";
+  }
+
+  getAttachmentTypeClass(attachment: Attachment): string {
+    return `attachment-tile--${this.getAttachmentKind(attachment)}`;
+  }
+
+  isAudioAttachment(attachment: Attachment): boolean {
+    return this.getAttachmentKind(attachment) === "audio";
+  }
+
+  formatFileSize(fileSize: number): string {
+    if (!Number.isFinite(fileSize) || fileSize <= 0) {
+      return "Unknown size";
+    }
+
+    if (fileSize < 1024) {
+      return `${fileSize} B`;
+    }
+
+    if (fileSize < 1024 * 1024) {
+      return `${(fileSize / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   addNote(): void {
     if (!this.complaint || !this.internalNoteText.trim()) return;
     this.addingNote = true;
@@ -275,7 +357,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       .addNote(this.complaint.id, this.internalNoteText, true)
       .subscribe({
         next: (note) => {
-          this.complaint = this.normalizeComplaintTimeline({
+          this.setComplaint({
             ...this.complaint!,
             notes: [...this.complaint!.notes, note],
           });
@@ -811,6 +893,34 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       firstName: parts.slice(0, -1).join(" "),
       lastName: parts[parts.length - 1],
     };
+  }
+
+  private getAttachmentKind(attachment: Attachment): AttachmentKind {
+    const fileType = attachment.fileType.toLowerCase();
+    const fileName = attachment.fileName.toLowerCase();
+
+    if (
+      fileType.startsWith("image/") ||
+      fileName.endsWith(".png") ||
+      fileName.endsWith(".jpg") ||
+      fileName.endsWith(".jpeg")
+    ) {
+      return "image";
+    }
+
+    if (fileType === "application/pdf" || fileName.endsWith(".pdf")) {
+      return "pdf";
+    }
+
+    if (
+      fileType.startsWith("audio/") ||
+      fileName.endsWith(".m4a") ||
+      fileName.endsWith(".mp4")
+    ) {
+      return "audio";
+    }
+
+    return "file";
   }
 
   private normalizeComplaintTimeline(complaint: Complaint): Complaint {

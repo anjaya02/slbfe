@@ -107,17 +107,46 @@
       <div class="card incident-card">
         <h3 class="card-title">Incident</h3>
         <p class="incident-description">{{ complaint.description }}</p>
-        <div class="attachments" *ngIf="complaint.attachments.length">
-          <div class="attachment-label">Attachments</div>
+        <div class="attachments" *ngIf="displayAttachments.length">
+          <div class="attachment-header">
+            <div>
+              <div class="attachment-label">Submitted files</div>
+              <div class="attachment-reference">
+                Reference {{ complaint.referenceNo }}
+              </div>
+            </div>
+            <span class="attachment-count">
+              {{ displayAttachments.length }}
+            </span>
+          </div>
           <div class="attachment-grid">
             <div
-              class="attachment-thumb"
-              *ngFor="let att of complaint.attachments"
+              class="attachment-tile"
+              [ngClass]="getAttachmentTypeClass(att)"
+              *ngFor="let att of displayAttachments; trackBy: trackAttachment"
+              role="button"
+              tabindex="0"
+              (click)="openAttachment(att)"
+              (keydown.enter)="openAttachment(att)"
+              (keydown.space)="openAttachment(att); $event.preventDefault()"
+              [matTooltip]="'Open ' + att.fileName"
             >
-              <mat-icon>{{
-                att.fileType.includes("image") ? "image" : "description"
-              }}</mat-icon>
-              <span class="att-name">{{ att.fileName }}</span>
+              <span class="attachment-icon">
+                <mat-icon>{{ getAttachmentIcon(att) }}</mat-icon>
+              </span>
+              <span class="attachment-copy">
+                <span class="attachment-name">{{ att.fileName }}</span>
+                <span class="attachment-meta">
+                  {{ getAttachmentLabel(att) }} - {{ formatFileSize(att.fileSize) }}
+                </span>
+              </span>
+              <mat-icon class="attachment-open-icon">open_in_new</mat-icon>
+              <audio
+                *ngIf="isAudioAttachment(att)"
+                controls
+                [src]="att.url"
+                (click)="$event.stopPropagation()"
+              ></audio>
             </div>
           </div>
         </div>
