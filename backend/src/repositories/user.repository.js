@@ -24,7 +24,7 @@ async function findByEmail(email) {
   const rows = await query(
     `
       SELECT *
-      FROM users
+      FROM consular_users
       WHERE email = :email
       LIMIT 1
     `,
@@ -38,7 +38,7 @@ async function findById(id) {
   const rows = await query(
     `
       SELECT *
-      FROM users
+      FROM consular_users
       WHERE id = :id
       LIMIT 1
     `,
@@ -72,7 +72,7 @@ async function listUsers(filters = {}) {
   const rows = await query(
     `
       SELECT *
-      FROM users
+      FROM consular_users
       ${whereClause}
       ORDER BY created_at DESC
     `,
@@ -86,7 +86,7 @@ async function listCaseOfficers() {
   const rows = await query(
     `
       SELECT *
-      FROM users
+      FROM consular_users
       WHERE role = 'CASE_OFFICER' AND is_active = 1
       ORDER BY name ASC
     `,
@@ -98,7 +98,7 @@ async function listCaseOfficers() {
 async function createUser(user) {
   await query(
     `
-      INSERT INTO users (
+      INSERT INTO consular_users (
         id,
         name,
         email,
@@ -145,7 +145,7 @@ async function updateUser(id, updates) {
 
   await query(
     `
-      UPDATE users
+      UPDATE consular_users
       SET ${sets.join(", ")}, updated_at = CURRENT_TIMESTAMP
       WHERE id = :id
     `,
@@ -158,7 +158,7 @@ async function updateUser(id, updates) {
 async function updateLastLogin(id) {
   await query(
     `
-      UPDATE users
+      UPDATE consular_users
       SET last_login_at = CURRENT_TIMESTAMP
       WHERE id = :id
     `,

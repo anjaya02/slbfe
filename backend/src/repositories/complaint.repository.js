@@ -207,7 +207,7 @@ function getComplaintBaseSelect() {
     LEFT JOIN complain_catagory cc ON cc.category_id = d.complain_catagory
     LEFT JOIN resolution_catagory rc ON rc.category_id = d.resolution_catagory
     LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
-    LEFT JOIN users u ON u.id = ca.assigned_to_user_id
+    LEFT JOIN consular_users u ON u.id = ca.assigned_to_user_id
   `;
 }
 
@@ -604,7 +604,7 @@ async function findComplaintById(id) {
           ae.created_at,
           u.name AS updated_user_name
         FROM complaint_audit_events ae
-        LEFT JOIN users u ON u.id = ae.actor_user_id
+        LEFT JOIN consular_users u ON u.id = ae.actor_user_id
         WHERE ae.complaint_id = :id
         ORDER BY ae.created_at DESC
       `,
@@ -619,7 +619,7 @@ async function findComplaintById(id) {
           l.updated_time,
           u.name AS updated_user_name
         FROM complain_logs l
-        LEFT JOIN users u ON u.id = l.updated_user
+        LEFT JOIN consular_users u ON u.id = l.updated_user
         WHERE l.complain_id = :id
         ORDER BY COALESCE(l.updated_time, '1970-01-01') DESC
       `,
@@ -634,7 +634,7 @@ async function findComplaintById(id) {
           c.updated_time,
           u.name AS updated_user_name
         FROM complain_comments c
-        LEFT JOIN users u ON u.id = c.updated_user
+        LEFT JOIN consular_users u ON u.id = c.updated_user
         WHERE c.complain_id = :id
         ORDER BY COALESCE(c.updated_time, '1970-01-01') DESC
       `,
@@ -1018,7 +1018,7 @@ async function findComplaintsForReport(filters = {}) {
         u.name AS assigned_to_name
       FROM complain_details d
       LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
-      LEFT JOIN users u ON u.id = ca.assigned_to_user_id
+      LEFT JOIN consular_users u ON u.id = ca.assigned_to_user_id
       ${whereClause}
       ORDER BY ${complaintDateExpr} ASC
     `,

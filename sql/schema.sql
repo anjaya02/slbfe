@@ -12,7 +12,7 @@ USE slbfe;
 -- ------------------------------------------------------------
 -- AUTH TABLES
 -- ------------------------------------------------------------
-CREATE TABLE `users` (
+CREATE TABLE `consular_users` (
   `id` varchar(20) NOT NULL,
   `name` varchar(150) NOT NULL,
   `email` varchar(255) NOT NULL,
@@ -28,9 +28,9 @@ CREATE TABLE `users` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `last_login_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_users_email` (`email`),
-  KEY `idx_users_role` (`role`),
-  KEY `idx_users_is_active` (`is_active`)
+  UNIQUE KEY `uq_consular_users_email` (`email`),
+  KEY `idx_consular_users_role` (`role`),
+  KEY `idx_consular_users_is_active` (`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `auth_refresh_tokens` (
@@ -45,7 +45,7 @@ CREATE TABLE `auth_refresh_tokens` (
   UNIQUE KEY `uq_auth_refresh_tokens_hash` (`token_hash`),
   KEY `idx_auth_refresh_tokens_user` (`user_id`),
   KEY `idx_auth_refresh_tokens_expiry` (`expires_at`),
-  CONSTRAINT `fk_auth_refresh_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `fk_auth_refresh_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `consular_users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
@@ -108,7 +108,7 @@ CREATE TABLE `complaint_audit_events` (
   KEY `idx_complaint_audit_complaint_created` (`complaint_id`,`created_at`),
   KEY `idx_complaint_audit_actor_created` (`actor_user_id`,`created_at`),
   KEY `idx_complaint_audit_event_type` (`event_type`),
-  CONSTRAINT `fk_complaint_audit_actor` FOREIGN KEY (`actor_user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `fk_complaint_audit_actor` FOREIGN KEY (`actor_user_id`) REFERENCES `consular_users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `migrant_employees` (
@@ -146,8 +146,8 @@ CREATE TABLE `complaint_assignments` (
   PRIMARY KEY (`complaint_id`),
   KEY `idx_assignments_user` (`assigned_to_user_id`),
   KEY `idx_assignments_assigned_at` (`assigned_at`),
-  CONSTRAINT `fk_assignments_user` FOREIGN KEY (`assigned_to_user_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `fk_assignments_by_user` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `fk_assignments_user` FOREIGN KEY (`assigned_to_user_id`) REFERENCES `consular_users` (`id`),
+  CONSTRAINT `fk_assignments_by_user` FOREIGN KEY (`assigned_by_user_id`) REFERENCES `consular_users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `complaint_attachments` (
@@ -164,7 +164,7 @@ CREATE TABLE `complaint_attachments` (
   PRIMARY KEY (`id`),
   KEY `idx_attachments_complaint` (`complaint_id`),
   KEY `idx_attachments_uploaded_at` (`uploaded_at`),
-  CONSTRAINT `fk_attachments_user` FOREIGN KEY (`uploaded_by_user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `fk_attachments_user` FOREIGN KEY (`uploaded_by_user_id`) REFERENCES `consular_users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `notifications` (
@@ -184,7 +184,7 @@ CREATE TABLE `notifications` (
   KEY `idx_notif_recipient` (`recipient_user_id`),
   KEY `idx_notif_is_read` (`is_read`),
   KEY `idx_notif_recipient_read_date` (`recipient_user_id`,`is_read`,`created_at`),
-  CONSTRAINT `fk_notif_recipient` FOREIGN KEY (`recipient_user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `fk_notif_recipient` FOREIGN KEY (`recipient_user_id`) REFERENCES `consular_users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
@@ -192,7 +192,7 @@ CREATE TABLE `notifications` (
 -- Supervisor password: Admin@1234
 -- Case Officer password: Officer@1234
 -- ------------------------------------------------------------
-INSERT INTO `users` (
+INSERT INTO `consular_users` (
   `id`,
   `name`,
   `email`,

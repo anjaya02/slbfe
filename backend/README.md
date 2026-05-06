@@ -91,7 +91,7 @@ You can also run [../sql/schema.sql](../sql/schema.sql) directly in MySQL Workbe
 
 This creates:
 
-- `users`
+- `consular_users`
 - `auth_refresh_tokens`
 - `complain_details`
 - `complain_comments`

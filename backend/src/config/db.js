@@ -60,7 +60,7 @@ async function ensureRuntimeTables() {
         UNIQUE KEY uq_auth_refresh_tokens_hash (token_hash),
         KEY idx_auth_refresh_tokens_user (user_id),
         KEY idx_auth_refresh_tokens_expiry (expires_at),
-        CONSTRAINT fk_auth_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES users(id)
+        CONSTRAINT fk_auth_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES consular_users(id)
       )
     `,
   );
@@ -76,8 +76,8 @@ async function ensureRuntimeTables() {
         PRIMARY KEY (complaint_id),
         KEY idx_assignments_user (assigned_to_user_id),
         KEY idx_assignments_assigned_at (assigned_at),
-        CONSTRAINT fk_assignments_user FOREIGN KEY (assigned_to_user_id) REFERENCES users(id),
-        CONSTRAINT fk_assignments_by_user FOREIGN KEY (assigned_by_user_id) REFERENCES users(id)
+        CONSTRAINT fk_assignments_user FOREIGN KEY (assigned_to_user_id) REFERENCES consular_users(id),
+        CONSTRAINT fk_assignments_by_user FOREIGN KEY (assigned_by_user_id) REFERENCES consular_users(id)
       )
     `,
   );
@@ -98,7 +98,7 @@ async function ensureRuntimeTables() {
         PRIMARY KEY (id),
         KEY idx_attachments_complaint (complaint_id),
         KEY idx_attachments_uploaded_at (uploaded_at),
-        CONSTRAINT fk_attachments_user_runtime FOREIGN KEY (uploaded_by_user_id) REFERENCES users(id)
+        CONSTRAINT fk_attachments_user_runtime FOREIGN KEY (uploaded_by_user_id) REFERENCES consular_users(id)
       )
     `,
   );
@@ -122,7 +122,7 @@ async function ensureRuntimeTables() {
         KEY idx_notif_recipient (recipient_user_id),
         KEY idx_notif_is_read (is_read),
         KEY idx_notif_recipient_read_date (recipient_user_id, is_read, created_at),
-        CONSTRAINT fk_notif_recipient_runtime FOREIGN KEY (recipient_user_id) REFERENCES users(id)
+        CONSTRAINT fk_notif_recipient_runtime FOREIGN KEY (recipient_user_id) REFERENCES consular_users(id)
       )
     `,
   );
@@ -150,7 +150,7 @@ async function ensureRuntimeTables() {
         KEY idx_complaint_audit_complaint_created (complaint_id, created_at),
         KEY idx_complaint_audit_actor_created (actor_user_id, created_at),
         KEY idx_complaint_audit_event_type (event_type),
-        CONSTRAINT fk_complaint_audit_actor_runtime FOREIGN KEY (actor_user_id) REFERENCES users(id)
+        CONSTRAINT fk_complaint_audit_actor_runtime FOREIGN KEY (actor_user_id) REFERENCES consular_users(id)
       )
     `,
   );
