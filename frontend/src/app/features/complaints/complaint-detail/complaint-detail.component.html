@@ -55,6 +55,19 @@
           getRegistrationPathLabel(complaint.registrationPath)
         }}</span>
       </div>
+      <button
+        mat-flat-button
+        class="btn-slbfe-transfer"
+        matTooltip="Update complaint handling path to SLBFE"
+        (click)="transferToSlbfe()"
+        [disabled]="transferringToSlbfe"
+        *ngIf="canTransferToSlbfe"
+      >
+        <mat-icon>{{
+          transferringToSlbfe ? "hourglass_empty" : "assured_workload"
+        }}</mat-icon>
+        SLBFE Transfer
+      </button>
     </div>
   </div>
 
@@ -62,44 +75,81 @@
     <div class="detail-grid">
       <div class="card worker-card">
         <div class="card-title-row">
-          <h3 class="card-title">Worker profile</h3>
+          <h3 class="card-title">{{ displayedProfileTitle }}</h3>
+          <mat-button-toggle-group
+            *ngIf="complaint.hasComplainantProfile"
+            [value]="selectedProfileMode"
+            aria-label="Profile view"
+            class="profile-toggle-group"
+          >
+            <mat-button-toggle
+              value="worker"
+              (click)="selectProfileMode('worker', $event)"
+            >
+              Worker
+            </mat-button-toggle>
+            <mat-button-toggle
+              value="complainant"
+              (click)="selectProfileMode('complainant', $event)"
+            >
+              Complainant
+            </mat-button-toggle>
+          </mat-button-toggle-group>
         </div>
-        <div class="profile-fields">
+        <div class="profile-fields" *ngIf="activeProfile as profile">
           <div class="field">
             <span class="field-label">FIRST NAME</span>
             <span class="field-value">{{
-              getWorkerFirstName(complaint.workerName)
+              getWorkerFirstName(profile.fullName)
             }}</span>
           </div>
           <div class="field">
             <span class="field-label">LAST NAME</span>
             <span class="field-value">{{
-              getWorkerLastName(complaint.workerName)
+              getWorkerLastName(profile.fullName)
             }}</span>
           </div>
           <div class="field">
             <span class="field-label">NIC</span>
-            <span class="field-value">{{ complaint.workerNIC }}</span>
+            <span
+              class="field-value"
+              [class.field-value--placeholder]="!profile.nic"
+              >{{ profile.nic || unavailableFieldText }}</span>
           </div>
-          <div class="field" *ngIf="complaint.workerPassport">
+          <div class="field">
             <span class="field-label">PASSPORT</span>
-            <span class="field-value">{{ complaint.workerPassport }}</span>
+            <span
+              class="field-value"
+              [class.field-value--placeholder]="!profile.passport"
+              >{{ profile.passport || unavailableFieldText }}</span>
           </div>
           <div class="field">
             <span class="field-label">MOBILE NUMBER</span>
-            <span class="field-value">{{ complaint.workerContact }}</span>
+            <span
+              class="field-value"
+              [class.field-value--placeholder]="!profile.mobile"
+              >{{ profile.mobile || unavailableFieldText }}</span>
           </div>
           <div class="field">
             <span class="field-label">EMAIL</span>
-            <span class="field-value field-value--placeholder">{{
-              unavailableFieldText
-            }}</span>
+            <span
+              class="field-value"
+              [class.field-value--placeholder]="!profile.email"
+              >{{ profile.email || unavailableFieldText }}</span>
           </div>
           <div class="field">
             <span class="field-label">WORK COUNTRY</span>
-            <span class="field-value field-value--placeholder">{{
-              unavailableFieldText
-            }}</span>
+            <span
+              class="field-value"
+              [class.field-value--placeholder]="!profile.workCountry"
+              >{{ profile.workCountry || unavailableFieldText }}</span>
+          </div>
+          <div class="field" *ngIf="selectedProfileMode === 'complainant'">
+            <span class="field-label">USERNAME</span>
+            <span
+              class="field-value"
+              [class.field-value--placeholder]="!profile.username"
+              >{{ profile.username || unavailableFieldText }}</span>
           </div>
         </div>
       </div>

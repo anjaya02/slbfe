@@ -180,6 +180,27 @@
   }
 }
 
+.btn-slbfe-transfer {
+  background: linear-gradient(135deg, v.$primary-blue, v.$primary-dark) !important;
+  color: v.$white !important;
+  font-weight: v.$font-weight-semibold;
+  border-radius: v.$radius-md !important;
+  height: v.$action-button-height;
+  padding: 0 v.$action-button-padding-x !important;
+  box-shadow: 0 3px 10px rgba(0, 64, 128, 0.2);
+  transition: all 0.2s ease;
+  border: none !important;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+
+  &:hover {
+    box-shadow: 0 5px 15px rgba(0, 64, 128, 0.3) !important;
+    transform: translateY(-1px);
+  }
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -214,9 +235,44 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  gap: 16px;
 
   .card-title {
     margin-bottom: 0;
+    min-width: 180px;
+    flex-shrink: 0;
+  }
+}
+
+// Custom Profile Toggle Group
+.profile-toggle-group {
+  background: v.$gray-100;
+  border: none;
+  border-radius: v.$radius-md;
+  padding: 5px;
+  overflow: visible;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  ::ng-deep .mat-button-toggle {
+    background: transparent;
+    border: none !important;
+    color: v.$gray-600;
+    font-weight: v.$font-weight-medium;
+    border-radius: v.$radius-sm !important;
+    transition: all 0.2s ease;
+  }
+
+  ::ng-deep .mat-button-toggle-label-content {
+    line-height: 32px;
+    padding: 0 16px;
+    font-size: v.$font-size-sm;
+  }
+
+  ::ng-deep .mat-button-toggle-checked {
+    background: v.$white !important;
+    color: v.$primary-blue !important;
+    font-weight: v.$font-weight-bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -225,6 +281,8 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  will-change: contents;
+  contain: layout style;
 }
 
 .profile-input-card {

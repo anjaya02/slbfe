@@ -72,10 +72,12 @@ CREATE TABLE `complain_details` (
   `passport_no` varchar(30) DEFAULT NULL,
   `nic_no` varchar(30) DEFAULT NULL,
   `work_country` varchar(30) DEFAULT NULL,
+  `description` varchar(300) DEFAULT NULL,
   `reported_time` datetime DEFAULT NULL,
   `complain_catagory` varchar(50) DEFAULT NULL,
-  `resolution_catagory` varchar(50) DEFAULT NULL,
+  `resolution_catagory` varchar(150) DEFAULT NULL,
   `complain_status` varchar(30) DEFAULT NULL,
+  `complain_handle` varchar(30) DEFAULT NULL,
   `updated_time` datetime DEFAULT NULL,
   `updated_user` varchar(30) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -232,6 +234,7 @@ INSERT INTO `consular_users` (
 -- ------------------------------------------------------------
 INSERT INTO `complain_catagory` (`category_id`, `category_name`) VALUES
   ('BREACH_OF_CONTRACT', 'Breach of Employment Contract'),
+  ('HARASSMENT', 'Harassment'),
   ('LACK_OF_COMMUNICATION', 'Lack of Communication'),
   ('SICK', 'Sick'),
   ('BEING_JAILED', 'Being Jailed'),
@@ -314,6 +317,18 @@ INSERT INTO `migrant_employees` (
   'kasun.ranasinghe@example.com',
   NOW(),
   NOW()
+), (
+  'Saman',
+  'Ekanayake',
+  '763453218V',
+  'N1234',
+  '893456',
+  'Qatar',
+  'N1234',
+  '81dc9bdb52d04dc20036dbd8313ed055',
+  'aa@gmail',
+  NOW(),
+  NOW()
 );
 
 -- ------------------------------------------------------------
@@ -328,10 +343,12 @@ INSERT INTO `complain_details` (
   `passport_no`,
   `nic_no`,
   `work_country`,
+  `description`,
   `reported_time`,
   `complain_catagory`,
   `resolution_catagory`,
   `complain_status`,
+  `complain_handle`,
   `updated_time`,
   `updated_user`
 ) VALUES (
@@ -343,10 +360,12 @@ INSERT INTO `complain_details` (
   'N7684521',
   '199234567890',
   'Kuwait',
+  'Worker reported unpaid salary, forced overtime, and passport retention by the employer.',
   '2026-04-18 08:40:00',
   'BREACH_OF_CONTRACT',
   NULL,
   'In Progress',
+  'SLBFE',
   '2026-04-21 11:10:00',
   'USR002'
 ), (
@@ -358,10 +377,12 @@ INSERT INTO `complain_details` (
   'OL5432189',
   '198765432145',
   'Riyadh',
+  'Worker requested assistance with annual leave and employer pressure to sign a settlement paper.',
   '2026-04-17 19:25:00',
   'LACK_OF_COMMUNICATION',
   NULL,
   'Awaiting Info',
+  'CONSULAR',
   '2026-04-20 14:05:00',
   'USR002'
 ), (
@@ -373,10 +394,12 @@ INSERT INTO `complain_details` (
   'P9843216',
   '199678901234',
   'Dubai',
+  'Worker reported passport retention, restricted communication, and physical intimidation.',
   '2026-04-16 06:50:00',
   'BEING_RETAINED',
   NULL,
   'In Progress',
+  'CONSULAR',
   '2026-04-19 09:40:00',
   'USR001'
 ), (
@@ -388,10 +411,12 @@ INSERT INTO `complain_details` (
   'N5439872',
   '199045612378',
   'Doha',
+  'Worker reported unsafe heat exposure and threats after raising concerns at the work site.',
   '2026-04-10 12:15:00',
   'BREACH_OF_CONTRACT',
   'RESOLVED',
   'Resolved',
+  'SLBFE',
   '2026-04-15 17:20:00',
   'USR002'
 ), (
@@ -403,10 +428,12 @@ INSERT INTO `complain_details` (
   'M8765432',
   '199112345678',
   'Muscat',
+  'Worker requested guidance before signing a final salary settlement paper.',
   '2026-04-22 09:05:00',
   'OTHER',
   NULL,
   'Submitted',
+  'CONSULAR',
   '2026-04-22 09:05:00',
   NULL
 ), (
@@ -418,10 +445,12 @@ INSERT INTO `complain_details` (
   'D6543218',
   '199556789012',
   'Manama',
+  'Worker requested help contacting the sponsor to obtain medical attention.',
   '2026-04-22 10:30:00',
   'SICK',
   NULL,
   'Under Review',
+  'SLBFE',
   '2026-04-22 11:00:00',
   'USR001'
 ), (
@@ -433,12 +462,31 @@ INSERT INTO `complain_details` (
   'R3344556',
   '198812349876',
   'Doha',
+  'Worker reported being stranded after the agency stopped responding to calls.',
   '2026-04-08 13:45:00',
   'BEING_STRANDED',
   'CLOSED',
   'Closed',
+  'SLBFE',
   '2026-04-18 15:30:00',
   'USR001'
+), (
+  'C008',
+  'HARASSMENT',
+  'Saman Ekanayake',
+  'Nadeesha Kumari Jayawardena',
+  '+971 551183624',
+  'P9843216',
+  '199678901234',
+  'Dubai',
+  'Submitted by Saman Ekanayake on behalf of Nadeesha Kumari Jayawardena for harassment support and consular intervention.',
+  '2026-05-06 12:30:00',
+  'HARASSMENT',
+  NULL,
+  'Under Review',
+  'CONSULAR',
+  '2026-05-06 12:30:00',
+  'N1234'
 );
 
 INSERT INTO `complaint_assignments` (
@@ -483,6 +531,12 @@ INSERT INTO `complaint_assignments` (
   'USR001',
   '2026-04-08 14:10:00',
   '2026-04-08 14:10:00'
+), (
+  'C008',
+  'USR002',
+  'USR001',
+  '2026-05-06 12:35:00',
+  '2026-05-06 12:35:00'
 );
 
 INSERT INTO `complaint_attachments` (
@@ -595,6 +649,18 @@ INSERT INTO `complain_comments` (`complain_id`, `complain_msg`, `updated_user`, 
     'Return travel support was completed, worker confirmed safe arrival, and the case was closed by the supervisor.',
     'USR001',
     '2026-04-18 15:30:00'
+  ),
+  (
+    'C008',
+    'Complainant submitted this on behalf of the worker from the mobile app.',
+    NULL,
+    '2026-05-06 12:31:00'
+  ),
+  (
+    'C008',
+    'Assigned consular-path case is ready for review. Use SLBFE Transfer only if the handling path should move to SLBFE.',
+    'USR002',
+    '2026-05-06 12:40:00'
   );
 
 INSERT INTO `complain_logs` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
@@ -610,7 +676,8 @@ INSERT INTO `complain_logs` (`complain_id`, `complain_msg`, `updated_user`, `upd
   ('C007', 'Assigned to Iman Fernando', 'USR001', '2026-04-08 14:10:00'),
   ('C007', 'Status Changed: In Progress', 'USR002', '2026-04-09 08:45:00'),
   ('C007', 'Status Changed: Resolved', 'USR002', '2026-04-17 16:20:00'),
-  ('C007', 'Status Changed: Closed', 'USR001', '2026-04-18 15:30:00');
+  ('C007', 'Status Changed: Closed', 'USR001', '2026-04-18 15:30:00'),
+  ('C008', 'Assigned to Iman Fernando', 'USR001', '2026-05-06 12:35:00');
 
 INSERT INTO `complaint_audit_events` (
   `id`,
@@ -640,7 +707,8 @@ INSERT INTO `complaint_audit_events` (
   ('AUD010', 'C007', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-08 14:10:00'),
   ('AUD011', 'C007', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-09 08:45:00'),
   ('AUD012', 'C007', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'In Progress', 'Resolved', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-17 16:20:00'),
-  ('AUD013', 'C007', 'STATUS_CHANGED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Resolved', 'Closed', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-18 15:30:00');
+  ('AUD013', 'C007', 'STATUS_CHANGED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Resolved', 'Closed', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-18 15:30:00'),
+  ('AUD014', 'C008', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'onBehalf', TRUE), '2026-05-06 12:35:00');
 
 INSERT INTO `notifications` (
   `id`,
@@ -718,5 +786,16 @@ INSERT INTO `notifications` (
   '/complaints/C007',
   'C007',
   '2026-04-18 15:35:00',
+  NULL
+), (
+  'NTF007',
+  'USR002',
+  'ASSIGNMENT',
+  'New On-Behalf Case Assigned',
+  'Case C008 has been assigned to you on the Consular path.',
+  0,
+  '/complaints/C008',
+  'C008',
+  '2026-05-06 12:35:00',
   NULL
 );

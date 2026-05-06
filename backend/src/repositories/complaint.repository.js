@@ -11,6 +11,7 @@ const STATUS_VALUES = [
 
 const TYPE_VALUES = [
   "BREACH_OF_CONTRACT",
+  "HARASSMENT",
   "LACK_OF_COMMUNICATION",
   "SICK",
   "BEING_JAILED",
@@ -49,27 +50,41 @@ const TYPE_KEY_MAP = {
   BREACH_OF_EMPLOYMENT_CONTRACT: "BREACH_OF_CONTRACT",
   CONTRACT_BREACH: "BREACH_OF_CONTRACT",
   CONTRACT: "BREACH_OF_CONTRACT",
+  400: "BREACH_OF_CONTRACT",
+  HARASSMENT: "HARASSMENT",
+  450: "HARASSMENT",
   LACK_OF_COMMUNICATION: "LACK_OF_COMMUNICATION",
   COMMUNICATION: "LACK_OF_COMMUNICATION",
+  500: "LACK_OF_COMMUNICATION",
   SICK: "SICK",
   ILLNESS: "SICK",
+  550: "SICK",
   BEING_JAILED: "BEING_JAILED",
   JAILED: "BEING_JAILED",
   IN_JAIL: "BEING_JAILED",
+  600: "BEING_JAILED",
   BEING_REMANDED_BY_POLICE: "BEING_REMANDED_BY_POLICE",
   REMANDED_BY_POLICE: "BEING_REMANDED_BY_POLICE",
   POLICE_REMAND: "BEING_REMANDED_BY_POLICE",
+  650: "BEING_REMANDED_BY_POLICE",
   BEING_STRANDED: "BEING_STRANDED",
   STRANDED: "BEING_STRANDED",
   BEING_STRANDED_WITHOUT_EMPLOYMENT: "BEING_STRANDED",
+  700: "BEING_STRANDED",
   PROBLEMS_AT_HOME: "PROBLEMS_AT_HOME",
+  PROBLEMS_AT_EMPLOYEE_S_HOME_SRI_LANKA: "PROBLEMS_AT_HOME",
   PROBLEMS_AT_EMPLOYEES_HOME_SRI_LANKA: "PROBLEMS_AT_HOME",
   HOME_PROBLEMS: "PROBLEMS_AT_HOME",
+  750: "PROBLEMS_AT_HOME",
   DEATH: "DEATH",
+  800: "DEATH",
   BEING_RETAINED: "BEING_RETAINED",
   RETAINED: "BEING_RETAINED",
+  BEING_RETAINED_BY_AN_UNKNOWN_PERSON: "BEING_RETAINED",
   BEING_RETAINED_BY_UNKNOWN_PERSON: "BEING_RETAINED",
+  850: "BEING_RETAINED",
   OTHER: "OTHER",
+  900: "OTHER",
 };
 
 function normalizeKey(value) {
@@ -142,6 +157,13 @@ function fallbackText(value, fallback = "") {
   return text || fallback;
 }
 
+function buildFullName(firstName, lastName) {
+  return [firstName, lastName]
+    .map((part) => fallbackText(part))
+    .filter(Boolean)
+    .join(" ");
+}
+
 function getPriority(type, status) {
   if (type === "DEATH" || type === "BEING_RETAINED") {
     return "CRITICAL";
@@ -170,6 +192,20 @@ function getResolutionCategory(status) {
   return null;
 }
 
+function getRegistrationPath(row) {
+  const handle = normalizeKey(row.complain_handle);
+
+  if (handle === "SLBFE") {
+    return "SLBFE";
+  }
+
+  if (handle === "CONSULAR") {
+    return "CONSULAR";
+  }
+
+  return row.behalf_user ? "CONSULAR" : "SLBFE";
+}
+
 function getComplaintDateExpression() {
   return "COALESCE(d.reported_time, d.updated_time)";
 }
@@ -185,15 +221,25 @@ function getComplaintBaseSelect() {
       d.passport_no,
       d.nic_no,
       d.work_country,
+      d.description,
       d.reported_time,
       d.complain_catagory,
       cc.category_name AS complain_category_name,
       d.resolution_catagory,
       rc.category_name AS resolution_category_name,
       d.complain_status,
+      d.complain_handle,
       ${statusCaseSql("d.complain_status")} AS normalized_status,
       d.updated_time,
       d.updated_user,
+      mu.fname AS complainant_first_name,
+      mu.lname AS complainant_last_name,
+      mu.nic AS complainant_nic,
+      mu.passport AS complainant_passport,
+      mu.mobile AS complainant_mobile,
+      mu.email AS complainant_email,
+      mu.empcountry AS complainant_work_country,
+      mu.username AS complainant_username,
       ca.assigned_to_user_id,
       u.name AS assigned_to_name,
       (
@@ -206,6 +252,21 @@ function getComplaintBaseSelect() {
     FROM complain_details d
     LEFT JOIN complain_catagory cc ON cc.category_id = d.complain_catagory
     LEFT JOIN resolution_catagory rc ON rc.category_id = d.resolution_catagory
+    LEFT JOIN migrant_employees mu ON mu.id = (
+      SELECT me.id
+      FROM migrant_employees me
+      WHERE me.username = d.updated_user
+        OR me.passport = d.updated_user
+        OR me.nic = d.updated_user
+      ORDER BY
+        CASE
+          WHEN me.username = d.updated_user THEN 1
+          WHEN me.passport = d.updated_user THEN 2
+          WHEN me.nic = d.updated_user THEN 3
+          ELSE 4
+        END
+      LIMIT 1
+    )
     LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
     LEFT JOIN consular_users u ON u.id = ca.assigned_to_user_id
   `;
@@ -226,6 +287,11 @@ function mapComplaintRow(row) {
     row.behalf_user || row.complain_user,
     "Not provided",
   );
+  const complainantName = fallbackText(
+    row.complain_user,
+    buildFullName(row.complainant_first_name, row.complainant_last_name),
+  );
+  const hasOnBehalfWorker = Boolean(fallbackText(row.behalf_user));
   const workCountry = fallbackText(row.work_country, "Not provided");
   const reportedTime = row.reported_time || row.updated_time;
   const updatedTime = row.updated_time || row.reported_time;
@@ -243,11 +309,32 @@ function mapComplaintRow(row) {
     type,
     status,
     priority: getPriority(type, status),
-    registrationPath: row.behalf_user ? "CONSULAR" : "SLBFE",
+    registrationPath: getRegistrationPath(row),
     description:
+      fallbackText(row.description) ||
       fallbackText(row.first_comment) ||
       fallbackText(row.complain_category_name) ||
       "No complaint description recorded.",
+    hasComplainantProfile: hasOnBehalfWorker,
+    workerProfile: {
+      fullName: workerName,
+      nic: fallbackText(row.nic_no),
+      passport: fallbackText(row.passport_no),
+      mobile: fallbackText(row.mobile_no),
+      email: "",
+      workCountry,
+    },
+    complainantProfile: hasOnBehalfWorker
+      ? {
+          fullName: complainantName,
+          nic: fallbackText(row.complainant_nic),
+          passport: fallbackText(row.complainant_passport),
+          mobile: fallbackText(row.complainant_mobile),
+          email: fallbackText(row.complainant_email),
+          workCountry: fallbackText(row.complainant_work_country),
+          username: fallbackText(row.complainant_username || row.updated_user),
+        }
+      : null,
     assignedTo: row.assigned_to_user_id || null,
     assignedToName: row.assigned_to_name || null,
     dateSubmitted: reportedTime,
@@ -704,14 +791,12 @@ async function updateComplaintStatus({
         UPDATE complain_details
         SET complain_status = ?,
             resolution_catagory = ?,
-            updated_time = CURRENT_TIMESTAMP,
-            updated_user = ?
+            updated_time = CURRENT_TIMESTAMP
         WHERE complain_id = ?
       `,
       [
         newStatus,
         getResolutionCategory(newStatus),
-        actor?.id || null,
         complaintId,
       ],
     );
@@ -803,14 +888,12 @@ async function assignComplaint({
         UPDATE complain_details
         SET complain_status = ?,
             resolution_catagory = ?,
-            updated_time = CURRENT_TIMESTAMP,
-            updated_user = ?
+            updated_time = CURRENT_TIMESTAMP
         WHERE complain_id = ?
       `,
       [
         effectiveNextStatus,
         getResolutionCategory(effectiveNextStatus),
-        actor?.id || null,
         complaintId,
       ],
     );
@@ -884,6 +967,52 @@ async function addNote({
     timestamp: new Date(),
     isInternal: Boolean(isInternal),
   };
+}
+
+async function transferToSlbfe({ complaintId, actor, auditEvent }) {
+  await withTransaction(async (connection) => {
+    const [complaintRows] = await connection.execute(
+      `
+        SELECT complain_id, complain_handle
+        FROM complain_details
+        WHERE complain_id = ?
+        LIMIT 1
+      `,
+      [complaintId],
+    );
+
+    const complaint = complaintRows[0];
+
+    if (!complaint) {
+      throw new Error("Complaint not found");
+    }
+
+    await connection.execute(
+      `
+        UPDATE complain_details
+        SET complain_handle = 'SLBFE',
+            updated_time = CURRENT_TIMESTAMP
+        WHERE complain_id = ?
+      `,
+      [complaintId],
+    );
+
+    await connection.execute(
+      `
+        INSERT INTO complain_logs (
+          complain_id,
+          complain_msg,
+          updated_user,
+          updated_time
+        ) VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      `,
+      [complaintId, "Transferred to SLBFE", actor?.id || null],
+    );
+
+    await insertComplaintAuditEvent(connection, auditEvent);
+  });
+
+  return findComplaintById(complaintId);
 }
 
 async function getDashboardCounts() {
@@ -1039,6 +1168,7 @@ module.exports = {
   updateComplaintStatus,
   assignComplaint,
   addNote,
+  transferToSlbfe,
   getDashboardCounts,
   getDashboardCountsForOfficer,
   getWeeklyComplaintStats,

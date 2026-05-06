@@ -9,6 +9,7 @@ import { User } from "../../../core/models/user.model";
 import {
   Attachment,
   Complaint,
+  ComplaintProfile,
   ComplaintStatus,
   COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
@@ -26,6 +27,7 @@ interface PdfLayout {
 
 type ActionOption = { value: string; label: string };
 type AttachmentKind = "image" | "pdf" | "audio" | "file";
+type ProfileMode = "worker" | "complainant";
 
 @Component({
   standalone: false,
@@ -49,6 +51,9 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   addingNote = false;
   updating = false;
   exportingPdf = false;
+  transferringToSlbfe = false;
+  selectedProfileMode: ProfileMode = "worker";
+  activeProfile: ComplaintProfile | null = null;
   canUpdateComplaint = false;
   actionOptions: ActionOption[] = [];
 
@@ -137,6 +142,10 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
   private setComplaint(complaint: Complaint): void {
     this.complaint = this.normalizeComplaintTimeline(complaint);
+    if (!this.complaint.hasComplainantProfile) {
+      this.selectedProfileMode = "worker";
+    }
+    this.activeProfile = this.getProfileForMode(this.selectedProfileMode);
     this.displayAttachments = this.complaint.attachments;
     this.refreshActionOptions();
   }
@@ -272,6 +281,67 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
 
   get canAssignComplaint(): boolean {
     return this.isSupervisor;
+  }
+
+  get canTransferToSlbfe(): boolean {
+    return (
+      Boolean(this.complaint) &&
+      this.complaint!.registrationPath !== "SLBFE"
+    );
+  }
+
+  private getProfileForMode(mode: ProfileMode): ComplaintProfile | null {
+    if (!this.complaint) {
+      return null;
+    }
+
+    if (
+      mode === "complainant" &&
+      this.complaint.complainantProfile
+    ) {
+      return this.complaint.complainantProfile;
+    }
+
+    return this.complaint.workerProfile;
+  }
+
+  get displayedProfileTitle(): string {
+    return this.selectedProfileMode === "complainant"
+      ? "Complainant profile"
+      : "Worker profile";
+  }
+
+  selectProfileMode(mode: ProfileMode, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    if (mode === "complainant" && !this.complaint?.hasComplainantProfile) {
+      return;
+    }
+
+    this.selectedProfileMode = mode;
+    this.activeProfile = this.getProfileForMode(mode);
+  }
+
+  transferToSlbfe(): void {
+    if (!this.complaint || !this.canTransferToSlbfe || this.transferringToSlbfe) {
+      return;
+    }
+
+    this.transferringToSlbfe = true;
+    this.complaintService
+      .transferToSlbfe(this.complaint.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          this.setComplaint(updated);
+          this.transferringToSlbfe = false;
+          this.toast.success("Transferred to SLBFE");
+        },
+        error: () => {
+          this.transferringToSlbfe = false;
+        },
+      });
   }
 
   trackActionOption(_index: number, option: ActionOption): string {
@@ -425,6 +495,27 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       ["Address", complaint.workerAddress || this.unavailableFieldText],
       ["Registration Path", this.getRegistrationPathLabel(complaint.registrationPath)],
     ]);
+
+    if (complaint.complainantProfile) {
+      this.drawSectionTitle(pdf, layout, "Complainant Profile");
+      this.drawFieldGrid(pdf, layout, [
+        ["Full Name", complaint.complainantProfile.fullName],
+        ["NIC", complaint.complainantProfile.nic || this.unavailableFieldText],
+        [
+          "Passport",
+          complaint.complainantProfile.passport || this.unavailableFieldText,
+        ],
+        [
+          "Mobile Number",
+          complaint.complainantProfile.mobile || this.unavailableFieldText,
+        ],
+        ["Email", complaint.complainantProfile.email || this.unavailableFieldText],
+        [
+          "Work Country",
+          complaint.complainantProfile.workCountry || this.unavailableFieldText,
+        ],
+      ]);
+    }
 
     this.drawSectionTitle(pdf, layout, "Complaint Details");
     this.drawFieldGrid(pdf, layout, [
@@ -872,7 +963,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   }
 
   getRegistrationPathLabel(path: Complaint["registrationPath"]): string {
-    return path === "SLBFE" ? "SLBFE Transfer" : "Consular Path";
+    return path === "SLBFE" ? "SLBFE" : "Consular Path";
   }
 
   private getNameParts(fullName: string): {

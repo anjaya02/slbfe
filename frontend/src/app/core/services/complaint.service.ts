@@ -18,6 +18,16 @@ export class ComplaintService {
   constructor(private http: HttpClient) {}
 
   private mapComplaint(complaint: any): Complaint {
+    const workerProfile = complaint.workerProfile || {
+      fullName: complaint.workerName,
+      nic: complaint.workerNIC,
+      passport: complaint.workerPassport || "",
+      mobile: complaint.workerContact,
+      email: "",
+      workCountry: complaint.branch,
+    };
+    const complainantProfile = complaint.complainantProfile || undefined;
+
     return {
       id: complaint.id,
       referenceNo: complaint.referenceNo,
@@ -33,6 +43,11 @@ export class ComplaintService {
       priority: complaint.priority,
       registrationPath: complaint.registrationPath,
       description: complaint.description,
+      hasComplainantProfile: Boolean(
+        complaint.hasComplainantProfile && complainantProfile,
+      ),
+      workerProfile,
+      complainantProfile,
       attachments: (complaint.attachments || []).map((attachment: any) => ({
         id: attachment.id,
         fileName: attachment.fileName,
@@ -155,6 +170,15 @@ export class ComplaintService {
           isInternal: Boolean(note.isInternal),
         })),
       );
+  }
+
+  transferToSlbfe(complaintId: string): Observable<Complaint> {
+    return this.http
+      .patch<any>(
+        `${this.apiBaseUrl}/complaints/${complaintId}/slbfe-transfer`,
+        {},
+      )
+      .pipe(map((complaint) => this.mapComplaint(complaint)));
   }
 
   getDashboardStats(): Observable<DashboardStats> {

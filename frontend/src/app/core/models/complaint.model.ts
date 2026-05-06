@@ -9,6 +9,7 @@ export enum ComplaintStatus {
 
 export type ComplaintType =
   | "BREACH_OF_CONTRACT"
+  | "HARASSMENT"
   | "LACK_OF_COMMUNICATION"
   | "SICK"
   | "BEING_JAILED"
@@ -22,6 +23,16 @@ export type ComplaintType =
 export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export type RegistrationPath = "SLBFE" | "CONSULAR";
+
+export interface ComplaintProfile {
+  fullName: string;
+  nic: string;
+  passport?: string;
+  mobile: string;
+  email?: string;
+  workCountry?: string;
+  username?: string;
+}
 
 export interface Complaint {
   id: string;
@@ -38,6 +49,9 @@ export interface Complaint {
   priority: Priority;
   registrationPath: RegistrationPath;
   description: string;
+  hasComplainantProfile: boolean;
+  workerProfile: ComplaintProfile;
+  complainantProfile?: ComplaintProfile;
   attachments: Attachment[];
   dateSubmitted: Date;
   dateUpdated: Date;
@@ -115,6 +129,7 @@ export interface MonthlyData {
 
 export const COMPLAINT_TYPE_LABELS: Record<ComplaintType, string> = {
   BREACH_OF_CONTRACT: "Breach of Employment Contract",
+  HARASSMENT: "Harassment",
   LACK_OF_COMMUNICATION: "Lack of Communication",
   SICK: "Sick",
   BEING_JAILED: "Being Jailed",

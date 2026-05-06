@@ -25,6 +25,7 @@ const originalFunctions = {
   complaintUpdateStatus: complaintRepository.updateComplaintStatus,
   complaintAssign: complaintRepository.assignComplaint,
   complaintAddNote: complaintRepository.addNote,
+  complaintTransferToSlbfe: complaintRepository.transferToSlbfe,
   createStatusNotification: notificationService.createStatusNotification,
   createAssignmentNotification: notificationService.createAssignmentNotification,
   getUnreadNotificationCount: notificationService.getUnreadCount,
@@ -76,6 +77,8 @@ test.afterEach(() => {
     originalFunctions.complaintUpdateStatus;
   complaintRepository.assignComplaint = originalFunctions.complaintAssign;
   complaintRepository.addNote = originalFunctions.complaintAddNote;
+  complaintRepository.transferToSlbfe =
+    originalFunctions.complaintTransferToSlbfe;
   notificationService.createStatusNotification =
     originalFunctions.createStatusNotification;
   notificationService.createAssignmentNotification =
@@ -426,6 +429,38 @@ test("PATCH /api/complaints/:id/assignment remains supervisor-only", async () =>
   assert.match(response.body.message, /permission/i);
 });
 
+test("PATCH /api/complaints/:id/slbfe-transfer allows assigned case officers", async () => {
+  const officer = createUserRow({
+    id: "USR_OFF",
+    role: "CASE_OFFICER",
+    email: "officer@slbfe.gov.lk",
+    name: "Case Officer",
+  });
+
+  mockAuthenticatedUsers([officer]);
+  complaintRepository.findComplaintById = async () => ({
+    id: "C008",
+    referenceNo: "C008",
+    status: "Under Review",
+    assignedTo: "USR_OFF",
+    registrationPath: "CONSULAR",
+  });
+  complaintRepository.transferToSlbfe = async () => ({
+    id: "C008",
+    referenceNo: "C008",
+    assignedTo: "USR_OFF",
+    registrationPath: "SLBFE",
+  });
+
+  const response = await request(app)
+    .patch("/api/complaints/C008/slbfe-transfer")
+    .set("Authorization", `Bearer ${signToken(officer)}`)
+    .send({});
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.registrationPath, "SLBFE");
+});
+
 test("complaint status updates carry a structured audit event", async () => {
   const actor = {
     id: "USR_OFF",
@@ -670,4 +705,39 @@ test("complaint notes carry a structured audit event with the note id", async ()
   assert.equal(capturedAuditEvent.noteId, note.id);
   assert.equal(capturedAuditEvent.noteType, "INTERNAL_NOTE");
   assert.equal(capturedAuditEvent.metadata.contentLength, note.content.length);
+});
+
+test("complaint SLBFE transfer updates only the complaint handling path", async () => {
+  const actor = {
+    id: "USR_SUP",
+    name: "Supervisor",
+    role: "SUPERVISOR",
+  };
+  const existingComplaint = {
+    id: "C001",
+    referenceNo: "C001",
+    status: "Submitted",
+    registrationPath: "CONSULAR",
+  };
+  let capturedTransferPayload = null;
+
+  complaintRepository.findComplaintById = async () => existingComplaint;
+  complaintRepository.transferToSlbfe = async (payload) => {
+    capturedTransferPayload = payload;
+    return {
+      ...existingComplaint,
+      registrationPath: "SLBFE",
+    };
+  };
+
+  const complaint = await complaintService.transferToSlbfe({
+    complaintId: "C001",
+    actor,
+  });
+
+  assert.equal(capturedTransferPayload.complaintId, "C001");
+  assert.equal(capturedTransferPayload.auditEvent.eventType, "SLBFE_TRANSFERRED");
+  assert.equal(capturedTransferPayload.auditEvent.metadata.previousHandle, "CONSULAR");
+  assert.equal(capturedTransferPayload.auditEvent.metadata.newHandle, "SLBFE");
+  assert.equal(complaint.registrationPath, "SLBFE");
 });

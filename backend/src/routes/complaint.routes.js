@@ -82,6 +82,18 @@ router.patch(
   }),
 );
 
+router.patch(
+  "/:id/slbfe-transfer",
+  validateRequest({ params: idParamSchema }),
+  asyncHandler(async (req, res) => {
+    const complaint = await complaintService.transferToSlbfe({
+      complaintId: req.params.id,
+      actor: req.user,
+    });
+    res.json(complaint);
+  }),
+);
+
 router.post(
   "/:id/notes",
   validateRequest({ params: idParamSchema, body: complaintNoteBodySchema }),

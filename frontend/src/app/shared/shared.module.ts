@@ -4,6 +4,7 @@ import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatBadgeModule } from "@angular/material/badge";
 import { MatSnackBarModule } from "@angular/material/snack-bar";
@@ -33,6 +34,7 @@ import { ConfirmDialogComponent } from "./components/confirm-dialog/confirm-dial
 const MATERIAL_MODULES = [
   MatIconModule,
   MatButtonModule,
+  MatButtonToggleModule,
   MatTooltipModule,
   MatBadgeModule,
   MatSnackBarModule,

@@ -7,6 +7,7 @@ const { writeComplaintLog } = require("../utils/activity-logger");
 
 const TYPE_LABELS = {
   BREACH_OF_CONTRACT: "Breach of Employment Contract",
+  HARASSMENT: "Harassment",
   LACK_OF_COMMUNICATION: "Lack of Communication",
   SICK: "Sick",
   BEING_JAILED: "Being Jailed",
@@ -396,6 +397,47 @@ async function addNote({ complaintId, content, isInternal, actor }) {
   return note;
 }
 
+async function transferToSlbfe({ complaintId, actor }) {
+  const existingComplaint = await getAuthorizedComplaint(
+    complaintId,
+    actor,
+    "COMPLAINT_SLBFE_TRANSFER",
+  );
+
+  if (existingComplaint.registrationPath === "SLBFE") {
+    return existingComplaint;
+  }
+
+  const updatedComplaint = await complaintRepository.transferToSlbfe({
+    complaintId,
+    actor,
+    auditEvent: {
+      id: generateId("AUD"),
+      complaintId,
+      eventType: "SLBFE_TRANSFERRED",
+      ...getActorAuditFields(actor),
+      metadata: {
+        previousHandle: existingComplaint.registrationPath,
+        newHandle: "SLBFE",
+      },
+    },
+  });
+
+  if (!updatedComplaint) {
+    throw new AppError(404, "Complaint not found");
+  }
+
+  writeComplaintLog("COMPLAINT_SLBFE_TRANSFERRED", {
+    ...getActorFields(actor),
+    complaintId: updatedComplaint.id,
+    referenceNo: updatedComplaint.referenceNo,
+    previousHandle: existingComplaint.registrationPath,
+    newHandle: updatedComplaint.registrationPath,
+  });
+
+  return updatedComplaint;
+}
+
 function validateStatusTransition(complaint, newStatus, actor) {
   const allowedStatuses = ALLOWED_STATUS_TRANSITIONS[complaint.status] || new Set();
 
@@ -690,6 +732,7 @@ module.exports = {
   updateComplaintStatus,
   assignComplaint,
   addNote,
+  transferToSlbfe,
   getDashboardStats,
   generateReport,
 };
