@@ -51,8 +51,8 @@ export class ComplaintService {
       complainantProfile,
       attachments: (complaint.attachments || []).map((attachment: any) => ({
         id: attachment.id,
-        fileName: attachment.fileName,
-        fileType: attachment.fileType,
+        fileName: attachment.fileName || "",
+        fileType: attachment.fileType || "",
         fileSize: Number(attachment.fileSize),
         url: attachment.url,
         uploadedBy: attachment.uploadedBy,

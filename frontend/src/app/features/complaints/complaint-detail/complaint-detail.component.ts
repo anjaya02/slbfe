@@ -988,8 +988,8 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   }
 
   private getAttachmentKind(attachment: Attachment): AttachmentKind {
-    const fileType = attachment.fileType.toLowerCase();
-    const fileName = attachment.fileName.toLowerCase();
+    const fileType = (attachment.fileType || "").toLowerCase();
+    const fileName = (attachment.fileName || "").toLowerCase();
 
     if (
       fileType.startsWith("image/") ||

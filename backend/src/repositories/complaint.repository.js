@@ -180,18 +180,6 @@ function getPriority(type, status) {
   return "MEDIUM";
 }
 
-function getResolutionCategory(status) {
-  if (status === "Resolved") {
-    return "RESOLVED";
-  }
-
-  if (status === "Closed") {
-    return "CLOSED";
-  }
-
-  return null;
-}
-
 function getRegistrationPath(row) {
   const handle = normalizeKey(row.complain_handle);
 
@@ -762,8 +750,8 @@ async function findComplaintById(id) {
   complaint.attachments = attachments.map((row) => ({
     id: row.id,
     complaintId: row.complaint_id,
-    fileName: row.file_name,
-    fileType: row.file_type,
+    fileName: fallbackText(row.file_name),
+    fileType: fallbackText(row.file_type),
     fileSize: row.file_size,
     url: row.storage_url,
     uploadedBy: row.uploaded_by_name,
@@ -820,15 +808,10 @@ async function updateComplaintStatus({
       `
         UPDATE complain_details
         SET complain_status = ?,
-            resolution_catagory = ?,
             updated_time = CURRENT_TIMESTAMP
         WHERE complain_id = ?
       `,
-      [
-        newStatus,
-        getResolutionCategory(newStatus),
-        complaintId,
-      ],
+      [newStatus, complaintId],
     );
 
     await connection.execute(
@@ -917,15 +900,10 @@ async function assignComplaint({
       `
         UPDATE complain_details
         SET complain_status = ?,
-            resolution_catagory = ?,
             updated_time = CURRENT_TIMESTAMP
         WHERE complain_id = ?
       `,
-      [
-        effectiveNextStatus,
-        getResolutionCategory(effectiveNextStatus),
-        complaintId,
-      ],
+      [effectiveNextStatus, complaintId],
     );
 
     await connection.execute(
