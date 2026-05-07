@@ -120,6 +120,7 @@ async function getAuthorizedComplaint(complaintId, actor, actionPrefix) {
 async function getComplaints(filters) {
   const effectiveFilters = {
     ...filters,
+    consularPathOnly: true,
     assignedTo:
       filters.actor?.role === "CASE_OFFICER"
         ? filters.actor.id

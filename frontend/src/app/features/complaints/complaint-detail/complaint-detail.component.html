@@ -44,9 +44,7 @@
     >
       <div class="case-path-avatar">
         <mat-icon>{{
-          complaint.registrationPath === "SLBFE"
-            ? "assured_workload"
-            : "public"
+          complaint.registrationPath === "SLBFE" ? "assured_workload" : "public"
         }}</mat-icon>
       </div>
       <div class="case-path-details">
@@ -114,42 +112,48 @@
             <span
               class="field-value"
               [class.field-value--placeholder]="!profile.nic"
-              >{{ profile.nic || unavailableFieldText }}</span>
+              >{{ profile.nic || unavailableFieldText }}</span
+            >
           </div>
           <div class="field">
             <span class="field-label">PASSPORT</span>
             <span
               class="field-value"
               [class.field-value--placeholder]="!profile.passport"
-              >{{ profile.passport || unavailableFieldText }}</span>
+              >{{ profile.passport || unavailableFieldText }}</span
+            >
           </div>
           <div class="field">
             <span class="field-label">MOBILE NUMBER</span>
             <span
               class="field-value"
               [class.field-value--placeholder]="!profile.mobile"
-              >{{ profile.mobile || unavailableFieldText }}</span>
+              >{{ profile.mobile || unavailableFieldText }}</span
+            >
           </div>
           <div class="field">
             <span class="field-label">EMAIL</span>
             <span
               class="field-value"
               [class.field-value--placeholder]="!profile.email"
-              >{{ profile.email || unavailableFieldText }}</span>
+              >{{ profile.email || unavailableFieldText }}</span
+            >
           </div>
           <div class="field">
             <span class="field-label">WORK COUNTRY</span>
             <span
               class="field-value"
               [class.field-value--placeholder]="!profile.workCountry"
-              >{{ profile.workCountry || unavailableFieldText }}</span>
+              >{{ profile.workCountry || unavailableFieldText }}</span
+            >
           </div>
           <div class="field" *ngIf="selectedProfileMode === 'complainant'">
             <span class="field-label">USERNAME</span>
             <span
               class="field-value"
               [class.field-value--placeholder]="!profile.username"
-              >{{ profile.username || unavailableFieldText }}</span>
+              >{{ profile.username || unavailableFieldText }}</span
+            >
           </div>
         </div>
       </div>
@@ -157,6 +161,17 @@
       <div class="card incident-card">
         <h3 class="card-title">Incident</h3>
         <p class="incident-description">{{ complaint.description }}</p>
+        <div class="expected-resolution">
+          <span class="expected-resolution-label">Expected Resolution:</span>
+          <span
+            class="expected-resolution-value"
+            [class.expected-resolution-value--placeholder]="
+              !complaint.expectedResolution
+            "
+          >
+            {{ complaint.expectedResolution || unavailableFieldText }}
+          </span>
+        </div>
         <div class="attachments" *ngIf="displayAttachments.length">
           <div class="attachment-header">
             <div>
@@ -187,7 +202,8 @@
               <span class="attachment-copy">
                 <span class="attachment-name">{{ att.fileName }}</span>
                 <span class="attachment-meta">
-                  {{ getAttachmentLabel(att) }} - {{ formatFileSize(att.fileSize) }}
+                  {{ getAttachmentLabel(att) }} -
+                  {{ formatFileSize(att.fileSize) }}
                 </span>
               </span>
               <mat-icon class="attachment-open-icon">open_in_new</mat-icon>
@@ -206,7 +222,7 @@
           (click)="toggleUpdatePanel()"
           *ngIf="canUpdateComplaint"
         >
-          {{ canAssignComplaint ? "Solve" : "Update Case" }}
+          Update Case
         </button>
       </div>
     </div>

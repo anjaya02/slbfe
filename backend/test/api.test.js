@@ -21,6 +21,7 @@ const originalFunctions = {
   authLogout: authService.logout,
   dashboardStats: complaintService.getDashboardStats,
   generateReport: complaintService.generateReport,
+  complaintList: complaintRepository.listComplaints,
   complaintFindById: complaintRepository.findComplaintById,
   complaintUpdateStatus: complaintRepository.updateComplaintStatus,
   complaintAssign: complaintRepository.assignComplaint,
@@ -72,6 +73,7 @@ test.afterEach(() => {
   authService.logout = originalFunctions.authLogout;
   complaintService.getDashboardStats = originalFunctions.dashboardStats;
   complaintService.generateReport = originalFunctions.generateReport;
+  complaintRepository.listComplaints = originalFunctions.complaintList;
   complaintRepository.findComplaintById = originalFunctions.complaintFindById;
   complaintRepository.updateComplaintStatus =
     originalFunctions.complaintUpdateStatus;
@@ -408,6 +410,30 @@ test("GET /api/complaints/:id allows supervisors to open any complaint", async (
 
   assert.equal(response.status, 200);
   assert.equal(response.body.referenceNo, "C002");
+});
+
+test("complaint list returns only consular path cases", async () => {
+  const officer = {
+    id: "USR_OFF",
+    name: "Case Officer",
+    role: "CASE_OFFICER",
+  };
+  let capturedFilters = null;
+
+  complaintRepository.listComplaints = async (filters) => {
+    capturedFilters = filters;
+    return { data: [], total: 0 };
+  };
+
+  await complaintService.getComplaints({
+    actor: officer,
+    assignedTo: "USR_OTHER",
+    page: 0,
+    pageSize: 10,
+  });
+
+  assert.equal(capturedFilters.assignedTo, "USR_OFF");
+  assert.equal(capturedFilters.consularPathOnly, true);
 });
 
 test("PATCH /api/complaints/:id/assignment remains supervisor-only", async () => {

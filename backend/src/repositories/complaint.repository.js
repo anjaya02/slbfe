@@ -315,6 +315,10 @@ function mapComplaintRow(row) {
       fallbackText(row.first_comment) ||
       fallbackText(row.complain_category_name) ||
       "No complaint description recorded.",
+    expectedResolution: fallbackText(
+      row.resolution_category_name,
+      fallbackText(row.resolution_catagory),
+    ),
     hasComplainantProfile: hasOnBehalfWorker,
     workerProfile: {
       fullName: workerName,
@@ -401,6 +405,32 @@ function buildFilterClauses(filters = {}) {
   if (filters.assignedTo) {
     clauses.push("ca.assigned_to_user_id = :assignedTo");
     params.assignedTo = filters.assignedTo;
+  }
+
+  if (filters.consularPathOnly) {
+    const handleExpression = `
+      UPPER(
+        REPLACE(
+          REPLACE(
+            REPLACE(COALESCE(d.complain_handle, ''), ' ', '_'),
+            '-',
+            '_'
+          ),
+          '/',
+          '_'
+        )
+      )
+    `;
+
+    clauses.push(`
+      (
+        ${handleExpression} = 'CONSULAR'
+        OR (
+          ${handleExpression} NOT IN ('SLBFE', 'CONSULAR')
+          AND COALESCE(TRIM(d.behalf_user), '') <> ''
+        )
+      )
+    `);
   }
 
   if (filters.branch) {

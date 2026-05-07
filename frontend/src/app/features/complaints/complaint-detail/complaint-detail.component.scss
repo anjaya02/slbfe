@@ -346,6 +346,35 @@
   margin-bottom: 16px;
 }
 
+.expected-resolution {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border-top: 1px solid v.$gray-100;
+  padding-top: 14px;
+  margin-bottom: 18px;
+}
+
+.expected-resolution-label {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.expected-resolution-value {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: var(--text-primary);
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.expected-resolution-value--placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .attachments {
   margin: 18px 0 20px;
 }

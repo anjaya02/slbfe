@@ -363,9 +363,9 @@ INSERT INTO `complain_details` (
   'Worker reported unpaid salary, forced overtime, and passport retention by the employer.',
   '2026-04-18 08:40:00',
   'BREACH_OF_CONTRACT',
-  NULL,
+  'EMPLOYER_CONTACTED',
   'In Progress',
-  'SLBFE',
+  'CONSULAR',
   '2026-04-21 11:10:00',
   'USR002'
 ), (
@@ -380,7 +380,7 @@ INSERT INTO `complain_details` (
   'Worker requested assistance with annual leave and employer pressure to sign a settlement paper.',
   '2026-04-17 19:25:00',
   'LACK_OF_COMMUNICATION',
-  NULL,
+  'REFERRED_TO_MISSION',
   'Awaiting Info',
   'CONSULAR',
   '2026-04-20 14:05:00',
@@ -397,7 +397,7 @@ INSERT INTO `complain_details` (
   'Worker reported passport retention, restricted communication, and physical intimidation.',
   '2026-04-16 06:50:00',
   'BEING_RETAINED',
-  NULL,
+  'REFERRED_TO_MISSION',
   'In Progress',
   'CONSULAR',
   '2026-04-19 09:40:00',
@@ -431,7 +431,7 @@ INSERT INTO `complain_details` (
   'Worker requested guidance before signing a final salary settlement paper.',
   '2026-04-22 09:05:00',
   'OTHER',
-  NULL,
+  'WORKER_UPDATED',
   'Submitted',
   'CONSULAR',
   '2026-04-22 09:05:00',
@@ -448,9 +448,9 @@ INSERT INTO `complain_details` (
   'Worker requested help contacting the sponsor to obtain medical attention.',
   '2026-04-22 10:30:00',
   'SICK',
-  NULL,
+  'EMPLOYER_CONTACTED',
   'Under Review',
-  'SLBFE',
+  'CONSULAR',
   '2026-04-22 11:00:00',
   'USR001'
 ), (
@@ -467,7 +467,7 @@ INSERT INTO `complain_details` (
   'BEING_STRANDED',
   'CLOSED',
   'Closed',
-  'SLBFE',
+  'CONSULAR',
   '2026-04-18 15:30:00',
   'USR001'
 ), (
@@ -482,11 +482,113 @@ INSERT INTO `complain_details` (
   'Submitted by Saman Ekanayake on behalf of Nadeesha Kumari Jayawardena for harassment support and consular intervention.',
   '2026-05-06 12:30:00',
   'HARASSMENT',
-  NULL,
+  'REFERRED_TO_MISSION',
   'Under Review',
   'CONSULAR',
   '2026-05-06 12:30:00',
   'N1234'
+), (
+  'C009',
+  'PROBLEMS_AT_HOME',
+  'Pradeep Nishantha',
+  NULL,
+  '+968 92345678',
+  'M2233445',
+  '198934561234',
+  'Muscat',
+  'Worker requested help after family members in Sri Lanka reported an urgent welfare concern.',
+  '2026-05-05 09:15:00',
+  'PROBLEMS_AT_HOME',
+  'WORKER_UPDATED',
+  'Awaiting Info',
+  'CONSULAR',
+  '2026-05-05 14:20:00',
+  'USR002'
+), (
+  'C010',
+  'BEING_JAILED',
+  'Lahiru Madusanka',
+  NULL,
+  '+974 55667788',
+  'Q9988776',
+  '199145678901',
+  'Doha',
+  'Family reported the worker was detained after a workplace dispute and requested mission assistance.',
+  '2026-05-04 16:05:00',
+  'BEING_JAILED',
+  'REFERRED_TO_MISSION',
+  'Under Review',
+  'CONSULAR',
+  '2026-05-04 16:45:00',
+  'USR001'
+), (
+  'C011',
+  'DEATH',
+  'Anusha Priyadarshani',
+  NULL,
+  '+965 60112233',
+  'K5566778',
+  '198756789012',
+  'Kuwait',
+  'Relative requested urgent consular support after receiving notice of the worker death abroad.',
+  '2026-05-03 07:30:00',
+  'DEATH',
+  'REFERRED_TO_MISSION',
+  'In Progress',
+  'CONSULAR',
+  '2026-05-03 10:10:00',
+  'USR001'
+), (
+  'C012',
+  'BREACH_OF_CONTRACT',
+  'Roshan Kumara',
+  NULL,
+  '+973 39876543',
+  'B6677889',
+  '199023456789',
+  'Manama',
+  'Worker reported contract substitution, delayed salary, and pressure to accept different duties.',
+  '2026-05-02 18:25:00',
+  'BREACH_OF_CONTRACT',
+  'EMPLOYER_CONTACTED',
+  'Under Review',
+  'CONSULAR',
+  '2026-05-02 19:00:00',
+  'USR001'
+), (
+  'C013',
+  'OTHER',
+  'Nirmala Fernando',
+  NULL,
+  '+6591234567',
+  'S3344556',
+  '199567890123',
+  'Singapore',
+  'Worker requested guidance about renewing documents before returning to the employer.',
+  '2026-05-01 11:10:00',
+  'OTHER',
+  'WORKER_UPDATED',
+  'Submitted',
+  'CONSULAR',
+  '2026-05-01 11:10:00',
+  NULL
+), (
+  'C014',
+  'LACK_OF_COMMUNICATION',
+  'Hashan Perera',
+  NULL,
+  '+966 501234567',
+  'R7788990',
+  '198645678901',
+  'Riyadh',
+  'Worker could not contact the local agency after the employer stopped responding about leave approval.',
+  '2026-04-30 08:50:00',
+  'LACK_OF_COMMUNICATION',
+  'RESOLVED',
+  'Resolved',
+  'CONSULAR',
+  '2026-05-04 12:40:00',
+  'USR002'
 );
 
 INSERT INTO `complaint_assignments` (
@@ -537,6 +639,36 @@ INSERT INTO `complaint_assignments` (
   'USR001',
   '2026-05-06 12:35:00',
   '2026-05-06 12:35:00'
+), (
+  'C009',
+  'USR002',
+  'USR001',
+  '2026-05-05 09:45:00',
+  '2026-05-05 09:45:00'
+), (
+  'C010',
+  'USR002',
+  'USR001',
+  '2026-05-04 16:45:00',
+  '2026-05-04 16:45:00'
+), (
+  'C011',
+  'USR002',
+  'USR001',
+  '2026-05-03 08:00:00',
+  '2026-05-03 08:00:00'
+), (
+  'C012',
+  'USR002',
+  'USR001',
+  '2026-05-02 19:00:00',
+  '2026-05-02 19:00:00'
+), (
+  'C014',
+  'USR002',
+  'USR001',
+  '2026-04-30 09:20:00',
+  '2026-04-30 09:20:00'
 );
 
 INSERT INTO `complaint_attachments` (
@@ -661,6 +793,72 @@ INSERT INTO `complain_comments` (`complain_id`, `complain_msg`, `updated_user`, 
     'Assigned consular-path case is ready for review. Use SLBFE Transfer only if the handling path should move to SLBFE.',
     'USR002',
     '2026-05-06 12:40:00'
+  ),
+  (
+    'C009',
+    'My family needs help with a welfare issue at home and I cannot reach the correct office while overseas.',
+    NULL,
+    '2026-05-05 09:15:00'
+  ),
+  (
+    'C009',
+    'Requested supporting documents and local contact details before coordinating welfare assistance.',
+    'USR002',
+    '2026-05-05 14:20:00'
+  ),
+  (
+    'C010',
+    'The family reported detention and asked for urgent help confirming the worker location.',
+    NULL,
+    '2026-05-04 16:05:00'
+  ),
+  (
+    'C010',
+    'Initial detention details were recorded. Officer will coordinate through mission channels.',
+    'USR002',
+    '2026-05-04 16:55:00'
+  ),
+  (
+    'C011',
+    'Relative requested assistance with death notification, documentation, and next steps for repatriation.',
+    NULL,
+    '2026-05-03 07:30:00'
+  ),
+  (
+    'C011',
+    'Priority handling started. Mission contact and family representative details were verified.',
+    'USR002',
+    '2026-05-03 10:15:00'
+  ),
+  (
+    'C012',
+    'My contract was changed after arrival and I have not received the salary amount promised before departure.',
+    NULL,
+    '2026-05-02 18:25:00'
+  ),
+  (
+    'C012',
+    'Assigned for contract review. Awaiting copies of agreement and recent salary records.',
+    'USR002',
+    '2026-05-02 19:10:00'
+  ),
+  (
+    'C013',
+    'I need advice about document renewal before I return to my employer next month.',
+    NULL,
+    '2026-05-01 11:10:00'
+  ),
+  (
+    'C014',
+    'The agency stopped answering calls and my leave approval has been pending for several weeks.',
+    NULL,
+    '2026-04-30 08:50:00'
+  ),
+  (
+    'C014',
+    'Agency confirmed the leave approval timeline and worker accepted the written response.',
+    'USR002',
+    '2026-05-04 12:35:00'
   );
 
 INSERT INTO `complain_logs` (`complain_id`, `complain_msg`, `updated_user`, `updated_time`) VALUES
@@ -677,7 +875,15 @@ INSERT INTO `complain_logs` (`complain_id`, `complain_msg`, `updated_user`, `upd
   ('C007', 'Status Changed: In Progress', 'USR002', '2026-04-09 08:45:00'),
   ('C007', 'Status Changed: Resolved', 'USR002', '2026-04-17 16:20:00'),
   ('C007', 'Status Changed: Closed', 'USR001', '2026-04-18 15:30:00'),
-  ('C008', 'Assigned to Iman Fernando', 'USR001', '2026-05-06 12:35:00');
+  ('C008', 'Assigned to Iman Fernando', 'USR001', '2026-05-06 12:35:00'),
+  ('C009', 'Assigned to Iman Fernando', 'USR001', '2026-05-05 09:45:00'),
+  ('C009', 'Status Changed: Awaiting Info', 'USR002', '2026-05-05 14:20:00'),
+  ('C010', 'Assigned to Iman Fernando', 'USR001', '2026-05-04 16:45:00'),
+  ('C011', 'Assigned to Iman Fernando', 'USR001', '2026-05-03 08:00:00'),
+  ('C011', 'Status Changed: In Progress', 'USR002', '2026-05-03 10:10:00'),
+  ('C012', 'Assigned to Iman Fernando', 'USR001', '2026-05-02 19:00:00'),
+  ('C014', 'Assigned to Iman Fernando', 'USR001', '2026-04-30 09:20:00'),
+  ('C014', 'Status Changed: Resolved', 'USR002', '2026-05-04 12:40:00');
 
 INSERT INTO `complaint_audit_events` (
   `id`,
@@ -708,7 +914,15 @@ INSERT INTO `complaint_audit_events` (
   ('AUD011', 'C007', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-09 08:45:00'),
   ('AUD012', 'C007', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'In Progress', 'Resolved', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-17 16:20:00'),
   ('AUD013', 'C007', 'STATUS_CHANGED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Resolved', 'Closed', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-04-18 15:30:00'),
-  ('AUD014', 'C008', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'onBehalf', TRUE), '2026-05-06 12:35:00');
+  ('AUD014', 'C008', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'onBehalf', TRUE), '2026-05-06 12:35:00'),
+  ('AUD015', 'C009', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-05-05 09:45:00'),
+  ('AUD016', 'C009', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'Awaiting Info', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE, 'noteAdded', TRUE), '2026-05-05 14:20:00'),
+  ('AUD017', 'C010', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'urgent', TRUE), '2026-05-04 16:45:00'),
+  ('AUD018', 'C011', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'priority', 'critical'), '2026-05-03 08:00:00'),
+  ('AUD019', 'C011', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-05-03 10:10:00'),
+  ('AUD020', 'C012', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-05-02 19:00:00'),
+  ('AUD021', 'C014', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-30 09:20:00'),
+  ('AUD022', 'C014', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'Resolved', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-05-04 12:40:00');
 
 INSERT INTO `notifications` (
   `id`,

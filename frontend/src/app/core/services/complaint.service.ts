@@ -43,6 +43,7 @@ export class ComplaintService {
       priority: complaint.priority,
       registrationPath: complaint.registrationPath,
       description: complaint.description,
+      expectedResolution: complaint.expectedResolution || undefined,
       hasComplainantProfile: Boolean(
         complaint.hasComplainantProfile && complainantProfile,
       ),

@@ -337,6 +337,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
           this.setComplaint(updated);
           this.transferringToSlbfe = false;
           this.toast.success("Transferred to SLBFE");
+          this.router.navigate(["/complaints"], { replaceUrl: true });
         },
         error: () => {
           this.transferringToSlbfe = false;

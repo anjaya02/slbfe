@@ -49,6 +49,7 @@ export interface Complaint {
   priority: Priority;
   registrationPath: RegistrationPath;
   description: string;
+  expectedResolution?: string;
   hasComplainantProfile: boolean;
   workerProfile: ComplaintProfile;
   complainantProfile?: ComplaintProfile;
