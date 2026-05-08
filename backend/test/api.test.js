@@ -22,6 +22,16 @@ const originalFunctions = {
   dashboardStats: complaintService.getDashboardStats,
   generateReport: complaintService.generateReport,
   complaintList: complaintRepository.listComplaints,
+  complaintDashboardCounts: complaintRepository.getDashboardCounts,
+  complaintDashboardCountsForOfficer:
+    complaintRepository.getDashboardCountsForOfficer,
+  complaintWeeklyStats: complaintRepository.getWeeklyComplaintStats,
+  complaintWeeklyStatsForOfficer:
+    complaintRepository.getWeeklyComplaintStatsForOfficer,
+  complaintMonthlyStats: complaintRepository.getMonthlyComplaintStats,
+  complaintMonthlyStatsForOfficer:
+    complaintRepository.getMonthlyComplaintStatsForOfficer,
+  complaintFindForReport: complaintRepository.findComplaintsForReport,
   complaintFindById: complaintRepository.findComplaintById,
   complaintUpdateStatus: complaintRepository.updateComplaintStatus,
   complaintAssign: complaintRepository.assignComplaint,
@@ -74,6 +84,20 @@ test.afterEach(() => {
   complaintService.getDashboardStats = originalFunctions.dashboardStats;
   complaintService.generateReport = originalFunctions.generateReport;
   complaintRepository.listComplaints = originalFunctions.complaintList;
+  complaintRepository.getDashboardCounts =
+    originalFunctions.complaintDashboardCounts;
+  complaintRepository.getDashboardCountsForOfficer =
+    originalFunctions.complaintDashboardCountsForOfficer;
+  complaintRepository.getWeeklyComplaintStats =
+    originalFunctions.complaintWeeklyStats;
+  complaintRepository.getWeeklyComplaintStatsForOfficer =
+    originalFunctions.complaintWeeklyStatsForOfficer;
+  complaintRepository.getMonthlyComplaintStats =
+    originalFunctions.complaintMonthlyStats;
+  complaintRepository.getMonthlyComplaintStatsForOfficer =
+    originalFunctions.complaintMonthlyStatsForOfficer;
+  complaintRepository.findComplaintsForReport =
+    originalFunctions.complaintFindForReport;
   complaintRepository.findComplaintById = originalFunctions.complaintFindById;
   complaintRepository.updateComplaintStatus =
     originalFunctions.complaintUpdateStatus;
@@ -434,6 +458,61 @@ test("complaint list returns only consular path cases", async () => {
 
   assert.equal(capturedFilters.assignedTo, "USR_OFF");
   assert.equal(capturedFilters.consularPathOnly, true);
+});
+
+test("dashboard stats are scoped to consular path cases", async () => {
+  const officer = {
+    id: "USR_OFF",
+    name: "Case Officer",
+    role: "CASE_OFFICER",
+  };
+  let capturedCountsArgs = null;
+  let capturedWeeklyArgs = null;
+  let capturedMonthlyArgs = null;
+
+  complaintRepository.getDashboardCountsForOfficer = async (...args) => {
+    capturedCountsArgs = args;
+    return { total_cases: 0, resolved_cases: 0, open_cases: 0 };
+  };
+  complaintRepository.getWeeklyComplaintStatsForOfficer = async (...args) => {
+    capturedWeeklyArgs = args;
+    return [];
+  };
+  complaintRepository.getMonthlyComplaintStatsForOfficer = async (...args) => {
+    capturedMonthlyArgs = args;
+    return [];
+  };
+
+  await complaintService.getDashboardStats(officer);
+
+  assert.equal(capturedCountsArgs[0], "USR_OFF");
+  assert.equal(capturedCountsArgs[1].consularPathOnly, true);
+  assert.equal(capturedWeeklyArgs[0], "USR_OFF");
+  assert.equal(capturedWeeklyArgs[1].consularPathOnly, true);
+  assert.equal(capturedMonthlyArgs[0], "USR_OFF");
+  assert.equal(capturedMonthlyArgs[1].consularPathOnly, true);
+});
+
+test("generated reports are scoped to consular path cases", async () => {
+  const actor = {
+    id: "USR_SUP",
+    name: "Supervisor",
+    role: "SUPERVISOR",
+  };
+  let capturedFilters = null;
+
+  complaintRepository.findComplaintsForReport = async (filters) => {
+    capturedFilters = filters;
+    return [];
+  };
+
+  const report = await complaintService.generateReport(
+    { reportType: "MONTHLY" },
+    actor,
+  );
+
+  assert.equal(capturedFilters.consularPathOnly, true);
+  assert.equal(report.summary.totalCases, 0);
 });
 
 test("PATCH /api/complaints/:id/assignment remains supervisor-only", async () => {

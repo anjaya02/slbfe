@@ -432,6 +432,10 @@ function buildFilterClauses(filters = {}) {
   };
 }
 
+function appendWhereCondition(whereClause, condition) {
+  return whereClause ? `${whereClause} AND ${condition}` : `WHERE ${condition}`;
+}
+
 async function listComplaints(filters = {}) {
   const { whereClause, params } = buildFilterClauses(filters);
   const sortMap = {
@@ -1023,7 +1027,8 @@ async function transferToSlbfe({ complaintId, actor, auditEvent }) {
   return findComplaintById(complaintId);
 }
 
-async function getDashboardCounts() {
+async function getDashboardCounts(filters = {}) {
+  const { whereClause, params } = buildFilterClauses(filters);
   const statusExpr = statusCaseSql("d.complain_status");
   const rows = await query(
     `
@@ -1032,33 +1037,27 @@ async function getDashboardCounts() {
         SUM(CASE WHEN ${statusExpr} IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS resolved_cases,
         SUM(CASE WHEN ${statusExpr} NOT IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS open_cases
       FROM complain_details d
+      LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
+      ${whereClause}
     `,
+    params,
   );
 
   return rows[0] || { total_cases: 0, resolved_cases: 0, open_cases: 0 };
 }
 
-async function getDashboardCountsForOfficer(officerId) {
-  const statusExpr = statusCaseSql("d.complain_status");
-  const rows = await query(
-    `
-      SELECT
-        COUNT(*) AS total_cases,
-        SUM(CASE WHEN ${statusExpr} IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS resolved_cases,
-        SUM(CASE WHEN ${statusExpr} NOT IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS open_cases
-      FROM complain_details d
-      INNER JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
-      WHERE ca.assigned_to_user_id = :officerId
-    `,
-    { officerId },
-  );
-
-  return rows[0] || { total_cases: 0, resolved_cases: 0, open_cases: 0 };
+async function getDashboardCountsForOfficer(officerId, filters = {}) {
+  return getDashboardCounts({ ...filters, assignedTo: officerId });
 }
 
-async function getWeeklyComplaintStats() {
+async function getWeeklyComplaintStats(filters = {}) {
+  const { whereClause, params } = buildFilterClauses(filters);
   const statusExpr = statusCaseSql("d.complain_status");
   const complaintDateExpr = getComplaintDateExpression();
+  const weeklyWhereClause = appendWhereCondition(
+    whereClause,
+    `${complaintDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)`,
+  );
 
   return query(
     `
@@ -1068,37 +1067,26 @@ async function getWeeklyComplaintStats() {
         SUM(CASE WHEN ${statusExpr} IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS resolved,
         SUM(CASE WHEN ${statusExpr} NOT IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS pending
       FROM complain_details d
-      WHERE ${complaintDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+      LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
+      ${weeklyWhereClause}
       GROUP BY DATE(${complaintDateExpr})
       ORDER BY DATE(${complaintDateExpr}) ASC
     `,
+    params,
   );
 }
 
-async function getWeeklyComplaintStatsForOfficer(officerId) {
-  const statusExpr = statusCaseSql("d.complain_status");
-  const complaintDateExpr = getComplaintDateExpression();
-
-  return query(
-    `
-      SELECT
-        DATE(${complaintDateExpr}) AS stat_date,
-        SUM(1) AS submitted,
-        SUM(CASE WHEN ${statusExpr} IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS resolved,
-        SUM(CASE WHEN ${statusExpr} NOT IN ('Resolved', 'Closed') THEN 1 ELSE 0 END) AS pending
-      FROM complain_details d
-      INNER JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
-      WHERE ca.assigned_to_user_id = :officerId
-        AND ${complaintDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-      GROUP BY DATE(${complaintDateExpr})
-      ORDER BY DATE(${complaintDateExpr}) ASC
-    `,
-    { officerId },
-  );
+async function getWeeklyComplaintStatsForOfficer(officerId, filters = {}) {
+  return getWeeklyComplaintStats({ ...filters, assignedTo: officerId });
 }
 
-async function getMonthlyComplaintStats() {
+async function getMonthlyComplaintStats(filters = {}) {
+  const { whereClause, params } = buildFilterClauses(filters);
   const complaintDateExpr = getComplaintDateExpression();
+  const monthlyWhereClause = appendWhereCondition(
+    whereClause,
+    `${complaintDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)`,
+  );
 
   return query(
     `
@@ -1106,30 +1094,17 @@ async function getMonthlyComplaintStats() {
         DATE_FORMAT(${complaintDateExpr}, '%Y-%m') AS stat_month,
         COUNT(*) AS count
       FROM complain_details d
-      WHERE ${complaintDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
+      LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
+      ${monthlyWhereClause}
       GROUP BY DATE_FORMAT(${complaintDateExpr}, '%Y-%m')
       ORDER BY stat_month ASC
     `,
+    params,
   );
 }
 
-async function getMonthlyComplaintStatsForOfficer(officerId) {
-  const complaintDateExpr = getComplaintDateExpression();
-
-  return query(
-    `
-      SELECT
-        DATE_FORMAT(${complaintDateExpr}, '%Y-%m') AS stat_month,
-        COUNT(*) AS count
-      FROM complain_details d
-      INNER JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
-      WHERE ca.assigned_to_user_id = :officerId
-        AND ${complaintDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
-      GROUP BY DATE_FORMAT(${complaintDateExpr}, '%Y-%m')
-      ORDER BY stat_month ASC
-    `,
-    { officerId },
-  );
+async function getMonthlyComplaintStatsForOfficer(officerId, filters = {}) {
+  return getMonthlyComplaintStats({ ...filters, assignedTo: officerId });
 }
 
 async function findComplaintsForReport(filters = {}) {

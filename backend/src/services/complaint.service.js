@@ -463,18 +463,28 @@ function validateStatusTransition(complaint, newStatus, actor) {
 
 async function getDashboardStats(user) {
   const isCaseOfficer = user?.role === "CASE_OFFICER";
+  const dashboardFilters = { consularPathOnly: true };
 
   const [summary, weeklyRows, monthlyRows] = await Promise.all(
     isCaseOfficer
       ? [
-          complaintRepository.getDashboardCountsForOfficer(user.id),
-          complaintRepository.getWeeklyComplaintStatsForOfficer(user.id),
-          complaintRepository.getMonthlyComplaintStatsForOfficer(user.id),
+          complaintRepository.getDashboardCountsForOfficer(
+            user.id,
+            dashboardFilters,
+          ),
+          complaintRepository.getWeeklyComplaintStatsForOfficer(
+            user.id,
+            dashboardFilters,
+          ),
+          complaintRepository.getMonthlyComplaintStatsForOfficer(
+            user.id,
+            dashboardFilters,
+          ),
         ]
       : [
-          complaintRepository.getDashboardCounts(),
-          complaintRepository.getWeeklyComplaintStats(),
-          complaintRepository.getMonthlyComplaintStats(),
+          complaintRepository.getDashboardCounts(dashboardFilters),
+          complaintRepository.getWeeklyComplaintStats(dashboardFilters),
+          complaintRepository.getMonthlyComplaintStats(dashboardFilters),
         ],
   );
 
@@ -597,6 +607,7 @@ async function generateReport(filter, actor) {
   const effectiveFilter = {
     ...filter,
     ...buildDateRange(filter.reportType, filter),
+    consularPathOnly: true,
   };
 
   const complaints =
