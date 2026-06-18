@@ -421,6 +421,37 @@ function buildFilterClauses(filters = {}) {
     `);
   }
 
+  // NOTE:
+  // The slbfePathOnly filter mirrors the consularPathOnly logic.
+  // A complaint belongs to the SLBFE Path if:
+  // 1. The complain_handle is explicitly set to 'SLBFE'
+  // 2. Or the complain_handle is not 'SLBFE' or 'CONSULAR' (e.g. empty or null) and behalf_user is also empty or null
+  if (filters.slbfePathOnly) {
+    const handleExpression = `
+      UPPER(
+        REPLACE(
+          REPLACE(
+            REPLACE(COALESCE(d.complain_handle, ''), ' ', '_'),
+            '-',
+            '_'
+          ),
+          '/',
+          '_'
+        )
+      )
+    `;
+
+    clauses.push(`
+      (
+        ${handleExpression} = 'SLBFE'
+        OR (
+          ${handleExpression} NOT IN ('SLBFE', 'CONSULAR')
+          AND COALESCE(TRIM(d.behalf_user), '') = ''
+        )
+      )
+    `);
+  }
+
   if (filters.branch) {
     clauses.push("d.work_country = :branch");
     params.branch = filters.branch;

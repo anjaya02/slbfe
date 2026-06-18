@@ -5,6 +5,19 @@ const AppError = require("../utils/app-error");
 const { generateId } = require("../utils/id");
 const { writeComplaintLog } = require("../utils/activity-logger");
 
+// NOTE: Application mode configuration
+// Set to "CONSULAR" for the Consular Affairs Division deployment.
+// Set to "SLBFE" for the SLBFE Division deployment.
+const APPLICATION_PATH = "SLBFE";
+
+// Returns the active filter based on the configured APPLICATION_PATH.
+function getPathFilters() {
+  return {
+    consularPathOnly: APPLICATION_PATH === "CONSULAR",
+    slbfePathOnly: APPLICATION_PATH === "SLBFE",
+  };
+}
+
 const TYPE_LABELS = {
   BREACH_OF_CONTRACT: "Breach of Employment Contract",
   HARASSMENT: "Harassment",
@@ -120,7 +133,7 @@ async function getAuthorizedComplaint(complaintId, actor, actionPrefix) {
 async function getComplaints(filters) {
   const effectiveFilters = {
     ...filters,
-    consularPathOnly: true,
+    ...getPathFilters(),
     assignedTo:
       filters.actor?.role === "CASE_OFFICER"
         ? filters.actor.id
@@ -463,7 +476,7 @@ function validateStatusTransition(complaint, newStatus, actor) {
 
 async function getDashboardStats(user) {
   const isCaseOfficer = user?.role === "CASE_OFFICER";
-  const dashboardFilters = { consularPathOnly: true };
+  const dashboardFilters = getPathFilters();
 
   const [summary, weeklyRows, monthlyRows] = await Promise.all(
     isCaseOfficer
@@ -607,7 +620,7 @@ async function generateReport(filter, actor) {
   const effectiveFilter = {
     ...filter,
     ...buildDateRange(filter.reportType, filter),
-    consularPathOnly: true,
+    ...getPathFilters(),
   };
 
   const complaints =
@@ -739,6 +752,7 @@ async function generateReport(filter, actor) {
 }
 
 module.exports = {
+  APPLICATION_PATH,
   getComplaints,
   getComplaintById,
   updateComplaintStatus,

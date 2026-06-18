@@ -436,7 +436,7 @@ test("GET /api/complaints/:id allows supervisors to open any complaint", async (
   assert.equal(response.body.referenceNo, "C002");
 });
 
-test("complaint list returns only consular path cases", async () => {
+test("complaint list returns only path cases matching application mode", async () => {
   const officer = {
     id: "USR_OFF",
     name: "Case Officer",
@@ -457,10 +457,16 @@ test("complaint list returns only consular path cases", async () => {
   });
 
   assert.equal(capturedFilters.assignedTo, "USR_OFF");
-  assert.equal(capturedFilters.consularPathOnly, true);
+  if (complaintService.APPLICATION_PATH === "CONSULAR") {
+    assert.equal(capturedFilters.consularPathOnly, true);
+    assert.equal(capturedFilters.slbfePathOnly, false);
+  } else {
+    assert.equal(capturedFilters.slbfePathOnly, true);
+    assert.equal(capturedFilters.consularPathOnly, false);
+  }
 });
 
-test("dashboard stats are scoped to consular path cases", async () => {
+test("dashboard stats are scoped to path cases matching application mode", async () => {
   const officer = {
     id: "USR_OFF",
     name: "Case Officer",
@@ -486,14 +492,28 @@ test("dashboard stats are scoped to consular path cases", async () => {
   await complaintService.getDashboardStats(officer);
 
   assert.equal(capturedCountsArgs[0], "USR_OFF");
-  assert.equal(capturedCountsArgs[1].consularPathOnly, true);
-  assert.equal(capturedWeeklyArgs[0], "USR_OFF");
-  assert.equal(capturedWeeklyArgs[1].consularPathOnly, true);
-  assert.equal(capturedMonthlyArgs[0], "USR_OFF");
-  assert.equal(capturedMonthlyArgs[1].consularPathOnly, true);
+  if (complaintService.APPLICATION_PATH === "CONSULAR") {
+    assert.equal(capturedCountsArgs[1].consularPathOnly, true);
+    assert.equal(capturedCountsArgs[1].slbfePathOnly, false);
+    assert.equal(capturedWeeklyArgs[0], "USR_OFF");
+    assert.equal(capturedWeeklyArgs[1].consularPathOnly, true);
+    assert.equal(capturedWeeklyArgs[1].slbfePathOnly, false);
+    assert.equal(capturedMonthlyArgs[0], "USR_OFF");
+    assert.equal(capturedMonthlyArgs[1].consularPathOnly, true);
+    assert.equal(capturedMonthlyArgs[1].slbfePathOnly, false);
+  } else {
+    assert.equal(capturedCountsArgs[1].slbfePathOnly, true);
+    assert.equal(capturedCountsArgs[1].consularPathOnly, false);
+    assert.equal(capturedWeeklyArgs[0], "USR_OFF");
+    assert.equal(capturedWeeklyArgs[1].slbfePathOnly, true);
+    assert.equal(capturedWeeklyArgs[1].consularPathOnly, false);
+    assert.equal(capturedMonthlyArgs[0], "USR_OFF");
+    assert.equal(capturedMonthlyArgs[1].slbfePathOnly, true);
+    assert.equal(capturedMonthlyArgs[1].consularPathOnly, false);
+  }
 });
 
-test("generated reports are scoped to consular path cases", async () => {
+test("generated reports are scoped to path cases matching application mode", async () => {
   const actor = {
     id: "USR_SUP",
     name: "Supervisor",
@@ -511,7 +531,13 @@ test("generated reports are scoped to consular path cases", async () => {
     actor,
   );
 
-  assert.equal(capturedFilters.consularPathOnly, true);
+  if (complaintService.APPLICATION_PATH === "CONSULAR") {
+    assert.equal(capturedFilters.consularPathOnly, true);
+    assert.equal(capturedFilters.slbfePathOnly, false);
+  } else {
+    assert.equal(capturedFilters.slbfePathOnly, true);
+    assert.equal(capturedFilters.consularPathOnly, false);
+  }
   assert.equal(report.summary.totalCases, 0);
 });
 
