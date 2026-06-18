@@ -13,6 +13,7 @@ function mapUserRow(row) {
     avatar: row.avatar_url || "",
     phone: row.phone || "",
     location: row.location || "",
+    workCountry: row.work_country || "",
     notificationsEnabled: Boolean(row.notifications_enabled),
     dateFormat: row.date_format || "DD/MM/YYYY",
     isActive: Boolean(row.is_active),
@@ -107,6 +108,7 @@ async function createUser(user) {
         avatar_url,
         phone,
         location,
+        work_country,
         notifications_enabled,
         date_format,
         is_active
@@ -119,6 +121,7 @@ async function createUser(user) {
         :avatarUrl,
         :phone,
         :location,
+        :workCountry,
         :notificationsEnabled,
         :dateFormat,
         :isActive

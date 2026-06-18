@@ -8,6 +8,7 @@ export interface User {
   avatar?: string;
   phone?: string;
   location?: string;
+  workCountry?: string;
   notificationsEnabled: boolean;
   dateFormat?: string;
   isActive: boolean;
@@ -32,6 +33,7 @@ export interface CreateUserRequest {
   password: string;
   phone?: string;
   location?: string;
+  workCountry?: string;
 }
 
 export interface UserSettings {

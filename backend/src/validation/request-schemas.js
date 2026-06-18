@@ -82,6 +82,7 @@ const createUserBodySchema = z
       .max(255, "password must be at most 255 characters long"),
     phone: optionalString("phone", 50),
     location: optionalString("location", 120),
+    workCountry: optionalString("workCountry", 100),
     avatar: optionalString("avatar", 500),
     dateFormat: nonEmptyString("dateFormat", 50).optional(),
   })
@@ -99,6 +100,7 @@ const updateUserBodySchema = withAtLeastOneField(
       role: z.enum(USER_ROLES).optional(),
       phone: optionalString("phone", 50),
       location: optionalString("location", 120),
+      workCountry: optionalString("workCountry", 100),
       avatar: optionalString("avatar", 500),
     })
     .strict(),

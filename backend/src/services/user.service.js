@@ -39,6 +39,7 @@ async function createUser(data) {
     avatarUrl: data.avatar || "",
     phone: data.phone || "",
     location: data.location || "",
+    workCountry: data.workCountry || "",
     notificationsEnabled: 1,
     dateFormat: data.dateFormat || "DD/MM/YYYY",
     isActive: 1,
@@ -62,6 +63,8 @@ async function updateUser(userId, updates) {
   if (typeof updates.phone !== "undefined") payload.phone = updates.phone;
   if (typeof updates.location !== "undefined")
     payload.location = updates.location;
+  if (typeof updates.workCountry !== "undefined")
+    payload.work_country = updates.workCountry;
   if (typeof updates.avatar !== "undefined")
     payload.avatar_url = updates.avatar;
 

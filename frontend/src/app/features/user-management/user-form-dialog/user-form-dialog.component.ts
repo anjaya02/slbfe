@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { User, UserRole } from "../../../core/models/user.model";
+import { getNames } from "country-list";
 
 export interface UserFormDialogData {
   mode: "create" | "edit";
@@ -21,6 +22,8 @@ export class UserFormDialogComponent implements OnInit {
     { value: "CASE_OFFICER", label: "Case Officer" },
     { value: "SUPERVISOR", label: "Supervisor" },
   ];
+
+  countries: string[] = getNames().sort();
 
   constructor(
     private fb: FormBuilder,
@@ -43,6 +46,7 @@ export class UserFormDialogComponent implements OnInit {
       role: [this.data.user?.role || "CASE_OFFICER", Validators.required],
       phone: [this.data.user?.phone || ""],
       location: [this.data.user?.location || ""],
+      workCountry: [this.data.user?.workCountry || ""],
     };
 
     if (this.mode === "create") {

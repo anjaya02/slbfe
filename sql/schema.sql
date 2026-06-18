@@ -21,6 +21,7 @@ CREATE TABLE `consular_users` (
   `avatar_url` varchar(500) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `location` varchar(120) DEFAULT NULL,
+  `work_country` varchar(100) DEFAULT NULL,
   `notifications_enabled` tinyint(1) NOT NULL DEFAULT '1',
   `date_format` enum('DD/MM/YYYY','MM/DD/YYYY','YYYY-MM-DD') DEFAULT 'DD/MM/YYYY',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
@@ -202,6 +203,7 @@ INSERT INTO `consular_users` (
   `role`,
   `phone`,
   `location`,
+  `work_country`,
   `is_active`,
   `created_at`,
   `updated_at`
@@ -213,6 +215,7 @@ INSERT INTO `consular_users` (
   'SUPERVISOR',
   '+94 11 000 0000',
   'Colombo',
+  'Sri Lanka',
   1,
   NOW(),
   NOW()
@@ -224,6 +227,7 @@ INSERT INTO `consular_users` (
   'CASE_OFFICER',
   '+94 77 234 5678',
   'Colombo',
+  'Sri Lanka',
   1,
   NOW(),
   NOW()
