@@ -113,6 +113,7 @@ export class AuthService {
       avatar: user?.avatar || "",
       phone: user?.phone || "",
       location: user?.location || "",
+      workCountry: user?.workCountry || "",
       notificationsEnabled: Boolean(user?.notificationsEnabled),
       dateFormat: user?.dateFormat || "DD/MM/YYYY",
       isActive: Boolean(user?.isActive),

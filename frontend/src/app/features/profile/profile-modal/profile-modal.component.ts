@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { ToastService } from "../../../core/services/toast.service";
 import { AuthService } from "../../../core/services/auth.service";
 import { User } from "../../../core/models/user.model";
+import { getNames } from "country-list";
 
 @Component({
   standalone: false,
@@ -15,6 +16,7 @@ export class ProfileModalComponent implements OnInit {
   profileForm!: FormGroup;
   user: User | null = null;
   saving = false;
+  countries: string[] = getNames().sort();
 
   constructor(
     private dialogRef: MatDialogRef<ProfileModalComponent>,
@@ -30,14 +32,16 @@ export class ProfileModalComponent implements OnInit {
       email: [{ value: this.user?.email || "", disabled: true }],
       phone: [this.user?.phone || "", Validators.required],
       location: [this.user?.location || ""],
+      workCountry: [this.user?.workCountry || ""],
     });
   }
 
   save(): void {
     if (this.profileForm.invalid) return;
     this.saving = true;
-    const updates = this.profileForm.getRawValue();
-    this.authService.updateProfile(updates).subscribe({
+    const { name, phone, location, workCountry } =
+      this.profileForm.getRawValue();
+    this.authService.updateProfile({ name, phone, location, workCountry }).subscribe({
       next: () => {
         this.saving = false;
         this.toast.success("Profile updated successfully");

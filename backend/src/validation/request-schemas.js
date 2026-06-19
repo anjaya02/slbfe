@@ -55,6 +55,7 @@ const profileUpdateBodySchema = withAtLeastOneField(
       name: nonEmptyString("name", 120).optional(),
       phone: optionalString("phone", 50),
       location: optionalString("location", 120),
+      workCountry: optionalString("workCountry", 100),
       avatar: optionalString("avatar", 500),
     })
     .strict(),

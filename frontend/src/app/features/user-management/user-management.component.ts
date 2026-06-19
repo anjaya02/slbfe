@@ -15,7 +15,15 @@ import { UserFormDialogComponent } from "./user-form-dialog/user-form-dialog.com
   styleUrls: ["./user-management.component.scss"],
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
-  displayedColumns = ["name", "email", "role", "location", "status", "actions"];
+  displayedColumns = [
+    "name",
+    "email",
+    "role",
+    "location",
+    "workCountry",
+    "status",
+    "actions",
+  ];
   dataSource = new MatTableDataSource<User>([]);
   loading = true;
   error = false;
