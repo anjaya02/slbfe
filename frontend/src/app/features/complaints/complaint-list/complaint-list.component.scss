@@ -64,7 +64,7 @@
   }
 }
 
-.incident-header {
+.filter-header {
   position: relative;
   overflow: visible !important;
 }
@@ -195,7 +195,7 @@
 
 .complaint-table {
   width: 100%;
-  min-width: 960px;
+  min-width: 1080px;
 }
 
 th.mat-mdc-header-cell {
@@ -232,6 +232,11 @@ th.mat-mdc-header-cell {
 th.mat-column-assignedTo,
 td.mat-column-assignedTo {
   padding-left: 30px;
+}
+
+th.mat-column-country,
+td.mat-column-country {
+  min-width: 130px;
 }
 
 td.assign-cell {

@@ -33,6 +33,7 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     "workerName",
     "referenceNo",
     "dateSubmitted",
+    "country",
     "type",
     "status",
     "assignedTo",
@@ -50,6 +51,11 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
   filteredTypeOptions: ComplaintType[] = [];
   typeSearchOpen = false;
   typeSearchTerm = "";
+  selectedCountry = "ALL";
+  countryOptions: string[] = [];
+  filteredCountryOptions: string[] = [];
+  countrySearchOpen = false;
+  countrySearchTerm = "";
   caseOfficers: User[] = [];
   assigningId: string | null = null;
   isSupervisor = false;
@@ -64,6 +70,8 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild("typeSearchInput")
   typeSearchInput!: ElementRef<HTMLInputElement>;
+  @ViewChild("countrySearchInput")
+  countrySearchInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private complaintService: ComplaintService,
@@ -80,20 +88,37 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
       const filter = JSON.parse(rawFilter) as {
         search: string;
         type: ComplaintType | "ALL";
+        country: string;
       };
       const matchesSearch = !filter.search
         ? true
-        : [complaint.workerName, complaint.referenceNo]
+        : [complaint.workerName, complaint.referenceNo, this.getComplaintCountry(complaint)]
             .join(" ")
             .toLowerCase()
             .includes(filter.search);
       const matchesType = filter.type === "ALL" ? true : complaint.type === filter.type;
-      return matchesSearch && matchesType;
+      const matchesCountry =
+        filter.country === "ALL"
+          ? true
+          : this.getComplaintCountry(complaint) === filter.country;
+      return matchesSearch && matchesType && matchesCountry;
+    };
+    this.dataSource.sortingDataAccessor = (complaint, property) => {
+      if (property === "country") {
+        return this.getComplaintCountry(complaint).toLowerCase();
+      }
+
+      if (property === "type") {
+        return this.getTypeLabel(complaint.type).toLowerCase();
+      }
+
+      return (complaint as any)[property];
     };
     this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.searchValue = params.get("q") || "";
       const type = params.get("type") || "ALL";
       this.selectedType = this.isValidType(type) ? type : "ALL";
+      this.selectedCountry = params.get("country") || "ALL";
       this.pageIndex = this.parsePositiveNumber(params.get("page"), 0);
       this.pageSize = this.parsePositiveNumber(params.get("pageSize"), 10);
       this.sortActive = params.get("sort") || "";
@@ -124,6 +149,7 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: (res) => {
           this.dataSource.data = res.data;
+          this.setCountryOptions(res.data);
           this.loading = false;
           setTimeout(() => this.syncTableControls());
         },
@@ -149,6 +175,7 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.dataSource.filter = JSON.stringify({
       search: this.searchValue.trim().toLowerCase(),
       type: this.selectedType,
+      country: this.selectedCountry,
     });
 
     if (resetPage && this.dataSource.paginator) {
@@ -193,6 +220,49 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   getTypeLabel(type: ComplaintType | "ALL"): string {
     return type === "ALL" ? "All Categories" : this.typeLabels[type];
+  }
+
+  openCountrySearch(event: Event): void {
+    event.stopPropagation();
+    this.countrySearchOpen = true;
+    this.countrySearchTerm = "";
+    this.filteredCountryOptions = [...this.countryOptions];
+
+    setTimeout(() => {
+      this.countrySearchInput?.nativeElement?.focus();
+    }, 50);
+  }
+
+  closeCountrySearch(): void {
+    this.countrySearchOpen = false;
+    this.countrySearchTerm = "";
+  }
+
+  filterCountryOptions(): void {
+    const term = this.countrySearchTerm.toLowerCase();
+    this.filteredCountryOptions = this.countryOptions.filter((country) =>
+      country.toLowerCase().includes(term),
+    );
+  }
+
+  selectCountryFilter(value: string): void {
+    this.selectedCountry = value;
+    this.countrySearchOpen = false;
+    this.countrySearchTerm = "";
+    this.applyFilter();
+  }
+
+  clearCountryFilter(): void {
+    this.selectedCountry = "ALL";
+    this.applyFilter();
+  }
+
+  getCountryLabel(country: string): string {
+    return country === "ALL" ? "All Countries" : country;
+  }
+
+  getComplaintCountry(complaint: Complaint): string {
+    return complaint.branch || complaint.workerAddress || "Not provided";
   }
 
   onPageChange(event: PageEvent): void {
@@ -270,6 +340,7 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
       queryParams: {
         q: this.searchValue.trim() || null,
         type: this.selectedType === "ALL" ? null : this.selectedType,
+        country: this.selectedCountry === "ALL" ? null : this.selectedCountry,
         page: this.pageIndex || null,
         pageSize: this.pageSize === 10 ? null : this.pageSize,
         sort: this.sortActive || null,
@@ -282,6 +353,17 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private isValidType(type: string): type is ComplaintType | "ALL" {
     return type === "ALL" || this.typeOptions.includes(type as ComplaintType);
+  }
+
+  private setCountryOptions(complaints: Complaint[]): void {
+    this.countryOptions = Array.from(
+      new Set(
+        complaints
+          .map((complaint) => this.getComplaintCountry(complaint))
+          .filter((country) => country && country !== "Not provided"),
+      ),
+    ).sort((left, right) => left.localeCompare(right));
+    this.filteredCountryOptions = [...this.countryOptions];
   }
 
   private parsePositiveNumber(value: string | null, fallback: number): number {

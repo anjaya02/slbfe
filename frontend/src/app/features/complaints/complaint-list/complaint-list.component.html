@@ -69,8 +69,72 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="country">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="filter-header">
+            <div class="incident-header-wrapper">
+              <div class="incident-header-row">
+                <ng-container *ngIf="!countrySearchOpen">
+                  <span>Country</span>
+                  <mat-icon
+                    class="header-search-icon"
+                    (click)="openCountrySearch($event)"
+                    matTooltip="Search countries"
+                    >search</mat-icon
+                  >
+                </ng-container>
+
+                <div
+                  class="header-search-box"
+                  *ngIf="countrySearchOpen"
+                  (click)="$event.stopPropagation()"
+                >
+                  <input
+                    #countrySearchInput
+                    class="header-search-input"
+                    placeholder="Type to filter..."
+                    [(ngModel)]="countrySearchTerm"
+                    [matAutocomplete]="countryAuto"
+                    (input)="filterCountryOptions()"
+                    (keydown.escape)="closeCountrySearch()"
+                  />
+                  <mat-icon
+                    class="header-search-close"
+                    (click)="closeCountrySearch()"
+                    >close</mat-icon
+                  >
+                  <mat-autocomplete
+                    #countryAuto="matAutocomplete"
+                    (optionSelected)="selectCountryFilter($event.option.value)"
+                    panelClass="type-autocomplete-panel"
+                    panelWidth="auto"
+                  >
+                    <mat-option value="ALL">All Countries</mat-option>
+                    <mat-option
+                      *ngFor="let country of filteredCountryOptions"
+                      [value]="country"
+                    >
+                      {{ country }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </div>
+              </div>
+
+              <span
+                class="active-filter-chip"
+                *ngIf="!countrySearchOpen && selectedCountry !== 'ALL'"
+                (click)="clearCountryFilter()"
+                matTooltip="Click to clear filter"
+              >
+                {{ getCountryLabel(selectedCountry) }}
+                <mat-icon class="chip-clear">close</mat-icon>
+              </span>
+            </div>
+          </th>
+          <td mat-cell *matCellDef="let row">{{ getComplaintCountry(row) }}</td>
+        </ng-container>
+
         <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef class="incident-header">
+          <th mat-header-cell *matHeaderCellDef class="filter-header">
             <div class="incident-header-wrapper">
               <div class="incident-header-row">
                 <ng-container *ngIf="!typeSearchOpen">
