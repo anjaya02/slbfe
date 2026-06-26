@@ -29,6 +29,7 @@ const TYPE_LABELS = {
   PROBLEMS_AT_HOME: "Problems at Employee's Home (Sri Lanka)",
   DEATH: "Death",
   BEING_RETAINED: "Being Retained by Unknown Person",
+  SOS: "SOS",
   OTHER: "Other",
 };
 

@@ -20,6 +20,7 @@ const TYPE_VALUES = [
   "PROBLEMS_AT_HOME",
   "DEATH",
   "BEING_RETAINED",
+  "SOS",
   "OTHER",
 ];
 
@@ -83,6 +84,11 @@ const TYPE_KEY_MAP = {
   BEING_RETAINED_BY_AN_UNKNOWN_PERSON: "BEING_RETAINED",
   BEING_RETAINED_BY_UNKNOWN_PERSON: "BEING_RETAINED",
   850: "BEING_RETAINED",
+  SOS: "SOS",
+  S_O_S: "SOS",
+  EMERGENCY: "SOS",
+  EMERGENCY_SOS: "SOS",
+  875: "SOS",
   OTHER: "OTHER",
   900: "OTHER",
 };
@@ -165,7 +171,7 @@ function buildFullName(firstName, lastName) {
 }
 
 function getPriority(type, status) {
-  if (type === "DEATH" || type === "BEING_RETAINED") {
+  if (type === "SOS" || type === "DEATH" || type === "BEING_RETAINED") {
     return "CRITICAL";
   }
 

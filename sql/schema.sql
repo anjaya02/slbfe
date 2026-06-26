@@ -247,6 +247,7 @@ INSERT INTO `complain_catagory` (`category_id`, `category_name`) VALUES
   ('PROBLEMS_AT_HOME', 'Problems at Employee''s Home (Sri Lanka)'),
   ('DEATH', 'Death'),
   ('BEING_RETAINED', 'Being Retained by Unknown Person'),
+  ('SOS', 'SOS'),
   ('OTHER', 'Other');
 
 INSERT INTO `resolution_catagory` (`category_id`, `category_name`) VALUES

@@ -315,6 +315,21 @@ td .assign-cell {
   color: var(--text-secondary);
 }
 
+// Incident category cell — SOS (emergency) rows are flagged light red.
+.incident-type {
+  display: inline-flex;
+  align-items: center;
+}
+
+.incident-sos {
+  padding: 4px 12px;
+  border-radius: v.$radius-full;
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: v.$font-weight-semibold;
+  white-space: nowrap;
+}
+
 .status-badge {
   display: inline-flex;
   padding: 4px 12px;

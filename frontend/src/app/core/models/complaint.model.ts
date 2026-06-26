@@ -18,6 +18,7 @@ export type ComplaintType =
   | "PROBLEMS_AT_HOME"
   | "DEATH"
   | "BEING_RETAINED"
+  | "SOS"
   | "OTHER";
 
 export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -140,5 +141,6 @@ export const COMPLAINT_TYPE_LABELS: Record<ComplaintType, string> = {
   PROBLEMS_AT_HOME: "Problems at Employee's Home (Sri Lanka)",
   DEATH: "Death",
   BEING_RETAINED: "Being Retained by Unknown Person",
+  SOS: "SOS",
   OTHER: "Other",
 };

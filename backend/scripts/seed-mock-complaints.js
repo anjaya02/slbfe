@@ -48,6 +48,7 @@ const CATEGORIES = [
   "PROBLEMS_AT_HOME",
   "DEATH",
   "BEING_RETAINED",
+  "SOS",
   "OTHER",
 ];
 
