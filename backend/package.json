@@ -8,6 +8,8 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "db:reset": "node scripts/reset-database.js",
+    "seed:mock-complaints": "node scripts/seed-mock-complaints.js",
+    "seed:mock-complaints:slbfe": "node scripts/seed-mock-complaints.js --path=SLBFE",
     "test": "node --test"
   },
   "keywords": [
