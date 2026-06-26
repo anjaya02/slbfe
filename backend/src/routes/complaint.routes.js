@@ -30,12 +30,21 @@ router.get(
       dateFrom: req.query.dateFrom,
       dateTo: req.query.dateTo,
       assignedTo: req.query.assignedTo,
+      branch: req.query.branch,
       page: Number(req.query.page || 0),
       pageSize: Number(req.query.pageSize || 10),
       sortBy: req.query.sortBy,
       sortDirection: req.query.sortDirection,
     });
     res.json(response);
+  }),
+);
+
+router.get(
+  "/countries",
+  asyncHandler(async (req, res) => {
+    const countries = await complaintService.getComplaintCountries(req.user);
+    res.json(countries);
   }),
 );
 

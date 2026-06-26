@@ -101,6 +101,7 @@ export interface ComplaintFilter {
   dateFrom?: Date;
   dateTo?: Date;
   assignedTo?: string;
+  branch?: string;
   page: number;
   pageSize: number;
   sortBy?: string;

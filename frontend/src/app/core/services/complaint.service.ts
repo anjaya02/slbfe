@@ -100,6 +100,7 @@ export class ComplaintService {
     if (filter?.dateTo)
       params = params.set("dateTo", filter.dateTo.toISOString());
     if (filter?.assignedTo) params = params.set("assignedTo", filter.assignedTo);
+    if (filter?.branch) params = params.set("branch", filter.branch);
     params = params.set("page", String(filter?.page ?? 0));
     params = params.set("pageSize", String(filter?.pageSize ?? 10));
     if (filter?.sortBy) params = params.set("sortBy", filter.sortBy);
@@ -116,6 +117,10 @@ export class ComplaintService {
           total: Number(response.total || 0),
         })),
       );
+  }
+
+  getComplaintCountries(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiBaseUrl}/complaints/countries`);
   }
 
   getComplaintById(id: string): Observable<Complaint | undefined> {

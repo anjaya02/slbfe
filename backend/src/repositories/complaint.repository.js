@@ -475,6 +475,7 @@ async function listComplaints(filters = {}) {
     dateSubmitted: getComplaintDateExpression(),
     dateUpdated: "d.updated_time",
     status: statusCaseSql("d.complain_status"),
+    country: "d.work_country",
   };
   const sortBy = sortMap[filters.sortBy] || getComplaintDateExpression();
   const sortDirection = filters.sortDirection === "asc" ? "ASC" : "DESC";
@@ -506,6 +507,25 @@ async function listComplaints(filters = {}) {
     data: rows.map(mapComplaintRow),
     total: Number(countRows[0]?.total || 0),
   };
+}
+
+async function listComplaintCountries(filters = {}) {
+  const { whereClause, params } = buildFilterClauses(filters);
+
+  const rows = await query(
+    `
+      SELECT DISTINCT d.work_country AS country
+      FROM complain_details d
+      LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
+      ${whereClause}
+      ORDER BY d.work_country ASC
+    `,
+    params,
+  );
+
+  return rows
+    .map((row) => String(row.country || "").trim())
+    .filter((country) => country.length > 0);
 }
 
 function syntheticId(prefix, complaintId, timestamp, index) {
@@ -1178,6 +1198,7 @@ async function findComplaintsForReport(filters = {}) {
 module.exports = {
   STATUS_VALUES,
   listComplaints,
+  listComplaintCountries,
   findComplaintById,
   updateComplaintStatus,
   assignComplaint,

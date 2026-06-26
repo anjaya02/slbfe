@@ -157,6 +157,13 @@ async function getComplaints(filters) {
   return response;
 }
 
+async function getComplaintCountries(actor) {
+  return complaintRepository.listComplaintCountries({
+    ...getPathFilters(),
+    assignedTo: actor?.role === "CASE_OFFICER" ? actor.id : undefined,
+  });
+}
+
 async function getComplaintById(complaintId, actor) {
   let complaint = await getAuthorizedComplaint(
     complaintId,
@@ -754,6 +761,7 @@ async function generateReport(filter, actor) {
 module.exports = {
   APPLICATION_PATH,
   getComplaints,
+  getComplaintCountries,
   getComplaintById,
   updateComplaintStatus,
   assignComplaint,
