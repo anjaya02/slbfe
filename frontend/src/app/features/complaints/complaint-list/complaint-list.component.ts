@@ -1,20 +1,20 @@
 import {
-  AfterViewInit,
   Component,
   OnInit,
-  ViewChild,
   OnDestroy,
   ElementRef,
+  ViewChild,
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { MatTableDataSource } from "@angular/material/table";
-import { MatPaginator, PageEvent } from "@angular/material/paginator";
-import { MatSort, Sort, SortDirection } from "@angular/material/sort";
+import { PageEvent } from "@angular/material/paginator";
+import { Sort, SortDirection } from "@angular/material/sort";
 import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
+import { debounceTime, takeUntil } from "rxjs/operators";
 import { ComplaintService } from "../../../core/services/complaint.service";
 import {
   Complaint,
+  ComplaintFilter,
   ComplaintType,
   COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
@@ -28,7 +28,7 @@ import { User } from "../../../core/models/user.model";
   templateUrl: "./complaint-list.component.html",
   styleUrls: ["./complaint-list.component.scss"],
 })
-export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ComplaintListComponent implements OnInit, OnDestroy {
   displayedColumns = [
     "workerName",
     "referenceNo",
@@ -39,8 +39,13 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     "assignedTo",
     "action",
   ];
+  // Holds only the current page of rows; pagination is driven by the server.
   dataSource = new MatTableDataSource<Complaint>([]);
+  total = 0;
   loading = true;
+  // True only until the first response; keeps the table mounted (no skeleton
+  // flash) on subsequent page/sort/filter refetches.
+  initialLoading = true;
   error = false;
   typeLabels = COMPLAINT_TYPE_LABELS;
   searchValue = "";
@@ -64,10 +69,8 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
   sortActive = "";
   sortDirection: SortDirection = "";
   private destroy$ = new Subject<void>();
-  private viewReady = false;
+  private search$ = new Subject<void>();
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild("typeSearchInput")
   typeSearchInput!: ElementRef<HTMLInputElement>;
   @ViewChild("countrySearchInput")
@@ -84,49 +87,33 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
   ngOnInit(): void {
     this.isSupervisor = this.authService.currentUser?.role === "SUPERVISOR";
     this.filteredTypeOptions = [...this.typeOptions];
-    this.dataSource.filterPredicate = (complaint, rawFilter) => {
-      const filter = JSON.parse(rawFilter) as {
-        search: string;
-        type: ComplaintType | "ALL";
-        country: string;
-      };
-      const matchesSearch = !filter.search
-        ? true
-        : [complaint.workerName, complaint.referenceNo, this.getComplaintCountry(complaint)]
-            .join(" ")
-            .toLowerCase()
-            .includes(filter.search);
-      const matchesType = filter.type === "ALL" ? true : complaint.type === filter.type;
-      const matchesCountry =
-        filter.country === "ALL"
-          ? true
-          : this.getComplaintCountry(complaint) === filter.country;
-      return matchesSearch && matchesType && matchesCountry;
-    };
-    this.dataSource.sortingDataAccessor = (complaint, property) => {
-      if (property === "country") {
-        return this.getComplaintCountry(complaint).toLowerCase();
-      }
 
-      if (property === "type") {
-        return this.getTypeLabel(complaint.type).toLowerCase();
-      }
+    // Debounce free-text search so a request isn't fired on every keystroke.
+    this.search$
+      .pipe(debounceTime(350), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.pageIndex = 0;
+        this.persistListState();
+      });
 
-      return (complaint as any)[property];
-    };
-    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.searchValue = params.get("q") || "";
-      const type = params.get("type") || "ALL";
-      this.selectedType = this.isValidType(type) ? type : "ALL";
-      this.selectedCountry = params.get("country") || "ALL";
-      this.pageIndex = this.parsePositiveNumber(params.get("page"), 0);
-      this.pageSize = this.parsePositiveNumber(params.get("pageSize"), 10);
-      this.sortActive = params.get("sort") || "";
-      this.sortDirection = this.parseSortDirection(params.get("dir"));
-      this.applyTableFilter(false);
-      this.syncTableControls();
-    });
-    this.loadComplaints();
+    // The URL query string is the single source of truth: every page, sort, or
+    // filter change is written there, which re-triggers a server fetch below.
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.searchValue = params.get("q") || "";
+        const type = params.get("type") || "ALL";
+        this.selectedType = this.isValidType(type) ? type : "ALL";
+        this.selectedCountry = params.get("country") || "ALL";
+        this.pageIndex = this.parsePositiveNumber(params.get("page"), 0);
+        this.pageSize = this.parsePositiveNumber(params.get("pageSize"), 10);
+        this.sortActive = params.get("sort") || "";
+        this.sortDirection = this.parseSortDirection(params.get("dir"));
+        this.loadComplaints();
+      });
+
+    this.loadCountryOptions();
+
     if (this.isSupervisor) {
       this.authService
         .getCaseOfficers()
@@ -135,28 +122,52 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  ngAfterViewInit(): void {
-    this.viewReady = true;
-    this.syncTableControls();
-  }
-
   loadComplaints(): void {
     this.loading = true;
     this.error = false;
     this.complaintService
-      .getComplaints({ page: 0, pageSize: 50 })
+      .getComplaints(this.buildFilter())
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           this.dataSource.data = res.data;
-          this.setCountryOptions(res.data);
+          this.total = res.total;
           this.loading = false;
-          setTimeout(() => this.syncTableControls());
+          this.initialLoading = false;
         },
         error: () => {
           this.loading = false;
+          this.initialLoading = false;
           this.error = true;
         },
+      });
+  }
+
+  private buildFilter(): ComplaintFilter {
+    const filter: ComplaintFilter = {
+      page: this.pageIndex,
+      pageSize: this.pageSize,
+    };
+
+    const search = this.searchValue.trim();
+    if (search) filter.search = search;
+    if (this.selectedType !== "ALL") filter.type = [this.selectedType];
+    if (this.selectedCountry !== "ALL") filter.branch = this.selectedCountry;
+    if (this.sortActive && this.sortDirection) {
+      filter.sortBy = this.sortActive;
+      filter.sortDirection = this.sortDirection;
+    }
+
+    return filter;
+  }
+
+  private loadCountryOptions(): void {
+    this.complaintService
+      .getComplaintCountries()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((countries) => {
+        this.countryOptions = countries;
+        this.filteredCountryOptions = [...countries];
       });
   }
 
@@ -165,22 +176,13 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.destroy$.complete();
   }
 
-  applyFilter(): void {
-    this.pageIndex = 0;
-    this.applyTableFilter(true);
-    this.persistListState();
+  onSearchInput(): void {
+    this.search$.next();
   }
 
-  private applyTableFilter(resetPage: boolean): void {
-    this.dataSource.filter = JSON.stringify({
-      search: this.searchValue.trim().toLowerCase(),
-      type: this.selectedType,
-      country: this.selectedCountry,
-    });
-
-    if (resetPage && this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  applyFilter(): void {
+    this.pageIndex = 0;
+    this.persistListState();
   }
 
   openTypeSearch(event: Event): void {
@@ -275,7 +277,6 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.sortActive = sort.active;
     this.sortDirection = sort.direction;
     this.pageIndex = 0;
-    this.dataSource.paginator?.firstPage();
     this.persistListState();
   }
 
@@ -318,22 +319,6 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.isSupervisor ? "Problem List" : "My Assigned Cases";
   }
 
-  private syncTableControls(): void {
-    if (!this.viewReady || this.loading) return;
-
-    if (this.paginator) {
-      this.paginator.pageIndex = this.pageIndex;
-      this.paginator.pageSize = this.pageSize;
-      this.dataSource.paginator = this.paginator;
-    }
-
-    if (this.sort) {
-      this.sort.active = this.sortActive;
-      this.sort.direction = this.sortDirection;
-      this.dataSource.sort = this.sort;
-    }
-  }
-
   private persistListState(): void {
     this.router.navigate([], {
       relativeTo: this.route,
@@ -353,17 +338,6 @@ export class ComplaintListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private isValidType(type: string): type is ComplaintType | "ALL" {
     return type === "ALL" || this.typeOptions.includes(type as ComplaintType);
-  }
-
-  private setCountryOptions(complaints: Complaint[]): void {
-    this.countryOptions = Array.from(
-      new Set(
-        complaints
-          .map((complaint) => this.getComplaintCountry(complaint))
-          .filter((country) => country && country !== "Not provided"),
-      ),
-    ).sort((left, right) => left.localeCompare(right));
-    this.filteredCountryOptions = [...this.countryOptions];
   }
 
   private parsePositiveNumber(value: string | null, fallback: number): number {

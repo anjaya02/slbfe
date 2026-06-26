@@ -6,12 +6,12 @@
   <div class="filters-bar">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Search by name or reference...</mat-label>
-      <input matInput [(ngModel)]="searchValue" (keyup)="applyFilter()" />
+      <input matInput [(ngModel)]="searchValue" (keyup)="onSearchInput()" />
     </mat-form-field>
   </div>
 
   <div class="table-card">
-    <div class="table-skeleton" *ngIf="loading">
+    <div class="table-skeleton" *ngIf="initialLoading">
       <div class="sk-head"></div>
       <div class="sk-row"></div>
       <div class="sk-row"></div>
@@ -24,7 +24,7 @@
 
     <div
       class="error-state"
-      *ngIf="!loading && error"
+      *ngIf="!initialLoading && error"
       style="text-align: center; padding: 48px 24px"
     >
       <mat-icon
@@ -38,7 +38,7 @@
       </button>
     </div>
 
-    <div class="table-scroll" *ngIf="!loading && !error">
+    <div class="table-scroll" *ngIf="!initialLoading && !error">
       <table
         mat-table
         [dataSource]="dataSource"
@@ -259,12 +259,13 @@
     </div>
 
     <mat-paginator
+      [length]="total"
       [pageSizeOptions]="[10, 25, 50]"
       [pageIndex]="pageIndex"
       [pageSize]="pageSize"
       (page)="onPageChange($event)"
       showFirstLastButtons
-      *ngIf="!loading && !error"
+      *ngIf="!initialLoading && !error"
     ></mat-paginator>
   </div>
 </div>
