@@ -62,6 +62,7 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   countrySearchOpen = false;
   countrySearchTerm = "";
   caseOfficers: User[] = [];
+  officerSearchTerm = "";
   assigningId: string | null = null;
   isSupervisor = false;
   pageIndex = 0;
@@ -118,7 +119,9 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
       this.authService
         .getCaseOfficers()
         .pipe(takeUntil(this.destroy$))
-        .subscribe((officers) => (this.caseOfficers = officers));
+        .subscribe((officers) => {
+          this.caseOfficers = officers;
+        });
     }
   }
 
@@ -301,6 +304,27 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
           this.assigningId = null;
         },
       });
+  }
+
+  // Called when the assign dropdown opens or closes. On open I clear the
+  // search box so every officer is visible again.
+  onAssignPanelToggle(opened: boolean): void {
+    if (opened) {
+      this.officerSearchTerm = "";
+    }
+  }
+
+  // True when an officer's name matches what's typed in the search box. We
+  // keep every officer as an option and just hide the ones that don't match,
+  // so no dropdown ever loses its selected value while another is searched.
+  officerMatches(officer: User): boolean {
+    const term = this.officerSearchTerm.toLowerCase().trim();
+    return officer.name.toLowerCase().includes(term);
+  }
+
+  // Whether any officer matches the current search 
+  get hasMatchingOfficers(): boolean {
+    return this.caseOfficers.some((officer) => this.officerMatches(officer));
   }
 
   getStatusClass(status: string): string {

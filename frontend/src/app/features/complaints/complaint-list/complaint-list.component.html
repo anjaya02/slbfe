@@ -216,15 +216,34 @@
                   [value]="row.assignedTo || null"
                   [disabled]="assigningId === row.id"
                   (selectionChange)="assignOfficer(row, $event.value)"
+                  (openedChange)="onAssignPanelToggle($event)"
                   panelClass="assign-officer-panel"
                   placeholder="Unassigned"
                 >
+                  <div class="assign-search" (click)="$event.stopPropagation()">
+                    <input
+                      class="assign-search-input"
+                      type="text"
+                      placeholder="Search officer..."
+                      [(ngModel)]="officerSearchTerm"
+                      (keydown)="$event.stopPropagation()"
+                    />
+                  </div>
+                  <!--
+                    Every officer is always kept as an option; non-matching ones
+                    are just hidden. Removing them from the list would make the
+                    other rows lose their selected value while searching here.
+                  -->
                   <mat-option
                     *ngFor="let officer of caseOfficers"
                     [value]="officer.id"
+                    [style.display]="officerMatches(officer) ? '' : 'none'"
                   >
                     {{ officer.name }}
                   </mat-option>
+                  <div class="assign-no-results" *ngIf="!hasMatchingOfficers">
+                    No officers found
+                  </div>
                 </mat-select>
                 <mat-progress-spinner
                   *ngIf="assigningId === row.id"

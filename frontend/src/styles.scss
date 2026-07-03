@@ -272,6 +272,9 @@ a {
   min-width: 180px !important;
   max-height: 240px !important;
   overflow-y: auto;
+  // Remove the panel's default top padding so scrolled options tuck fully
+  // under the sticky search box instead of peeking above it.
+  padding-top: 0 !important;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -279,6 +282,38 @@ a {
   &::-webkit-scrollbar-thumb {
     background: v.$gray-300;
     border-radius: 2px;
+  }
+
+  // Search box pinned at the top of the officer dropdown.
+  .assign-search {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding: 8px;
+    border-bottom: 1px solid v.$gray-200;
+    // Sit above the options so they scroll underneath, not through it.
+    z-index: 2;
+  }
+
+  .assign-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    font-size: v.$font-size-sm;
+    border: 1px solid v.$gray-300;
+    border-radius: v.$radius-md;
+    outline: none;
+
+    &:focus {
+      border-color: v.$primary-blue;
+    }
+  }
+
+  .assign-no-results {
+    padding: 10px 12px;
+    font-size: v.$font-size-sm;
+    color: v.$gray-400;
+    text-align: center;
   }
 
   .mat-mdc-option {
