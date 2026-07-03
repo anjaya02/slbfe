@@ -52,6 +52,21 @@ const CATEGORIES = [
   "OTHER",
 ];
 
+const CATEGORY_MAP = {
+  BREACH_OF_CONTRACT: "400",
+  HARASSMENT: "450",
+  LACK_OF_COMMUNICATION: "500",
+  SICK: "550",
+  BEING_JAILED: "600",
+  BEING_REMANDED_BY_POLICE: "650",
+  BEING_STRANDED: "700",
+  PROBLEMS_AT_HOME: "750",
+  DEATH: "800",
+  BEING_RETAINED: "850",
+  SOS: "875",
+  OTHER: "900",
+};
+
 const COUNTRIES = [
   "Kuwait",
   "Riyadh",
@@ -85,6 +100,15 @@ const RESOLUTIONS = [
   "Coordinate with local authorities for release",
   "Provide shelter and legal support",
 ];
+
+const RESOLUTION_MAP = {
+  "Recover unpaid salary and return passport": "52",
+  "Approve emergency leave or provide a fair settlement": "99",
+  "Move worker to safety and restore family contact": "60",
+  "Arrange repatriation and medical assistance": "12",
+  "Coordinate with local authorities for release": "24",
+  "Provide shelter and legal support": "30",
+};
 
 // Deterministic pseudo-random so re-runs produce a stable spread.
 function rand(seed) {
@@ -192,8 +216,8 @@ async function main() {
           country,
           description,
           reported,
-          category,
-          resolution,
+          CATEGORY_MAP[category] || "900",
+          RESOLUTION_MAP[resolution] || "99",
           status,
           HANDLE,
           updated,
