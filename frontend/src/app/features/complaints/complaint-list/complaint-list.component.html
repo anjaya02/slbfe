@@ -277,6 +277,7 @@
           mat-row
           *matRowDef="let row; columns: displayedColumns"
           class="table-row"
+          [class.row-sos]="row.isSos"
         ></tr>
       </table>
     </div>

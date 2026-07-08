@@ -207,6 +207,19 @@ th.mat-mdc-header-cell {
 
 .table-row {
   transition: background v.$transition-fast;
+
+  &.row-sos {
+    background: #fee2e2 !important;
+
+    &:hover {
+      background: #fecaca !important;
+    }
+
+    .incident-sos {
+      background: transparent !important;
+    }
+  }
+
   &:hover {
     background: v.$gray-50;
   }
