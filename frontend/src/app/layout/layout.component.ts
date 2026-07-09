@@ -41,7 +41,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   openProfile(): void {
     this.dialog.open(ProfileModalComponent, {
-      width: "480px",
+      width: "450px",
+      maxWidth: "calc(100vw - 32px)",
+      maxHeight: "calc(100vh - 32px)",
       panelClass: "custom-dialog",
     });
   }

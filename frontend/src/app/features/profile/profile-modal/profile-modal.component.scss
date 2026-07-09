@@ -2,6 +2,10 @@
 
 .profile-modal {
   width: 100%;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-header {
@@ -9,7 +13,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 24px 16px;
+  padding: 22px 24px 14px;
+  flex-shrink: 0;
   
   h2 {
     margin: 0;
@@ -27,21 +32,32 @@
 }
 
 .modal-body {
-  padding: 0 24px 24px;
+  padding: 0 24px 22px;
+  min-height: 0;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: v.$gray-300;
+    border-radius: v.$radius-full;
+  }
 }
 
 .avatar-section {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 28px;
-  padding-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
   border-bottom: 1px solid v.$gray-100;
 }
 
 .avatar {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: v.$primary-light;
   color: v.$white;
@@ -54,15 +70,15 @@
   box-shadow: v.$shadow-md;
 
   mat-icon {
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
   }
 }
 
 .avatar-img {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   object-fit: cover;
   box-shadow: v.$shadow-md;
@@ -84,20 +100,20 @@
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 3px 11px;
   border-radius: v.$radius-full;
   background: #dbeafe;
   color: v.$primary-blue;
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.25px;
   text-transform: uppercase;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 16px; // Increased gap
+  gap: 14px;
 }
 
 .full-width {
@@ -109,7 +125,7 @@ form {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
 .btn-save {
