@@ -65,7 +65,8 @@ async function main() {
         "198876543210",
         "Riyadh",
         "2026-04-21 10:15:00",
-        "500",
+        // Store the category text here, not the lookup ID 500.
+        "Lack of Communication",
         "99",
         "Resolved",
         "2026-04-23 11:20:00",

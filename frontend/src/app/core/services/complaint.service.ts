@@ -38,6 +38,7 @@ export class ComplaintService {
       workerContact: complaint.workerContact,
       serviceId: complaint.serviceId,
       branch: complaint.branch,
+      // Show the category exactly as the backend sends it.
       type: complaint.type,
       status: complaint.status,
       priority: complaint.priority,
@@ -121,6 +122,11 @@ export class ComplaintService {
 
   getComplaintCountries(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiBaseUrl}/complaints/countries`);
+  }
+
+  getComplaintTypes(): Observable<string[]> {
+    // Load type filters from the backend so the list stays dynamic.
+    return this.http.get<string[]>(`${this.apiBaseUrl}/complaints/types`);
   }
 
   getComplaintById(id: string): Observable<Complaint | undefined> {

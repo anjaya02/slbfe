@@ -7,19 +7,8 @@ export enum ComplaintStatus {
   CLOSED = "Closed",
 }
 
-export type ComplaintType =
-  | "BREACH_OF_CONTRACT"
-  | "HARASSMENT"
-  | "LACK_OF_COMMUNICATION"
-  | "SICK"
-  | "BEING_JAILED"
-  | "BEING_REMANDED_BY_POLICE"
-  | "BEING_STRANDED"
-  | "PROBLEMS_AT_HOME"
-  | "DEATH"
-  | "BEING_RETAINED"
-  | "SOS"
-  | "OTHER";
+// Category names come from the DB, so keep this flexible.
+export type ComplaintType = string;
 
 export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
@@ -130,17 +119,4 @@ export interface MonthlyData {
   count: number;
 }
 
-export const COMPLAINT_TYPE_LABELS: Record<ComplaintType, string> = {
-  BREACH_OF_CONTRACT: "Breach of Employment Contract",
-  HARASSMENT: "Harassment",
-  LACK_OF_COMMUNICATION: "Lack of Communication",
-  SICK: "Sick",
-  BEING_JAILED: "Being Jailed",
-  BEING_REMANDED_BY_POLICE: "Being Remanded by Police",
-  BEING_STRANDED: "Being Stranded without Employment",
-  PROBLEMS_AT_HOME: "Problems at Employee's Home (Sri Lanka)",
-  DEATH: "Death",
-  BEING_RETAINED: "Being Retained by Unknown Person",
-  SOS: "SOS",
-  OTHER: "Other",
-};
+

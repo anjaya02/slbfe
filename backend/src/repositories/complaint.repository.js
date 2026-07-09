@@ -9,21 +9,6 @@ const STATUS_VALUES = [
   "Closed",
 ];
 
-const TYPE_VALUES = [
-  "BREACH_OF_CONTRACT",
-  "HARASSMENT",
-  "LACK_OF_COMMUNICATION",
-  "SICK",
-  "BEING_JAILED",
-  "BEING_REMANDED_BY_POLICE",
-  "BEING_STRANDED",
-  "PROBLEMS_AT_HOME",
-  "DEATH",
-  "BEING_RETAINED",
-  "SOS",
-  "OTHER",
-];
-
 const STATUS_KEY_MAP = {
   SUBMITTED: "Submitted",
   NEW: "Submitted",
@@ -46,52 +31,20 @@ const STATUS_KEY_MAP = {
   CLOSE: "Closed",
 };
 
-const TYPE_KEY_MAP = {
-  BREACH_OF_CONTRACT: "BREACH_OF_CONTRACT",
-  BREACH_OF_EMPLOYMENT_CONTRACT: "BREACH_OF_CONTRACT",
-  CONTRACT_BREACH: "BREACH_OF_CONTRACT",
-  CONTRACT: "BREACH_OF_CONTRACT",
-  400: "BREACH_OF_CONTRACT",
-  HARASSMENT: "HARASSMENT",
-  450: "HARASSMENT",
-  LACK_OF_COMMUNICATION: "LACK_OF_COMMUNICATION",
-  COMMUNICATION: "LACK_OF_COMMUNICATION",
-  500: "LACK_OF_COMMUNICATION",
-  SICK: "SICK",
-  ILLNESS: "SICK",
-  550: "SICK",
-  BEING_JAILED: "BEING_JAILED",
-  JAILED: "BEING_JAILED",
-  IN_JAIL: "BEING_JAILED",
-  600: "BEING_JAILED",
-  BEING_REMANDED_BY_POLICE: "BEING_REMANDED_BY_POLICE",
-  REMANDED_BY_POLICE: "BEING_REMANDED_BY_POLICE",
-  POLICE_REMAND: "BEING_REMANDED_BY_POLICE",
-  650: "BEING_REMANDED_BY_POLICE",
-  BEING_STRANDED: "BEING_STRANDED",
-  STRANDED: "BEING_STRANDED",
-  BEING_STRANDED_WITHOUT_EMPLOYMENT: "BEING_STRANDED",
-  700: "BEING_STRANDED",
-  PROBLEMS_AT_HOME: "PROBLEMS_AT_HOME",
-  PROBLEMS_AT_EMPLOYEE_S_HOME_SRI_LANKA: "PROBLEMS_AT_HOME",
-  PROBLEMS_AT_EMPLOYEES_HOME_SRI_LANKA: "PROBLEMS_AT_HOME",
-  HOME_PROBLEMS: "PROBLEMS_AT_HOME",
-  750: "PROBLEMS_AT_HOME",
-  DEATH: "DEATH",
-  800: "DEATH",
-  BEING_RETAINED: "BEING_RETAINED",
-  RETAINED: "BEING_RETAINED",
-  BEING_RETAINED_BY_AN_UNKNOWN_PERSON: "BEING_RETAINED",
-  BEING_RETAINED_BY_UNKNOWN_PERSON: "BEING_RETAINED",
-  850: "BEING_RETAINED",
-  SOS: "SOS",
-  S_O_S: "SOS",
-  EMERGENCY: "SOS",
-  EMERGENCY_SOS: "SOS",
-  875: "SOS",
-  OTHER: "OTHER",
-  900: "OTHER",
-};
+function getEnglishSplit(value) {
+  // complain_catagory can be "SOS" or "Sinhala | Tamil | English".
+  // Pick the English part without keeping a separate category map.
+  return String(value || "")
+    .split("|")
+    .map((part) => part.trim())
+    .find((part) => /[A-Za-z]/.test(part)) || "";
+}
+
+function getComplaintTypeFromRow(row, fallback = "Other") {
+  // This should stay based on complain_details.complain_catagory.
+  // If new categories are added in DB, we should not change this file.
+  return getEnglishSplit(row.complain_catagory) || fallback;
+}
 
 function normalizeKey(value) {
   return String(value || "")
@@ -108,22 +61,6 @@ function normalizeStatus(value) {
   }
 
   return STATUS_KEY_MAP[normalizeKey(value)] || "Submitted";
-}
-
-function normalizeComplaintType(...values) {
-  for (const value of values) {
-    const exact = TYPE_VALUES.find((type) => type === value);
-    if (exact) {
-      return exact;
-    }
-
-    const mapped = TYPE_KEY_MAP[normalizeKey(value)];
-    if (mapped) {
-      return mapped;
-    }
-  }
-
-  return "OTHER";
 }
 
 function statusCaseSql(column) {
@@ -171,7 +108,15 @@ function buildFullName(firstName, lastName) {
 }
 
 function getPriority(type, status) {
-  if (type === "SOS" || type === "DEATH" || type === "BEING_RETAINED") {
+  // Category names now come from DB, but priority still needs simple rules.
+  const upperType = String(type || "").toUpperCase();
+
+  // Use includes() because some DB values are full labels, not single words.
+  if (
+    upperType === "SOS" ||
+    upperType.includes("DEATH") ||
+    upperType.includes("RETAINED")
+  ) {
     return "CRITICAL";
   }
 
@@ -179,7 +124,8 @@ function getPriority(type, status) {
     return "MEDIUM";
   }
 
-  if (type === "BREACH_OF_CONTRACT" || type === "BEING_STRANDED") {
+  // These are important, but not as urgent as SOS/death/retained.
+  if (upperType.includes("CONTRACT") || upperType.includes("STRANDED")) {
     return "HIGH";
   }
 
@@ -208,7 +154,6 @@ function getComplaintBaseSelect() {
   return `
     SELECT
       d.complain_id,
-      d.complain_type,
       d.complain_user,
       d.behalf_user,
       d.mobile_no,
@@ -217,8 +162,8 @@ function getComplaintBaseSelect() {
       d.work_country,
       d.description,
       d.reported_time,
+      -- Read category from the complaint row itself.
       d.complain_catagory,
-      cc.category_name AS complain_category_name,
       d.resolution_catagory,
       rc.category_name AS resolution_category_name,
       d.complain_status,
@@ -244,7 +189,6 @@ function getComplaintBaseSelect() {
         LIMIT 1
       ) AS first_comment
     FROM complain_details d
-    LEFT JOIN complain_catagory cc ON cc.category_id = d.complain_catagory
     LEFT JOIN resolution_catagory rc ON rc.category_id = d.resolution_catagory
     LEFT JOIN migrant_employees mu ON mu.id = (
       SELECT me.id
@@ -271,11 +215,8 @@ function mapComplaintRow(row) {
     return null;
   }
 
-  const type = normalizeComplaintType(
-    row.complain_catagory,
-    row.complain_type,
-    row.complain_category_name,
-  );
+  // Frontend can show this value directly.
+  const type = getComplaintTypeFromRow(row);
   const status = normalizeStatus(row.normalized_status || row.complain_status);
   const workerName = fallbackText(
     row.behalf_user || row.complain_user,
@@ -307,7 +248,7 @@ function mapComplaintRow(row) {
     description:
       fallbackText(row.description) ||
       fallbackText(row.first_comment) ||
-      fallbackText(row.complain_category_name) ||
+      type ||
       "No complaint description recorded.",
     expectedResolution: fallbackText(
       row.resolution_category_name,
@@ -350,6 +291,29 @@ function buildInClause(column, values, prefix, params) {
   return `${column} IN (${placeholders.join(", ")})`;
 }
 
+function buildComplaintTypeFilterClause(types, params) {
+  // Each selected type gets its own parameter names so SQL placeholders do not
+  // clash when more than one category is selected.
+  const conditions = types.map((type, index) => {
+    const exactKey = `typeExact${index}`;
+    const likeKey = `typeLike${index}`;
+    // exactKey checks values saved as plain text, for example "SOS".
+    params[exactKey] = type;
+    // likeKey checks values saved with Sinhala/Tamil/English in one string.
+    params[likeKey] = `%${type}%`;
+
+    return `
+      (
+        d.complain_catagory = :${exactKey}
+        OR d.complain_catagory LIKE :${likeKey}
+      )
+    `;
+  });
+
+  // If the user selects more than one type, any matching category is valid.
+  return `(${conditions.join(" OR ")})`;
+}
+
 function buildFilterClauses(filters = {}) {
   const clauses = [];
   const params = {};
@@ -375,15 +339,19 @@ function buildFilterClauses(filters = {}) {
   }
 
   if (filters.types && filters.types.length) {
+    // Type filters come from the URL/API as strings. Trim empty values first.
     const types = Array.from(
-      new Set(filters.types.map((type) => normalizeComplaintType(type))),
+      new Set(
+        filters.types
+          .map((type) => String(type || "").trim())
+          .filter(Boolean),
+      ),
     );
-    clauses.push(`
-      (
-        ${buildInClause("d.complain_catagory", types, "category", params)}
-        OR ${buildInClause("d.complain_type", types, "type", params)}
-      )
-    `);
+
+    if (types.length) {
+      // Add the complain_catagory filter only after we have real values.
+      clauses.push(buildComplaintTypeFilterClause(types, params));
+    }
   }
 
   if (filters.dateFrom) {
@@ -1174,7 +1142,8 @@ async function findComplaintsForReport(filters = {}) {
       SELECT
         d.complain_id AS id,
         d.complain_id AS reference_no,
-        COALESCE(d.complain_catagory, d.complain_type) AS complaint_type,
+        -- Keep reports using the same category value as the list.
+        d.complain_catagory,
         ${statusExpr} AS status,
         d.work_country AS branch,
         ca.assigned_to_user_id,
@@ -1196,15 +1165,43 @@ async function findComplaintsForReport(filters = {}) {
 
   return rows.map((row) => ({
     ...row,
-    complaint_type: normalizeComplaintType(row.complaint_type),
+    // Use the same English extraction for reports.
+    complaint_type: getComplaintTypeFromRow(row),
     status: normalizeStatus(row.status),
   }));
+}
+
+async function getComplaintTypes(filters = {}) {
+  // Get filter options from saved complaints.
+  const { whereClause, params } = buildFilterClauses({
+    ...filters,
+    types: undefined,
+  });
+
+  const rows = await query(
+    `
+      SELECT DISTINCT
+        -- Use saved complaint categories for the dropdown.
+        d.complain_catagory
+      FROM complain_details d
+      LEFT JOIN complaint_assignments ca ON ca.complaint_id = d.complain_id
+      ${whereClause}
+    `,
+    params,
+  );
+
+  const types = rows
+    .map((row) => getComplaintTypeFromRow(row, ""))
+    .filter(Boolean);
+
+  return Array.from(new Set(types)).sort();
 }
 
 module.exports = {
   STATUS_VALUES,
   listComplaints,
   listComplaintCountries,
+  getComplaintTypes,
   findComplaintById,
   updateComplaintStatus,
   assignComplaint,

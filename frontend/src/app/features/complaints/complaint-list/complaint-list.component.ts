@@ -16,7 +16,6 @@ import {
   Complaint,
   ComplaintFilter,
   ComplaintType,
-  COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
 import { AuthService } from "../../../core/services/auth.service";
 import { ToastService } from "../../../core/services/toast.service";
@@ -47,12 +46,10 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   // flash) on subsequent page/sort/filter refetches.
   initialLoading = true;
   error = false;
-  typeLabels = COMPLAINT_TYPE_LABELS;
   searchValue = "";
   selectedType: ComplaintType | "ALL" = "ALL";
-  typeOptions: ComplaintType[] = Object.keys(
-    COMPLAINT_TYPE_LABELS,
-  ) as ComplaintType[];
+  // Filled from /complaints/types after login/path filters are known.
+  typeOptions: ComplaintType[] = [];
   filteredTypeOptions: ComplaintType[] = [];
   typeSearchOpen = false;
   typeSearchTerm = "";
@@ -87,7 +84,15 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isSupervisor = this.authService.currentUser?.role === "SUPERVISOR";
-    this.filteredTypeOptions = [...this.typeOptions];
+
+    // Get type filters from the API because categories can change in DB.
+    this.complaintService
+      .getComplaintTypes()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((types) => {
+        this.typeOptions = types;
+        this.filteredTypeOptions = [...types];
+      });
 
     // Debounce free-text search so a request isn't fired on every keystroke.
     this.search$
@@ -224,7 +229,8 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   }
 
   getTypeLabel(type: ComplaintType | "ALL"): string {
-    return type === "ALL" ? "All Categories" : this.typeLabels[type];
+    // Type is already an English label from the API.
+    return type === "ALL" ? "All Categories" : type;
   }
 
   openCountrySearch(event: Event): void {
@@ -361,7 +367,8 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   }
 
   private isValidType(type: string): type is ComplaintType | "ALL" {
-    return type === "ALL" || this.typeOptions.includes(type as ComplaintType);
+    // URL can contain a category before typeOptions finishes loading.
+    return type === "ALL" || (typeof type === "string" && type.trim().length > 0);
   }
 
   private parsePositiveNumber(value: string | null, fallback: number): number {

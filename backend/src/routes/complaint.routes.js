@@ -49,6 +49,15 @@ router.get(
 );
 
 router.get(
+  "/types",
+  asyncHandler(async (req, res) => {
+    // Keep the type dropdown limited to what this user can see.
+    const types = await complaintService.getComplaintTypes(req.user);
+    res.json(types);
+  }),
+);
+
+router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const complaint = await complaintService.getComplaintById(

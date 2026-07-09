@@ -18,21 +18,6 @@ function getPathFilters() {
   };
 }
 
-const TYPE_LABELS = {
-  BREACH_OF_CONTRACT: "Breach of Employment Contract",
-  HARASSMENT: "Harassment",
-  LACK_OF_COMMUNICATION: "Lack of Communication",
-  SICK: "Sick",
-  BEING_JAILED: "Being Jailed",
-  BEING_REMANDED_BY_POLICE: "Being Remanded by Police",
-  BEING_STRANDED: "Being Stranded without Employment",
-  PROBLEMS_AT_HOME: "Problems at Employee's Home (Sri Lanka)",
-  DEATH: "Death",
-  BEING_RETAINED: "Being Retained by Unknown Person",
-  SOS: "SOS",
-  OTHER: "Other",
-};
-
 const RESOLVED_STATUSES = new Set(["Resolved", "Closed"]);
 const NOTE_PREVIEW_LENGTH = 160;
 const SUBMITTED_STATUS = "Submitted";
@@ -160,6 +145,14 @@ async function getComplaints(filters) {
 
 async function getComplaintCountries(actor) {
   return complaintRepository.listComplaintCountries({
+    ...getPathFilters(),
+    assignedTo: actor?.role === "CASE_OFFICER" ? actor.id : undefined,
+  });
+}
+
+async function getComplaintTypes(actor) {
+  // Match the complaint list access rules.
+  return complaintRepository.getComplaintTypes({
     ...getPathFilters(),
     assignedTo: actor?.role === "CASE_OFFICER" ? actor.id : undefined,
   });
@@ -658,8 +651,8 @@ async function generateReport(filter, actor) {
       complaint.status,
       (statusCounts.get(complaint.status) || 0) + 1,
     );
-    const typeLabel =
-      TYPE_LABELS[complaint.complaint_type] || complaint.complaint_type;
+    // Report counts should use the same category text shown in the list.
+    const typeLabel = complaint.complaint_type || "Other";
     typeCounts.set(typeLabel, (typeCounts.get(typeLabel) || 0) + 1);
 
     if (complaint.assigned_to_user_id && complaint.assigned_to_name) {
@@ -763,6 +756,7 @@ module.exports = {
   APPLICATION_PATH,
   getComplaints,
   getComplaintCountries,
+  getComplaintTypes,
   getComplaintById,
   updateComplaintStatus,
   assignComplaint,

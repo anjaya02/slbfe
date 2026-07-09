@@ -48,23 +48,22 @@ const CATEGORIES = [
   "PROBLEMS_AT_HOME",
   "DEATH",
   "BEING_RETAINED",
-  "SOS",
   "OTHER",
 ];
 
-const CATEGORY_MAP = {
-  BREACH_OF_CONTRACT: "400",
-  HARASSMENT: "450",
-  LACK_OF_COMMUNICATION: "500",
-  SICK: "550",
-  BEING_JAILED: "600",
-  BEING_REMANDED_BY_POLICE: "650",
-  BEING_STRANDED: "700",
-  PROBLEMS_AT_HOME: "750",
-  DEATH: "800",
-  BEING_RETAINED: "850",
-  SOS: "875",
-  OTHER: "900",
+const CATEGORY_LABELS = {
+  // Store what the app should display, not the old numeric category IDs.
+  BREACH_OF_CONTRACT: "Breach of Employment Contract",
+  HARASSMENT: "Harassment",
+  LACK_OF_COMMUNICATION: "Lack of Communication",
+  SICK: "Sick",
+  BEING_JAILED: "Being Jailed",
+  BEING_REMANDED_BY_POLICE: "Being Remanded by Police",
+  BEING_STRANDED: "Being stranded without employment",
+  PROBLEMS_AT_HOME: "Problems at Employee's Home (Sri Lanka)",
+  DEATH: "Death",
+  BEING_RETAINED: "Being retained by an unknown person",
+  OTHER: "Other",
 };
 
 const COUNTRIES = [
@@ -170,6 +169,8 @@ async function main() {
       const id = ids[i];
       const seed = START_INDEX + i;
       const category = CATEGORIES[Math.floor(rand(seed) * CATEGORIES.length)];
+      // ~12% are SOS, stored directly in complain_catagory.
+      const isSos = rand(seed * 17) < 0.12;
       const status = STATUSES[Math.floor(rand(seed * 2) * STATUSES.length)];
       const country = COUNTRIES[Math.floor(rand(seed * 3) * COUNTRIES.length)];
       const firstName = FIRST_NAMES[Math.floor(rand(seed * 5) * FIRST_NAMES.length)];
@@ -216,7 +217,8 @@ async function main() {
           country,
           description,
           reported,
-          CATEGORY_MAP[category] || "900",
+          // Complaint category is text/SOS; resolution still uses its own codes.
+          isSos ? "SOS" : CATEGORY_LABELS[category] || "Other",
           RESOLUTION_MAP[resolution] || "99",
           status,
           HANDLE,

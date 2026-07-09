@@ -191,8 +191,9 @@
             </div>
           </th>
           <td mat-cell *matCellDef="let row">
+            <!-- row.type already has the final category text. -->
             <span class="incident-type" [class.incident-sos]="row.type === 'SOS'">
-              {{ $any(typeLabels)[row.type] }}
+              {{ row.type }}
             </span>
           </td>
         </ng-container>
@@ -273,11 +274,12 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <!-- Highlight SOS rows using the same type value shown above. -->
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
           class="table-row"
-          [class.row-sos]="row.isSos"
+          [class.row-sos]="row.type === 'SOS'"
         ></tr>
       </table>
     </div>

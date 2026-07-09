@@ -11,7 +11,6 @@ import {
   Complaint,
   ComplaintProfile,
   ComplaintStatus,
-  COMPLAINT_TYPE_LABELS,
 } from "../../../core/models/complaint.model";
 
 type PdfDocument = InstanceType<typeof import("jspdf")["default"]>;
@@ -521,7 +520,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     this.drawSectionTitle(pdf, layout, "Complaint Details");
     this.drawFieldGrid(pdf, layout, [
       ["Reference Number", complaint.referenceNo],
-      ["Complaint Type", COMPLAINT_TYPE_LABELS[complaint.type]],
+      ["Complaint Type", complaint.type],
       ["Service ID", complaint.serviceId],
       ["Branch", complaint.branch],
       ["Submitted On", this.formatDateTime(complaint.dateSubmitted)],
