@@ -162,6 +162,7 @@ Use one MySQL server only:
 | GET | `/api/auth/me` | Get the current user |
 | PATCH | `/api/auth/me/profile` | Update the current user profile |
 | PATCH | `/api/auth/me/preferences` | Update notification/date preferences |
+| PATCH | `/api/auth/me/password` | Change the current user's password |
 
 ### Users
 

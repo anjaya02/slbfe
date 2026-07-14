@@ -16,6 +16,7 @@ import {
   LoginRequest,
   LoginResponse,
   CreateUserRequest,
+  ChangePasswordRequest,
   UserSettings,
 } from "../models/user.model";
 import { environment } from "../../../environments/environment";
@@ -279,6 +280,16 @@ export class AuthService {
           });
         }),
       );
+  }
+
+  updatePassword(
+    request: ChangePasswordRequest,
+  ): Observable<{ success: boolean }> {
+    // This endpoint only changes the logged-in user's own password.
+    return this.http.patch<{ success: boolean }>(
+      `${this.apiBaseUrl}/auth/me/password`,
+      request,
+    );
   }
 
   getUsers(): Observable<User[]> {

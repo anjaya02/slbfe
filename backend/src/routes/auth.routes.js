@@ -9,6 +9,7 @@ const {
   refreshTokenBodySchema,
   profileUpdateBodySchema,
   preferencesUpdateBodySchema,
+  changePasswordBodySchema,
 } = require("../validation/request-schemas");
 
 const router = express.Router();
@@ -69,6 +70,17 @@ router.patch(
       req.body || {},
     );
     res.json(preferences);
+  }),
+);
+
+router.patch(
+  "/me/password",
+  requireAuth,
+  validateRequest({ body: changePasswordBodySchema }),
+  asyncHandler(async (req, res) => {
+    // Password changes are self-service, so use the authenticated user id.
+    const response = await authService.updatePassword(req.user.id, req.body);
+    res.json(response);
   }),
 );
 

@@ -72,6 +72,35 @@ const preferencesUpdateBodySchema = withAtLeastOneField(
   "At least one preference field is required",
 );
 
+const changePasswordBodySchema = z
+  .object({
+    // Current password proves the logged-in user knows the existing password.
+    currentPassword: z
+      .string()
+      .min(1, "currentPassword is required")
+      .max(255, "currentPassword must be at most 255 characters long"),
+    // New password follows the same minimum length rule as login/create user.
+    newPassword: z
+      .string()
+      .min(8, "newPassword must be at least 8 characters long")
+      .max(255, "newPassword must be at most 255 characters long"),
+    confirmPassword: z
+      .string()
+      .min(8, "confirmPassword must be at least 8 characters long")
+      .max(255, "confirmPassword must be at most 255 characters long"),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    // The frontend checks this too, but the API must protect the database.
+    if (value.newPassword !== value.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmPassword"],
+        message: "confirmPassword must match newPassword",
+      });
+    }
+  });
+
 const createUserBodySchema = z
   .object({
     name: nonEmptyString("name", 120),
@@ -181,6 +210,7 @@ module.exports = {
   refreshTokenBodySchema,
   profileUpdateBodySchema,
   preferencesUpdateBodySchema,
+  changePasswordBodySchema,
   createUserBodySchema,
   updateUserBodySchema,
   updateUserStatusBodySchema,

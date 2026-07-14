@@ -65,6 +65,134 @@
         </mat-select>
       </mat-form-field>
 
+      <!-- Password section is optional. It is validated only when the user fills it. -->
+      <div class="password-section">
+        <h4>Change Password</h4>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Current Password</mat-label>
+          <input
+            matInput
+            formControlName="currentPassword"
+            [type]="showCurrentPassword ? 'text' : 'password'"
+            autocomplete="current-password"
+          />
+          <mat-icon matPrefix>lock_open</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            class="password-toggle"
+            [attr.aria-label]="
+              showCurrentPassword
+                ? 'Hide current password'
+                : 'Show current password'
+            "
+            [matTooltip]="
+              showCurrentPassword
+                ? 'Hide current password'
+                : 'Show current password'
+            "
+            (click)="toggleCurrentPasswordVisibility()"
+          >
+            <mat-icon>{{
+              showCurrentPassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+          <mat-error
+            *ngIf="
+              profileForm
+                .get('currentPassword')
+                ?.hasError('currentPasswordRequired')
+            "
+            >Current password is required</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>New Password</mat-label>
+          <input
+            matInput
+            formControlName="newPassword"
+            [type]="showNewPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            class="password-toggle"
+            [attr.aria-label]="
+              showNewPassword ? 'Hide new password' : 'Show new password'
+            "
+            [matTooltip]="
+              showNewPassword ? 'Hide new password' : 'Show new password'
+            "
+            (click)="toggleNewPasswordVisibility()"
+          >
+            <mat-icon>{{
+              showNewPassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+          <mat-error
+            *ngIf="profileForm.get('newPassword')?.hasError('newPasswordRequired')"
+            >New password is required</mat-error
+          >
+          <mat-error
+            *ngIf="profileForm.get('newPassword')?.hasError('minlength')"
+            >Minimum 8 characters</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input
+            matInput
+            formControlName="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+          />
+          <mat-icon matPrefix>lock_reset</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            class="password-toggle"
+            [attr.aria-label]="
+              showConfirmPassword
+                ? 'Hide confirm password'
+                : 'Show confirm password'
+            "
+            [matTooltip]="
+              showConfirmPassword
+                ? 'Hide confirm password'
+                : 'Show confirm password'
+            "
+            (click)="toggleConfirmPasswordVisibility()"
+          >
+            <mat-icon>{{
+              showConfirmPassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+          <mat-error
+            *ngIf="
+              profileForm
+                .get('confirmPassword')
+                ?.hasError('confirmPasswordRequired')
+            "
+            >Confirm password is required</mat-error
+          >
+          <mat-error
+            *ngIf="
+              profileForm.get('confirmPassword')?.hasError('passwordMismatch') &&
+              profileForm.get('confirmPassword')?.touched
+            "
+            >Passwords do not match</mat-error
+          >
+        </mat-form-field>
+      </div>
+
       <div class="modal-actions">
         <button mat-button type="button" (click)="close()">Cancel</button>
         <button

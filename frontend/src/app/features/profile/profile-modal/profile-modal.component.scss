@@ -120,6 +120,26 @@ form {
   width: 100%;
 }
 
+.password-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 2px;
+  padding-top: 18px;
+  border-top: 1px solid v.$gray-100;
+
+  h4 {
+    margin: 0;
+    font-size: v.$font-size-sm;
+    font-weight: v.$font-weight-semibold;
+    color: var(--text-primary);
+  }
+}
+
+.password-toggle {
+  color: v.$gray-500;
+}
+
 .modal-actions {
   display: flex;
   align-items: center;

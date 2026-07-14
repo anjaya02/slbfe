@@ -36,6 +36,15 @@ export interface CreateUserRequest {
   workCountry?: string;
 }
 
+export interface ChangePasswordRequest {
+  // The backend checks this against the existing bcrypt hash.
+  currentPassword: string;
+  // New password is sent only when the user fills the password section.
+  newPassword: string;
+  // Sent so the backend can reject mismatched client requests too.
+  confirmPassword: string;
+}
+
 export interface UserSettings {
   notificationsEnabled: boolean;
   dateFormat: string;

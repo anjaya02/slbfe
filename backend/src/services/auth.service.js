@@ -194,6 +194,44 @@ async function updatePreferences(userId, updates) {
   };
 }
 
+async function updatePassword(userId, data) {
+  // Load the user row so we can compare the supplied password with the hash.
+  const existing = await userRepository.findById(userId);
+
+  if (!existing) {
+    throw new AppError(404, "User not found");
+  }
+
+  // Keep this check here even though the request schema validates it too.
+  if (data.newPassword !== data.confirmPassword) {
+    throw new AppError(400, "Password confirmation does not match");
+  }
+
+  // The current password must match before the database is updated.
+  const currentPasswordMatches = await bcrypt.compare(
+    data.currentPassword,
+    existing.password_hash,
+  );
+
+  if (!currentPasswordMatches) {
+    throw new AppError(400, "Current password is incorrect");
+  }
+
+  // Save only the bcrypt hash. The plain password is never stored.
+  const passwordHash = await bcrypt.hash(data.newPassword, 10);
+  await userRepository.updateUser(userId, {
+    password_hash: passwordHash,
+  });
+
+  // After the password changes, revoke every refresh token this user has.
+  // This logs the user out on all devices, so an old
+  // session cannot keep renewing itself after the password was changed.
+  // The user must log in again with the new password.
+  await refreshTokenRepository.revokeAllRefreshTokensForUser(userId);
+
+  return { success: true };
+}
+
 module.exports = {
   login,
   refreshSession,
@@ -201,4 +239,5 @@ module.exports = {
   getCurrentUser,
   updateProfile,
   updatePreferences,
+  updatePassword,
 };

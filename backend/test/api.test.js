@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret";
 
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const request = require("supertest");
 
@@ -14,11 +15,13 @@ const complaintRepository = require("../src/repositories/complaint.repository");
 const notificationService = require("../src/services/notification.service");
 const userService = require("../src/services/user.service");
 const userRepository = require("../src/repositories/user.repository");
+const refreshTokenRepository = require("../src/repositories/refresh-token.repository");
 
 const originalFunctions = {
   authLogin: authService.login,
   authRefreshSession: authService.refreshSession,
   authLogout: authService.logout,
+  authUpdatePassword: authService.updatePassword,
   dashboardStats: complaintService.getDashboardStats,
   generateReport: complaintService.generateReport,
   complaintList: complaintRepository.listComplaints,
@@ -44,6 +47,8 @@ const originalFunctions = {
   updateUserStatus: userService.updateUserStatus,
   userFindById: userRepository.findById,
   userUpdateUser: userRepository.updateUser,
+  revokeAllRefreshTokensForUser:
+    refreshTokenRepository.revokeAllRefreshTokensForUser,
 };
 
 function createUserRow({ id, role, email, name }) {
@@ -81,6 +86,7 @@ test.afterEach(() => {
   authService.login = originalFunctions.authLogin;
   authService.refreshSession = originalFunctions.authRefreshSession;
   authService.logout = originalFunctions.authLogout;
+  authService.updatePassword = originalFunctions.authUpdatePassword;
   complaintService.getDashboardStats = originalFunctions.dashboardStats;
   complaintService.generateReport = originalFunctions.generateReport;
   complaintRepository.listComplaints = originalFunctions.complaintList;
@@ -115,6 +121,8 @@ test.afterEach(() => {
   userService.updateUserStatus = originalFunctions.updateUserStatus;
   userRepository.findById = originalFunctions.userFindById;
   userRepository.updateUser = originalFunctions.userUpdateUser;
+  refreshTokenRepository.revokeAllRefreshTokensForUser =
+    originalFunctions.revokeAllRefreshTokensForUser;
 });
 
 test.after(async () => {
@@ -182,6 +190,154 @@ test("POST /api/auth/logout revokes refresh token session", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(response.body.success, true);
+});
+
+test("PATCH /api/auth/me/password changes the current user's password", async () => {
+  // Any authenticated user can change only their own password.
+  const officer = createUserRow({
+    id: "USR_OFF",
+    role: "CASE_OFFICER",
+    email: "officer@slbfe.gov.lk",
+    name: "Case Officer",
+  });
+  let capturedRequest = null;
+
+  mockAuthenticatedUsers([officer]);
+  authService.updatePassword = async (userId, data) => {
+    capturedRequest = { userId, data };
+    return { success: true };
+  };
+
+  const response = await request(app)
+    .patch("/api/auth/me/password")
+    .set("Authorization", `Bearer ${signToken(officer)}`)
+    .send({
+      currentPassword: "OldPassword@123",
+      newPassword: "NewPassword@123",
+      confirmPassword: "NewPassword@123",
+    });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.success, true);
+  assert.equal(capturedRequest.userId, "USR_OFF");
+  assert.equal(capturedRequest.data.currentPassword, "OldPassword@123");
+  assert.equal(capturedRequest.data.newPassword, "NewPassword@123");
+});
+
+test("PATCH /api/auth/me/password rejects mismatched confirmation", async () => {
+  const supervisor = createUserRow({
+    id: "USR_SUP",
+    role: "SUPERVISOR",
+    email: "admin@slbfe.gov.lk",
+    name: "Supervisor",
+  });
+
+  mockAuthenticatedUsers([supervisor]);
+
+  const response = await request(app)
+    .patch("/api/auth/me/password")
+    .set("Authorization", `Bearer ${signToken(supervisor)}`)
+    .send({
+      currentPassword: "OldPassword@123",
+      newPassword: "NewPassword@123",
+      confirmPassword: "Different@123",
+    });
+
+  assert.equal(response.status, 400);
+  assert.match(response.body.message, /confirmPassword must match/i);
+});
+
+test("password service stores a bcrypt hash in the user table", async () => {
+  // The service must save a hash, not the plain password from the request.
+  const userRow = createUserRow({
+    id: "USR_OFF",
+    role: "CASE_OFFICER",
+    email: "officer@slbfe.gov.lk",
+    name: "Case Officer",
+  });
+  userRow.password_hash = await bcrypt.hash("Old@1234", 10);
+  let savedUpdates = null;
+
+  userRepository.findById = async () => userRow;
+  userRepository.updateUser = async (_userId, updates) => {
+    savedUpdates = updates;
+    return {
+      ...userRow,
+      ...updates,
+    };
+  };
+  // The service also revokes sessions after a change, so stub that out
+  // here to keep this test focused on the stored hash.
+  refreshTokenRepository.revokeAllRefreshTokensForUser = async () => {};
+
+  await authService.updatePassword("USR_OFF", {
+    currentPassword: "Old@1234",
+    newPassword: "Changed@1234",
+    confirmPassword: "Changed@1234",
+  });
+
+  assert.ok(savedUpdates.password_hash);
+  assert.notEqual(savedUpdates.password_hash, "Changed@1234");
+  assert.equal(
+    await bcrypt.compare("Changed@1234", savedUpdates.password_hash),
+    true,
+  );
+});
+
+test("password service revokes all sessions after a password change", async () => {
+  // Changing the password must log the user out everywhere, so old
+  // refresh tokens cannot be used to keep the session alive.
+  const userRow = createUserRow({
+    id: "USR_OFF",
+    role: "CASE_OFFICER",
+    email: "officer@slbfe.gov.lk",
+    name: "Case Officer",
+  });
+  userRow.password_hash = await bcrypt.hash("Old@1234", 10);
+  let revokedUserId = null;
+
+  userRepository.findById = async () => userRow;
+  userRepository.updateUser = async () => userRow;
+  refreshTokenRepository.revokeAllRefreshTokensForUser = async (userId) => {
+    revokedUserId = userId;
+  };
+
+  await authService.updatePassword("USR_OFF", {
+    currentPassword: "Old@1234",
+    newPassword: "Changed@1234",
+    confirmPassword: "Changed@1234",
+  });
+
+  assert.equal(revokedUserId, "USR_OFF");
+});
+
+test("password service rejects an incorrect current password", async () => {
+  // A wrong current password must stop before updateUser is called.
+  const userRow = createUserRow({
+    id: "USR_OFF",
+    role: "CASE_OFFICER",
+    email: "officer@slbfe.gov.lk",
+    name: "Case Officer",
+  });
+  userRow.password_hash = await bcrypt.hash("Old@1234", 10);
+
+  userRepository.findById = async () => userRow;
+  userRepository.updateUser = async () => {
+    throw new Error("updateUser should not be called");
+  };
+
+  await assert.rejects(
+    () =>
+      authService.updatePassword("USR_OFF", {
+        currentPassword: "Wrong@1234",
+        newPassword: "Changed@1234",
+        confirmPassword: "Changed@1234",
+      }),
+    {
+      statusCode: 400,
+      message: "Current password is incorrect",
+    },
+  );
 });
 
 test("GET /api/dashboard/stats returns global scope for supervisors", async () => {
