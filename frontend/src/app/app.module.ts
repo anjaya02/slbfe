@@ -17,6 +17,7 @@ import { NotificationListComponent } from "./features/notifications/notification
 import { ReportGeneratorComponent } from "./features/reports/report-generator/report-generator.component";
 import { ProfileModalComponent } from "./features/profile/profile-modal/profile-modal.component";
 import { SettingsModalComponent } from "./features/profile/settings-modal/settings-modal.component";
+import { ResetPasswordModalComponent } from "./features/profile/reset-password-modal/reset-password-modal.component";
 import { UserManagementComponent } from "./features/user-management/user-management.component";
 import { UserFormDialogComponent } from "./features/user-management/user-form-dialog/user-form-dialog.component";
 import { AuthInterceptor } from "./core/interceptors/auth.interceptor";
@@ -34,6 +35,7 @@ import { ErrorInterceptor } from "./core/interceptors/error.interceptor";
     ReportGeneratorComponent,
     ProfileModalComponent,
     SettingsModalComponent,
+    ResetPasswordModalComponent,
     UserManagementComponent,
     UserFormDialogComponent,
   ],

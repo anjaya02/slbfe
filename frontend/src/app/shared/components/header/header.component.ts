@@ -37,6 +37,7 @@ import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.compone
 })
 export class HeaderComponent {
   @Output() profileClicked = new EventEmitter<void>();
+  @Output() resetPasswordClicked = new EventEmitter<void>();
   @Output() settingsClicked = new EventEmitter<void>();
   @Output() menuToggle = new EventEmitter<void>();
 

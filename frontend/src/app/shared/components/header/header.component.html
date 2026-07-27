@@ -59,6 +59,14 @@
         </a>
         <a
           class="dropdown-item"
+          (click)="resetPasswordClicked.emit(); closeUserMenu()"
+        >
+          <mat-icon>lock_reset</mat-icon>
+          <span>Reset Password</span>
+          <mat-icon class="arrow">chevron_right</mat-icon>
+        </a>
+        <a
+          class="dropdown-item"
           (click)="settingsClicked.emit(); closeUserMenu()"
         >
           <mat-icon>settings</mat-icon>

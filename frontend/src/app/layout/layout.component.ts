@@ -5,6 +5,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ProfileModalComponent } from "../features/profile/profile-modal/profile-modal.component";
 import { SettingsModalComponent } from "../features/profile/settings-modal/settings-modal.component";
+import { ResetPasswordModalComponent } from "../features/profile/reset-password-modal/reset-password-modal.component";
 
 @Component({
   standalone: false,
@@ -41,6 +42,15 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   openProfile(): void {
     this.dialog.open(ProfileModalComponent, {
+      width: "450px",
+      maxWidth: "calc(100vw - 32px)",
+      maxHeight: "calc(100vh - 32px)",
+      panelClass: "custom-dialog",
+    });
+  }
+
+  openResetPassword(): void {
+    this.dialog.open(ResetPasswordModalComponent, {
       width: "450px",
       maxWidth: "calc(100vw - 32px)",
       maxHeight: "calc(100vh - 32px)",
