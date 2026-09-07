@@ -635,10 +635,8 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     complaint: Complaint,
   ): void {
     const gap = 4;
-    const cardWidth = (layout.contentWidth - gap * 3) / 4;
     const cards: Array<[string, string, PdfColor]> = [
       ["Status", complaint.status, [0, 68, 128]],
-      ["Priority", complaint.priority, [220, 38, 38]],
       [
         "Assigned Officer",
         complaint.assignedToName || "Unassigned",
@@ -646,6 +644,8 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       ],
       ["Reference", complaint.referenceNo, [5, 150, 105]],
     ];
+    const cardWidth =
+      (layout.contentWidth - gap * (cards.length - 1)) / cards.length;
 
     cards.forEach(([label, value, color], index) => {
       const x = layout.margin + index * (cardWidth + gap);

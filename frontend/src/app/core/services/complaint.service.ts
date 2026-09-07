@@ -41,7 +41,6 @@ export class ComplaintService {
       // Show the category exactly as the backend sends it.
       type: complaint.type,
       status: complaint.status,
-      priority: complaint.priority,
       registrationPath: complaint.registrationPath,
       description: complaint.description,
       expectedResolution: complaint.expectedResolution || undefined,

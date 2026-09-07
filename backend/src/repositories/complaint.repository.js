@@ -107,31 +107,6 @@ function buildFullName(firstName, lastName) {
     .join(" ");
 }
 
-function getPriority(type, status) {
-  // Category names now come from DB, but priority still needs simple rules.
-  const upperType = String(type || "").toUpperCase();
-
-  // Use includes() because some DB values are full labels, not single words.
-  if (
-    upperType === "SOS" ||
-    upperType.includes("DEATH") ||
-    upperType.includes("RETAINED")
-  ) {
-    return "CRITICAL";
-  }
-
-  if (status === "Resolved" || status === "Closed") {
-    return "MEDIUM";
-  }
-
-  // These are important, but not as urgent as SOS/death/retained.
-  if (upperType.includes("CONTRACT") || upperType.includes("STRANDED")) {
-    return "HIGH";
-  }
-
-  return "MEDIUM";
-}
-
 function getRegistrationPath(row) {
   const handle = normalizeKey(row.complain_handle);
 
@@ -243,7 +218,6 @@ function mapComplaintRow(row) {
     branch: workCountry,
     type,
     status,
-    priority: getPriority(type, status),
     registrationPath: getRegistrationPath(row),
     description:
       fallbackText(row.description) ||

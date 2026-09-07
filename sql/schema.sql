@@ -939,7 +939,7 @@ INSERT INTO `complaint_audit_events` (
   ('AUD015', 'C009', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-05-05 09:45:00'),
   ('AUD016', 'C009', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'Awaiting Info', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE, 'noteAdded', TRUE), '2026-05-05 14:20:00'),
   ('AUD017', 'C010', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'urgent', TRUE), '2026-05-04 16:45:00'),
-  ('AUD018', 'C011', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE, 'priority', 'critical'), '2026-05-03 08:00:00'),
+  ('AUD018', 'C011', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-05-03 08:00:00'),
   ('AUD019', 'C011', 'STATUS_CHANGED', 'USR002', 'Iman Fernando', 'CASE_OFFICER', 'Under Review', 'In Progress', NULL, NULL, NULL, NULL, JSON_OBJECT('seeded', TRUE), '2026-05-03 10:10:00'),
   ('AUD020', 'C012', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-05-02 19:00:00'),
   ('AUD021', 'C014', 'ASSIGNED', 'USR001', 'Admin Supervisor', 'SUPERVISOR', 'Submitted', 'Under Review', NULL, NULL, 'USR002', 'Iman Fernando', JSON_OBJECT('seeded', TRUE), '2026-04-30 09:20:00'),

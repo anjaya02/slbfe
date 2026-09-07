@@ -10,8 +10,6 @@ export enum ComplaintStatus {
 // Category names come from the DB, so keep this flexible.
 export type ComplaintType = string;
 
-export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-
 export type RegistrationPath = "SLBFE" | "CONSULAR";
 
 export interface ComplaintProfile {
@@ -36,7 +34,6 @@ export interface Complaint {
   branch: string;
   type: ComplaintType;
   status: ComplaintStatus;
-  priority: Priority;
   registrationPath: RegistrationPath;
   description: string;
   expectedResolution?: string;
