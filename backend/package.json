@@ -10,6 +10,7 @@
     "db:reset": "node scripts/reset-database.js",
     "seed:mock-complaints": "node scripts/seed-mock-complaints.js",
     "seed:mock-complaints:slbfe": "node scripts/seed-mock-complaints.js --path=SLBFE",
+    "seed:pdf-unicode": "node scripts/seed-pdf-unicode-data.js",
     "test": "node --test"
   },
   "keywords": [

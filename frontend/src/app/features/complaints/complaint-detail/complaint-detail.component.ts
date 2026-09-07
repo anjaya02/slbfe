@@ -12,6 +12,12 @@ import {
   ComplaintProfile,
   ComplaintStatus,
 } from "../../../core/models/complaint.model";
+import {
+  drawPdfText,
+  ensurePdfComplexScriptFonts,
+  splitPdfTextToSize,
+  truncatePdfText,
+} from "../../../shared/utils/pdf-complex-text";
 
 type PdfDocument = InstanceType<typeof import("jspdf")["default"]>;
 type PdfColor = [number, number, number];
@@ -449,6 +455,8 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     this.exportingPdf = true;
 
     try {
+      // Wait for the Sinhala and Tamil fonts before drawing any PDF text.
+      await ensurePdfComplexScriptFonts();
       const { default: jsPDF } = await import("jspdf");
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -585,24 +593,26 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(255, 255, 255);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(13);
-    pdf.text(
+    drawPdfText(
+      pdf,
       "Ministry of Foreign Affairs, Foreign Employment & Tourism",
       layout.margin + 18,
       15,
     );
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    pdf.text("Consular Affairs Division", layout.margin + 18, 21);
-    pdf.text("Complaint Case Report", layout.margin + 18, 31);
+    drawPdfText(pdf, "Consular Affairs Division", layout.margin + 18, 21);
+    drawPdfText(pdf, "Complaint Case Report", layout.margin + 18, 31);
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(18);
-    pdf.text(complaint.id, layout.pageWidth - layout.margin, 18, {
+    drawPdfText(pdf, complaint.id, layout.pageWidth - layout.margin, 18, {
       align: "right",
     });
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
-    pdf.text(
+    drawPdfText(
+      pdf,
       `Generated ${this.formatDateTime(new Date())}`,
       layout.pageWidth - layout.margin,
       25,
@@ -616,7 +626,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(255, 255, 255);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
-    pdf.text("Complaint Case Report", layout.margin, 8.5);
+    drawPdfText(pdf, "Complaint Case Report", layout.margin, 8.5);
   }
 
   private drawSummaryCards(
@@ -647,10 +657,15 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       pdf.setTextColor(100, 116, 139);
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(7);
-      pdf.text(label.toUpperCase(), x + 6, layout.y + 8);
+      drawPdfText(pdf, label.toUpperCase(), x + 6, layout.y + 8);
       pdf.setTextColor(15, 23, 42);
       pdf.setFontSize(10);
-      pdf.text(this.truncateText(pdf, value, cardWidth - 12), x + 6, layout.y + 16);
+      drawPdfText(
+        pdf,
+        this.truncateText(pdf, value, cardWidth - 12),
+        x + 6,
+        layout.y + 16,
+      );
     });
 
     layout.y += 34;
@@ -665,7 +680,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(0, 68, 128);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(12);
-    pdf.text(title, layout.margin, layout.y);
+    drawPdfText(pdf, title, layout.margin, layout.y);
     pdf.setDrawColor(191, 219, 254);
     pdf.line(layout.margin, layout.y + 3, layout.pageWidth - layout.margin, layout.y + 3);
     layout.y += 10;
@@ -713,7 +728,11 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   ): number {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    const lines = pdf.splitTextToSize(value || this.unavailableFieldText, width - 10);
+    const lines = splitPdfTextToSize(
+      pdf,
+      value || this.unavailableFieldText,
+      width - 10,
+    );
     return Math.max(18, 12 + lines.length * 4.5);
   }
 
@@ -731,15 +750,16 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(100, 116, 139);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7);
-    pdf.text(field[0].toUpperCase(), x + 5, y + 7);
+    drawPdfText(pdf, field[0].toUpperCase(), x + 5, y + 7);
     pdf.setTextColor(15, 23, 42);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    const lines = pdf.splitTextToSize(
+    const lines = splitPdfTextToSize(
+      pdf,
       field[1] || this.unavailableFieldText,
       width - 10,
     );
-    pdf.text(lines, x + 5, y + 13);
+    drawPdfText(pdf, lines, x + 5, y + 13);
   }
 
   private drawTextBox(
@@ -750,7 +770,11 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   ): void {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    const lines = pdf.splitTextToSize(text || this.unavailableFieldText, layout.contentWidth - 12);
+    const lines = splitPdfTextToSize(
+      pdf,
+      text || this.unavailableFieldText,
+      layout.contentWidth - 12,
+    );
     const height = 18 + lines.length * 4.8;
 
     this.ensurePdfSpace(pdf, layout, height + 4);
@@ -760,11 +784,11 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(0, 68, 128);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
-    pdf.text(title.toUpperCase(), layout.margin + 6, layout.y + 8);
+    drawPdfText(pdf, title.toUpperCase(), layout.margin + 6, layout.y + 8);
     pdf.setTextColor(15, 23, 42);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    pdf.text(lines, layout.margin + 6, layout.y + 15);
+    drawPdfText(pdf, lines, layout.margin + 6, layout.y + 15);
     layout.y += height + 6;
   }
 
@@ -779,7 +803,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   ): void {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    const lines = pdf.splitTextToSize(description, layout.contentWidth - 28);
+    const lines = splitPdfTextToSize(pdf, description, layout.contentWidth - 28);
     const itemHeight = Math.max(24, 18 + lines.length * 4.8);
 
     this.ensurePdfSpace(pdf, layout, itemHeight + 3);
@@ -796,18 +820,19 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(15, 23, 42);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
-    pdf.text(action, layout.margin + 13, layout.y + 6);
+    drawPdfText(pdf, action, layout.margin + 13, layout.y + 6);
     pdf.setTextColor(100, 116, 139);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(7.5);
-    pdf.text(
+    drawPdfText(
+      pdf,
       `${this.formatDateTime(timestamp)} | ${performedBy}`,
       layout.margin + 13,
       layout.y + 11,
     );
     pdf.setTextColor(51, 65, 85);
     pdf.setFontSize(8.5);
-    pdf.text(lines, layout.margin + 13, layout.y + 17);
+    drawPdfText(pdf, lines, layout.margin + 13, layout.y + 17);
     layout.y += itemHeight + 3;
   }
 
@@ -821,7 +846,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   ): void {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8.5);
-    const lines = pdf.splitTextToSize(content, layout.contentWidth - 18);
+    const lines = splitPdfTextToSize(pdf, content, layout.contentWidth - 18);
     const height = Math.max(25, 20 + lines.length * 4.6);
 
     this.ensurePdfSpace(pdf, layout, height + 5);
@@ -833,18 +858,23 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(30, 64, 175);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(6.5);
-    pdf.text(type.toUpperCase(), layout.margin + 8, layout.y + 9.2);
+    drawPdfText(pdf, type.toUpperCase(), layout.margin + 8, layout.y + 9.2);
     pdf.setTextColor(100, 116, 139);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(7.5);
-    pdf.text(this.formatDateTime(timestamp), layout.margin + 36, layout.y + 9);
+    drawPdfText(
+      pdf,
+      this.formatDateTime(timestamp),
+      layout.margin + 36,
+      layout.y + 9,
+    );
     pdf.setTextColor(15, 23, 42);
     pdf.setFontSize(8.5);
-    pdf.text(lines, layout.margin + 7, layout.y + 17);
+    drawPdfText(pdf, lines, layout.margin + 7, layout.y + 17);
     pdf.setTextColor(71, 85, 105);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7.5);
-    pdf.text(`By ${author}`, layout.margin + 7, layout.y + height - 5);
+    drawPdfText(pdf, `By ${author}`, layout.margin + 7, layout.y + height - 5);
     layout.y += height + 5;
   }
 
@@ -860,7 +890,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     pdf.setTextColor(100, 116, 139);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8.5);
-    pdf.text(message, layout.margin + 6, layout.y + 9);
+    drawPdfText(pdf, message, layout.margin + 6, layout.y + 9);
     layout.y += 20;
   }
 
@@ -890,24 +920,24 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       pdf.setTextColor(100, 116, 139);
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(7);
-      pdf.text("SLBFE - Consular Affairs Division", 14, pageHeight - 8);
-      pdf.text(`Page ${page} of ${pageCount}`, pageWidth - 14, pageHeight - 8, {
-        align: "right",
-      });
+      drawPdfText(
+        pdf,
+        "SLBFE - Consular Affairs Division",
+        14,
+        pageHeight - 8,
+      );
+      drawPdfText(
+        pdf,
+        `Page ${page} of ${pageCount}`,
+        pageWidth - 14,
+        pageHeight - 8,
+        { align: "right" },
+      );
     }
   }
 
   private truncateText(pdf: PdfDocument, text: string, maxWidth: number): string {
-    if (pdf.getTextWidth(text) <= maxWidth) {
-      return text;
-    }
-
-    let shortened = text;
-    while (shortened.length > 3 && pdf.getTextWidth(`${shortened}...`) > maxWidth) {
-      shortened = shortened.slice(0, -1);
-    }
-
-    return `${shortened}...`;
+    return truncatePdfText(pdf, text, maxWidth);
   }
 
   private async loadAssetAsDataUrl(assetPath: string): Promise<string | null> {

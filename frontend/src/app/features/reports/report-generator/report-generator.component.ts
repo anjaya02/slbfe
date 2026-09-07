@@ -13,6 +13,11 @@ import { takeUntil } from "rxjs/operators";
 import { ReportService } from "../../../core/services/report.service";
 import { ToastService } from "../../../core/services/toast.service";
 import {
+  drawPdfText,
+  ensurePdfComplexScriptFonts,
+  splitPdfTextToSize,
+} from "../../../shared/utils/pdf-complex-text";
+import {
   OfficerPerformanceItem,
   ReportData,
   ReportFilter,
@@ -182,6 +187,8 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     this.exportingPdf = true;
 
     try {
+      // Wait for the Sinhala and Tamil fonts before drawing any PDF text.
+      await ensurePdfComplexScriptFonts();
       const chartImages = this.getChartImages();
       const emblemDataUrl = await this.loadAssetAsDataUrl(
         "assets/Emblem_of_Sri_Lanka.png",
@@ -261,31 +268,34 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     const leftColumnWidth = 110;
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(11);
-    const ministryLines = pdf.splitTextToSize(
+    const ministryLines = splitPdfTextToSize(
+      pdf,
       "Ministry of Foreign Affairs, Foreign Employment & Tourism",
       leftColumnWidth,
     );
 
     pdf.setTextColor(255, 255, 255);
-    pdf.text(ministryLines, leftColumnX, 13);
+    drawPdfText(pdf, ministryLines, leftColumnX, 13);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    pdf.text(
+    drawPdfText(
+      pdf,
       "Consular Affairs Division",
       leftColumnX,
       15 + ministryLines.length * 5,
     );
-    pdf.text("Management Report", leftColumnX, 31);
+    drawPdfText(pdf, "Management Report", leftColumnX, 31);
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(17);
-    pdf.text(reportData.title, layout.pageWidth - layout.margin, 18, {
+    drawPdfText(pdf, reportData.title, layout.pageWidth - layout.margin, 18, {
       align: "right",
       maxWidth: 58,
     });
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
-    pdf.text(
+    drawPdfText(
+      pdf,
       `Generated ${this.formatDateTime(reportData.generatedAt)}`,
       layout.pageWidth - layout.margin,
       25,
@@ -294,7 +304,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
 
     const rangeText = this.getReportRangeText(reportData.filters);
     if (rangeText) {
-      pdf.text(rangeText, layout.pageWidth - layout.margin, 31, {
+      drawPdfText(pdf, rangeText, layout.pageWidth - layout.margin, 31, {
         align: "right",
       });
     }
@@ -306,7 +316,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     pdf.setTextColor(255, 255, 255);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
-    pdf.text("Management Report", layout.margin, 8.5);
+    drawPdfText(pdf, "Management Report", layout.margin, 8.5);
   }
 
   private drawSummaryCards(
@@ -337,10 +347,10 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
       pdf.setTextColor(100, 116, 139);
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(7);
-      pdf.text(label.toUpperCase(), x + 6, layout.y + 8);
+      drawPdfText(pdf, label.toUpperCase(), x + 6, layout.y + 8);
       pdf.setTextColor(15, 23, 42);
       pdf.setFontSize(13);
-      pdf.text(value, x + 6, layout.y + 17);
+      drawPdfText(pdf, value, x + 6, layout.y + 17);
     });
 
     layout.y += 34;
@@ -396,7 +406,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     pdf.setTextColor(15, 23, 42);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(10);
-    pdf.text(title, x + 6, y + 9);
+    drawPdfText(pdf, title, x + 6, y + 9);
 
     if (imageData) {
       pdf.addImage(imageData, "PNG", x + 6, y + 14, width - 12, height - 20);
@@ -420,7 +430,8 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
       pdf.setTextColor(51, 65, 85);
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
-      pdf.text(
+      drawPdfText(
+        pdf,
         `${item.status}: ${item.count} (${item.percentage.toFixed(1)}%)`,
         x + 7,
         itemY,
@@ -439,7 +450,8 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
       pdf.setTextColor(51, 65, 85);
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
-      pdf.text(
+      drawPdfText(
+        pdf,
         `${item.month}: ${item.submitted} submitted, ${item.resolved} resolved`,
         x,
         itemY,
@@ -456,7 +468,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     pdf.setTextColor(0, 68, 128);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(12);
-    pdf.text(title, layout.margin, layout.y);
+    drawPdfText(pdf, title, layout.margin, layout.y);
     pdf.setDrawColor(191, 219, 254);
     pdf.line(
       layout.margin,
@@ -550,7 +562,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
       const wrappedCells = row.map((cell, index) => {
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(8);
-        return pdf.splitTextToSize(cell, columnWidths[index] - 8);
+        return splitPdfTextToSize(pdf, cell, columnWidths[index] - 8);
       });
       const rowHeight = Math.max(
         10,
@@ -575,7 +587,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
         pdf.setTextColor(51, 65, 85);
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(8);
-        pdf.text(lines, x + 4, layout.y + 6);
+        drawPdfText(pdf, lines, x + 4, layout.y + 6);
         x += columnWidths[index];
       });
 
@@ -600,7 +612,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     pdf.setFontSize(7.5);
 
     headers.forEach((header, index) => {
-      pdf.text(header.toUpperCase(), x + 4, layout.y + 6.5);
+      drawPdfText(pdf, header.toUpperCase(), x + 4, layout.y + 6.5);
       x += columnWidths[index];
     });
 
@@ -619,7 +631,7 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
     pdf.setTextColor(100, 116, 139);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8.5);
-    pdf.text(message, layout.margin + 6, layout.y + 9);
+    drawPdfText(pdf, message, layout.margin + 6, layout.y + 9);
     layout.y += 20;
   }
 
@@ -649,10 +661,19 @@ export class ReportGeneratorComponent implements OnInit, OnDestroy {
       pdf.setTextColor(100, 116, 139);
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(7);
-      pdf.text("SLBFE - Consular Affairs Division", 14, pageHeight - 8);
-      pdf.text(`Page ${page} of ${pageCount}`, pageWidth - 14, pageHeight - 8, {
-        align: "right",
-      });
+      drawPdfText(
+        pdf,
+        "SLBFE - Consular Affairs Division",
+        14,
+        pageHeight - 8,
+      );
+      drawPdfText(
+        pdf,
+        `Page ${page} of ${pageCount}`,
+        pageWidth - 14,
+        pageHeight - 8,
+        { align: "right" },
+      );
     }
   }
 
