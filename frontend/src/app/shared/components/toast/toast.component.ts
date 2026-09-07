@@ -7,7 +7,7 @@ import {
 } from "@angular/material/snack-bar";
 import { MatIconModule } from "@angular/material/icon";
 
-export type ToastKind = "success" | "error" | "info" | "warning";
+export type ToastKind = "success" | "error" | "info";
 
 export interface ToastComponentData {
   message: string;
@@ -24,7 +24,6 @@ export interface ToastComponentData {
   template: `
     <div
       class="toast"
-      [class.toast-warning]="kind === 'warning'"
       [class.toast--timed]="!persistent"
       (mouseenter)="paused.emit()"
       (mouseleave)="resumed.emit()"
@@ -137,24 +136,6 @@ export interface ToastComponentData {
         }
       }
 
-      .toast-warning {
-        .toast__count {
-          background: rgba(17, 24, 39, 0.12);
-        }
-
-        .toast__close:hover {
-          background: rgba(17, 24, 39, 0.08);
-        }
-
-        .toast__progress-track {
-          background: rgba(17, 24, 39, 0.08);
-        }
-
-        .toast__progress-bar {
-          background: rgba(17, 24, 39, 0.42);
-        }
-      }
-
       .toast__progress-track {
         position: absolute;
         left: 16px;
@@ -202,8 +183,6 @@ export class ToastComponent {
         return "check_circle";
       case "error":
         return "error";
-      case "warning":
-        return "warning_amber";
       default:
         return "info";
     }

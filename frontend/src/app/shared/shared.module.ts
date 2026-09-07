@@ -16,19 +16,14 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatSortModule } from "@angular/material/sort";
-import { MatMenuModule } from "@angular/material/menu";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatChipsModule } from "@angular/material/chips";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatNativeDateModule } from "@angular/material/core";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
-import { MatTabsModule } from "@angular/material/tabs";
-import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { StatusStepperComponent } from "./components/status-stepper/status-stepper.component";
-import { LoadingComponent } from "./components/loading/loading.component";
 import { ConfirmDialogComponent } from "./components/confirm-dialog/confirm-dialog.component";
 
 const MATERIAL_MODULES = [
@@ -46,14 +41,10 @@ const MATERIAL_MODULES = [
   MatTableModule,
   MatPaginatorModule,
   MatSortModule,
-  MatMenuModule,
   MatProgressSpinnerModule,
-  MatChipsModule,
   MatDatepickerModule,
   MatNativeDateModule,
   MatSlideToggleModule,
-  MatTabsModule,
-  MatProgressBarModule,
   MatAutocompleteModule,
 ];
 
@@ -62,7 +53,6 @@ const MATERIAL_MODULES = [
     SidebarComponent,
     HeaderComponent,
     StatusStepperComponent,
-    LoadingComponent,
     ConfirmDialogComponent,
   ],
   imports: [
@@ -81,7 +71,6 @@ const MATERIAL_MODULES = [
     SidebarComponent,
     HeaderComponent,
     StatusStepperComponent,
-    LoadingComponent,
   ],
 })
 export class SharedModule {}

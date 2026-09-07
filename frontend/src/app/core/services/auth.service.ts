@@ -7,7 +7,6 @@ import {
   finalize,
   map,
   shareReplay,
-  switchMap,
   tap,
 } from "rxjs/operators";
 import {
@@ -35,7 +34,7 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private httpBackend: HttpBackend,
+    httpBackend: HttpBackend,
     private router: Router,
   ) {
     this.authHttp = new HttpClient(httpBackend);

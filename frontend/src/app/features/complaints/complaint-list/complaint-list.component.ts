@@ -41,7 +41,6 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   // Holds only the current page of rows; pagination is driven by the server.
   dataSource = new MatTableDataSource<Complaint>([]);
   total = 0;
-  loading = true;
   // True only until the first response; keeps the table mounted (no skeleton
   // flash) on subsequent page/sort/filter refetches.
   initialLoading = true;
@@ -131,7 +130,6 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
   }
 
   loadComplaints(): void {
-    this.loading = true;
     this.error = false;
     this.complaintService
       .getComplaints(this.buildFilter())
@@ -140,11 +138,9 @@ export class ComplaintListComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.dataSource.data = res.data;
           this.total = res.total;
-          this.loading = false;
           this.initialLoading = false;
         },
         error: () => {
-          this.loading = false;
           this.initialLoading = false;
           this.error = true;
         },

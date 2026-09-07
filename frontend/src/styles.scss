@@ -199,16 +199,6 @@ a {
     --mdc-snackbar-supporting-text-color: #{v.$white};
   }
 
-  &.toast-warning {
-    --mdc-snackbar-container-color: #{v.$warning-orange};
-    --mdc-snackbar-supporting-text-color: #{v.$dark};
-
-    .mdc-button.mat-mdc-snack-bar-action {
-      --mdc-text-button-label-text-color: #{v.$dark} !important;
-      color: v.$dark !important;
-    }
-  }
-
   .mdc-button.mat-mdc-snack-bar-action {
     --mdc-text-button-label-text-color: #{v.$white} !important;
     color: v.$white !important;

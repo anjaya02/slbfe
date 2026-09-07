@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  OnDestroy,
-} from "@angular/core";
+import { Component, Input, OnDestroy } from "@angular/core";
 import { Router, NavigationEnd } from "@angular/router";
 import { Subject } from "rxjs";
 import { filter, takeUntil } from "rxjs/operators";
@@ -25,7 +19,6 @@ interface NavItem {
 })
 export class SidebarComponent implements OnDestroy {
   @Input() collapsed = false;
-  @Output() navigated = new EventEmitter<void>();
   activeRoute = "";
   private destroy$ = new Subject<void>();
 
@@ -72,11 +65,6 @@ export class SidebarComponent implements OnDestroy {
 
   navigate(route: string): void {
     this.router.navigate([route]);
-    this.navigated.emit();
-  }
-
-  toggleCollapse(): void {
-    this.collapsed = !this.collapsed;
   }
 
   ngOnDestroy(): void {

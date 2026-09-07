@@ -57,7 +57,6 @@ function writeComplaintLog(event, fields = {}) {
 }
 
 module.exports = {
-  complaintLogPath,
   formatIstTimestamp,
   writeComplaintLog,
 };

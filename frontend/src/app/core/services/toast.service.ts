@@ -57,23 +57,8 @@ export class ToastService {
     this.enqueue("info", message, this.resolveOptions(3600, options));
   }
 
-  warning(message: string, options?: ToastOptionsInput): void {
-    this.enqueue("warning", message, this.resolveOptions(4500, options));
-  }
-
   persistentError(message: string): void {
     this.error(message, { persistent: true });
-  }
-
-  dismissAll(): void {
-    this.queue = [];
-    if (!this.activeToast) {
-      return;
-    }
-
-    this.clearTimer(this.activeToast);
-    this.clearProgressTracker(this.activeToast);
-    this.activeToast.ref.dismiss();
   }
 
   private resolveOptions(
